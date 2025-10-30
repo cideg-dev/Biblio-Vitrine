@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Gestion de la recherche
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
-        searchInput.addEventListener('input', filterPDFs);
+        searchInput.addEventListener('input', debounce(filterPDFs, 300)); // Apply debounce here
     }
     
     // Gestion du bouton Pro
@@ -45,6 +45,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fermer le modal
     document.querySelector('.close').addEventListener('click', closePdfModal);
 });
+
+// Debounce utility function
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+}
 
 // Charger la liste des PDFs
 async function loadPDFs() {
