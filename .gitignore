@@ -1,0 +1,3 @@
+# Fichier de configuration d'authentification
+# Ce fichier ne doit JAMAIS être commit.
+assets/config/auth.json

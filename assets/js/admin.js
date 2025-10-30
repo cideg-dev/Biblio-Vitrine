@@ -57,24 +57,32 @@ function showAdminInterface() {
 // Gérer la connexion admin
 async function handleAdminLogin() {
     const password = document.getElementById('adminPassword').value;
-    const storedHash = '482c18697d33589606d1920cdf05bd6c4ac85489dd78907ae390f0427516cb17';
 
-    // Fonction pour hasher le mot de passe entré par l'utilisateur
-    async function digestMessage(message) {
-      const msgUint8 = new TextEncoder().encode(message);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      return hashHex;
-    }
+    try {
+        // 1. Récupérer le hash sécurisé depuis le fichier de configuration
+        const response = await fetch('assets/config/auth.json');
+        if (!response.ok) {
+            throw new Error("Le fichier de configuration 'auth.json' est manquant ou illisible. Veuillez le créer en utilisant 'generateur-hash.html'.");
+        }
+        const config = await response.json();
+        const storedHash = config.hash;
 
-    const enteredHash = await digestMessage(password);
+        // 2. Hasher le mot de passe entré par l'utilisateur
+        const msgUint8 = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const enteredHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    if (enteredHash === storedHash) {
-        localStorage.setItem('adminAuthenticated', 'true');
-        showAdminInterface();
-    } else {
-        alert('Mot de passe incorrect');
+        // 3. Comparer les hashs
+        if (enteredHash === storedHash) {
+            localStorage.setItem('adminAuthenticated', 'true');
+            showAdminInterface();
+        } else {
+            alert('Mot de passe incorrect');
+        }
+    } catch (error) {
+        console.error("Erreur d'authentification:", error);
+        alert(error.message || 'Une erreur est survenue lors de la tentative de connexion.');
     }
 }
 
