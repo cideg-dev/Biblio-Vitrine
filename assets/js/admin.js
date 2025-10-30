@@ -87,7 +87,7 @@ function handleAdminLogout() {
 // Charger les PDFs existants
 async function loadExistingPDFs() {
     try {
-        const response = await fetch('pdfs/liste-pdfs.json');
+        const response = await fetch('assets/documents/liste-pdfs.json');
         const pdfs = await response.json();
         displayExistingPDFs(pdfs);
     } catch (error) {

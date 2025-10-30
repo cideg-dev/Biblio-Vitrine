@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Charger la liste des PDFs
 async function loadPDFs() {
     try {
-        const response = await fetch('pdfs/liste-pdfs.json');
+        const response = await fetch('assets/documents/liste-pdfs.json');
         const pdfs = await response.json();
         displayPDFs(pdfs);
     } catch (error) {
@@ -90,7 +90,7 @@ function openPDF(pdfFile) {
     const modal = document.getElementById('pdfModal');
     const pdfViewer = document.getElementById('pdfViewer');
     
-    pdfViewer.src = `pdfs/${pdfFile}`;
+    pdfViewer.src = `assets/documents/${pdfFile}`;
     modal.style.display = 'block';
     
     // Masquer les publicités si l'utilisateur est Pro
