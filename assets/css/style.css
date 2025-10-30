@@ -459,6 +459,31 @@ footer {
     transform: rotate(90deg);
 }
 
+.notification-message {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background-color: rgba(0, 255, 194, 0.1); /* Light neon background */
+    border: 1px solid var(--secondary-color);
+    border-radius: var(--border-radius);
+    color: var(--text-color);
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.notification-message h3 {
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+}
+
+.notification-message ol {
+    margin-left: 1.5rem;
+}
+
+.notification-message li {
+    margin-bottom: 0.5rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .hamburger {

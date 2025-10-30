@@ -154,7 +154,7 @@
             <h2>Gestion des PDFs</h2>
             
             <div class="admin-form">
-                <h3>Ajouter un nouveau PDF</h3>
+                <h3>Ajouter un nouveau PDF à la liste</h3>
                 <div class="form-group">
                     <label for="pdfTitle">Titre:</label>
                     <input type="text" id="pdfTitle" required>
@@ -164,14 +164,15 @@
                     <textarea id="pdfDescription" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="pdfFile">Fichier PDF:</label>
-                    <input type="file" id="pdfFile" accept=".pdf" required>
+                    <label for="pdfFileName">Nom du fichier PDF (ex: mon-fichier.pdf):</label>
+                    <input type="text" id="pdfFileName" required placeholder="Assurez-vous que le fichier est dans assets/documents/">
                 </div>
                 <div class="admin-actions">
-                    <button id="uploadBtn" class="btn btn-primary">Téléverser</button>
-                    <button id="resetBtn" class="btn btn-secondary">Réinitialiser</button>
+                    <button id="addPdfBtn" class="btn btn-primary">Ajouter à la liste</button>
+                    <button id="resetBtn" class="btn btn-secondary">Réinitialiser le formulaire</button>
                 </div>
                 <div id="uploadStatus" class="upload-status"></div>
+                <div id="notificationMessage" class="notification-message" style="display: none;"></div>
             </div>
             
             <div class="pdf-list">
@@ -179,6 +180,7 @@
                 <div id="existingPDFs">
                     <!-- Liste des PDFs existants -->
                 </div>
+                <button id="saveChangesBtn" class="btn btn-primary" style="display: none; margin-top: 1rem;">Sauvegarder les changements (Télécharger JSON)</button>
             </div>
         </div>
     </main>
