@@ -1,1 +1,248 @@
-// Global array to hold PDF data\nlet pdfs = [];\nconst PDF_LIST_FILE = \'liste-pdfs.json\';\nconst PDF_DIR = \'assets/documents/\';\n\n// Gestion de l\'interface d\'administration\ndocument.addEventListener(\'DOMContentLoaded\', function() {\n    // Vérifier si l\'utilisateur est déjà connecté\n    checkAdminAuth();\n\n    // Gestion de la connexion\n    const loginBtn = document.getElementById(\'loginBtn\');\n    if (loginBtn) {\n        loginBtn.addEventListener(\'click\', handleAdminLogin);\n    }\n\n    // Gestion de la déconnexion\n    const logoutBtn = document.getElementById(\'logoutBtn\');\n    if (logoutBtn) {\n        logoutBtn.addEventListener(\'click\', handleAdminLogout);\n    }\n\n    // Event listener for Add PDF button\n    const addPdfBtn = document.getElementById(\'addPdfBtn\');\n    if (addPdfBtn) {\n        addPdfBtn.addEventListener(\'click\', addPDF);\n    }\n\n    // Event listener for Save Changes button\n    const saveChangesBtn = document.getElementById(\'saveChangesBtn\');\n    if (saveChangesBtn) {\n        saveChangesBtn.addEventListener(\'click\', saveChanges);\n    }\n\n    // Event listener for Reset Form button\n    const resetBtn = document.getElementById(\'resetBtn\');\n    if (resetBtn) {\n        resetBtn.addEventListener(\'click\', resetForm);\n    }\n\n    // Initial load of PDFs\n    loadExistingPDFs();\n});\n\n// Vérifier l\'authentification admin\nfunction checkAdminAuth() {\n    const isAuthenticated = localStorage.getItem(\'adminAuthenticated\') === \'true\';\n\n    if (isAuthenticated) {\n        showAdminInterface();\n    } else {\n        showLoginForm();\n    }\n}\n\n// Afficher le formulaire de connexion\nfunction showLoginForm() {\n    document.getElementById(\'loginSection\').style.display = \'block\';\n    document.getElementById(\'adminInterface\').style.display = \'none\';\n}\n\n// Afficher l\'interface d\'administration\nfunction showAdminInterface() {\n    document.getElementById(\'loginSection\').style.display = \'none\';\n    document.getElementById(\'adminInterface\').style.display = \'block\';\n    // Hide notification message when showing interface\n    document.getElementById(\'notificationMessage\').style.display = \'none\';\n}\n\n// Gérer la connexion admin\nasync function handleAdminLogin() {\n    const password = document.getElementById(\'adminPassword\').value;\n\n    try {\n        const response = await fetch(\'assets/config/auth.json\');\n        if (!response.ok) {\n            throw new Error(\"Le fichier de configuration \'auth.json\' est manquant ou illisible. Veuillez le créer en utilisant \'generateur-hash.html\'.\");\n        }\n        const config = await response.json();\n        const storedHash = config.hash;\n\n        const msgUint8 = new TextEncoder().encode(password);\n        const hashBuffer = await crypto.subtle.digest(\'SHA-256\', msgUint8);\n        const hashArray = Array.from(new Uint8Array(hashBuffer));\n        const enteredHash = hashArray.map(b => b.toString(16).padStart(2, \'0\')).join(\'\');\n\n        if (enteredHash === storedHash) {\n            localStorage.setItem(\'adminAuthenticated\', \'true\');\n            showAdminInterface();\n        } else {\n            alert(\'Mot de passe incorrect\');\n        }\n    } catch (error) {\n        console.error(\"Erreur d\'authentification:\", error);\n        alert(error.message || \'Une erreur est survenue lors de la tentative de connexion.\');\n    }\n}\n\n// Gérer la déconnexion admin\nfunction handleAdminLogout() {\n    localStorage.removeItem(\'adminAuthenticated\');\n    showLoginForm();\n}\n\n// Charger les PDFs existants\nasync function loadExistingPDFs() {\n    try {\n        const response = await fetch(PDF_DIR + PDF_LIST_FILE);\n        if (!response.ok) {\n            // If file not found, assume empty list\n            pdfs = [];\n            console.warn(`Fichier ${PDF_LIST_FILE} non trouvé ou illisible. Initialisation d\'une liste vide.`);\n        } else {\n            pdfs = await response.json();\n        }\n        displayExistingPDFs();\n    } catch (error) {\n        console.error(\'Erreur lors du chargement des PDFs existants:\', error);\n        pdfs = []; // Ensure pdfs is an array even on error\n        displayExistingPDFs();\n    }\n}\n\n// Afficher les PDFs existants\nfunction displayExistingPDFs() {\n    const existingPDFs = document.getElementById(\'existingPDFs\');\n    existingPDFs.innerHTML = \'\';\n\n    if (pdfs.length === 0) {\n        existingPDFs.innerHTML = \'<p>Aucun PDF dans la liste. Ajoutez-en un nouveau !</p>\';\n        return;\n    }\n\n    pdfs.forEach((pdf, index) => {\n        const pdfItem = document.createElement(\'div\');\n        pdfItem.className = \'pdf-item\';\n        pdfItem.innerHTML = `\n            <div>\n                <strong>${pdf.title}</strong>\n                <p>${pdf.description}</p>\n                <small>Fichier: ${pdf.file}</small>\n            </div>\n            <div class=\"pdf-actions\">\n                <button class=\"btn btn-secondary\" onclick=\"editPDF(${index})\">Modifier</button>\n                <button class=\"btn btn-secondary\" onclick=\"deletePDF(${index})\">Supprimer</button>\n            </div>\n        `;\n        existingPDFs.appendChild(pdfItem);\n    });\n    // Show save button if there are changes (or just always show it if list is not empty)\n    if (pdfs.length > 0) {\n        document.getElementById(\'saveChangesBtn\').style.display = \'inline-block\';\n    } else {\n        document.getElementById(\'saveChangesBtn\').style.display = \'none\';\n    }\n}\n\n// Ajouter un nouveau PDF à la liste (en mémoire)\nfunction addPDF() {\n    const title = document.getElementById(\'pdfTitle\').value.trim();\n    const description = document.getElementById(\'pdfDescription\').value.trim();\n    const fileName = document.getElementById(\'pdfFileName\').value.trim();\n\n    if (!title || !description || !fileName) {\n        showUploadStatus(\'Veuillez remplir tous les champs (Titre, Description, Nom du fichier PDF).\', \'error\');\n        return;\n    }\n\n    const newPdf = { title, description, file: fileName };\n    pdfs.push(newPdf);\n    displayExistingPDFs();\n    resetForm();\n    showUploadStatus(\'PDF ajouté à la liste en mémoire. N\'oubliez pas de sauvegarder les changements !\', \'success\');\n    document.getElementById(\'saveChangesBtn\').style.display = \'inline-block\'; // Show save button\n}\n\n// Supprimer un PDF de la liste (en mémoire)\nfunction deletePDF(index) {\n    if (confirm(\'Êtes-vous sûr de vouloir supprimer ce PDF de la liste ?\')) {\n        pdfs.splice(index, 1);\n        displayExistingPDFs();\n        showUploadStatus(\'PDF supprimé de la liste en mémoire. N\'oubliez pas de sauvegarder les changements !\', \'success\');\n        document.getElementById(\'saveChangesBtn\').style.display = \'inline-block\'; // Show save button\n    }\n}\n\n// Sauvegarder les changements en téléchargeant le nouveau fichier JSON\nfunction saveChanges() {\n    const jsonString = JSON.stringify(pdfs, null, 4); // Pretty print JSON\n\n    const blob = new Blob([jsonString], { type: \'application/json\' });\n    const url = URL.createObjectURL(blob);\n\n    const a = document.createElement(\'a\');\n    a.href = url;\n    a.download = PDF_LIST_FILE;\n    document.body.appendChild(a);\n    a.click();\n    document.body.removeChild(a);\n    URL.revokeObjectURL(url);\n\n    showUploadStatus(\'Nouveau fichier \' + PDF_LIST_FILE + \' téléchargé ! Veuillez le remplacer manuellement dans le dossier assets/documents/.\', \'success\');\n    displayPostSaveInstructions();\n    document.getElementById(\'saveChangesBtn\').style.display = \'none\'; // Hide save button after saving\n}\n\n// Afficher les instructions après la sauvegarde\nfunction displayPostSaveInstructions() {\n    const notificationMessage = document.getElementById(\'notificationMessage\');\n    notificationMessage.innerHTML = `\n        <h3>Étapes Suivantes pour Mettre à Jour le Site :</h3>\n        <ol>\n            <li>**Remplacez le fichier :** Prenez le fichier \`${PDF_LIST_FILE}\` que vous venez de télécharger et utilisez-le pour remplacer l\'ancien fichier situé dans \`${PDF_DIR}\`.</li>\n            <li>**Lancez le déploiement :** Double-cliquez sur le script \`deployer.bat\` (situé à la racine de votre projet) pour que vos changements soient mis en ligne sur GitHub.</li>\n        </ol>\n        <p>C\'est tout ! Votre site sera mis à jour après le déploiement.</p>\n    `;\n    notificationMessage.style.display = \'block\';\n}\n\n// Afficher le statut (pour les messages d\'erreur/succès temporaires)\nfunction showUploadStatus(message, type) {\n    const statusElement = document.getElementById(\'uploadStatus\');\n    statusElement.textContent = message;\n    statusElement.className = \'upload-status\'; // Reset classes\n    if (type) {\n        statusElement.classList.add(type);\n    }\n    statusElement.style.display = \'block\';\n    // Hide after a few seconds\n    setTimeout(() => {\n        statusElement.style.display = \'none\';\n    }, 5000);\n}\n\n// Réinitialiser le formulaire d\'ajout de PDF\nfunction resetForm() {\n    document.getElementById(\'pdfTitle\').value = \'\';\n    document.getElementById(\'pdfDescription\').value = \'\';\n    document.getElementById(\'pdfFileName\').value = \'\';\n    // Clear status message\n    document.getElementById(\'uploadStatus\').style.display = \'none\';\n}\n\n// Placeholder for edit function (not implemented yet)\nfunction editPDF(index) {\n    alert(\'Fonctionnalité de modification à implémenter\');\n}\n
+// Global array to hold PDF data
+let pdfs = [];
+const PDF_LIST_FILE = 'liste-pdfs.json';
+const PDF_DIR = 'assets/documents/';
+
+// Gestion de l'interface d'administration
+document.addEventListener('DOMContentLoaded', function() {
+    // Vérifier si l'utilisateur est déjà connecté
+    checkAdminAuth();
+
+    // Gestion de la connexion
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', handleAdminLogin);
+    }
+
+    // Gestion de la déconnexion
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleAdminLogout);
+    }
+
+    // Event listener for Add PDF button
+    const addPdfBtn = document.getElementById('addPdfBtn');
+    if (addPdfBtn) {
+        addPdfBtn.addEventListener('click', addPDF);
+    }
+
+    // Event listener for Save Changes button
+    const saveChangesBtn = document.getElementById('saveChangesBtn');
+    if (saveChangesBtn) {
+        saveChangesBtn.addEventListener('click', saveChanges);
+    }
+
+    // Event listener for Reset Form button
+    const resetBtn = document.getElementById('resetBtn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetForm);
+    }
+
+    // Initial load of PDFs
+    loadExistingPDFs();
+});
+
+// Vérifier l'authentification admin
+function checkAdminAuth() {
+    const isAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
+
+    if (isAuthenticated) {
+        showAdminInterface();
+    } else {
+        showLoginForm();
+    }
+}
+
+// Afficher le formulaire de connexion
+function showLoginForm() {
+    document.getElementById('loginSection').style.display = 'block';
+    document.getElementById('adminInterface').style.display = 'none';
+}
+
+// Afficher l'interface d'administration
+function showAdminInterface() {
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('adminInterface').style.display = 'block';
+    // Hide notification message when showing interface
+    document.getElementById('notificationMessage').style.display = 'none';
+}
+
+// Gérer la connexion admin
+async function handleAdminLogin() {
+    const password = document.getElementById('adminPassword').value;
+
+    try {
+        const response = await fetch('assets/config/auth.json');
+        if (!response.ok) {
+            throw new Error("Le fichier de configuration 'auth.json' est manquant ou illisible. Veuillez le créer en utilisant 'generateur-hash.html'.");
+        }
+        const config = await response.json();
+        const storedHash = config.hash;
+
+        const msgUint8 = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const enteredHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+        if (enteredHash === storedHash) {
+            localStorage.setItem('adminAuthenticated', 'true');
+            showAdminInterface();
+        } else {
+            alert('Mot de passe incorrect');
+        }
+    } catch (error) {
+        console.error("Erreur d'authentification:", error);
+        alert(error.message || 'Une erreur est survenue lors de la tentative de connexion.');
+    }
+}
+
+// Gérer la déconnexion admin
+function handleAdminLogout() {
+    localStorage.removeItem('adminAuthenticated');
+    showLoginForm();
+}
+
+// Charger les PDFs existants
+async function loadExistingPDFs() {
+    try {
+        const response = await fetch(PDF_DIR + PDF_LIST_FILE);
+        if (!response.ok) {
+            // If file not found, assume empty list
+            pdfs = [];
+            console.warn(`Fichier ${PDF_LIST_FILE} non trouvé ou illisible. Initialisation d'une liste vide.`);
+        } else {
+            pdfs = await response.json();
+        }
+        displayExistingPDFs();
+    } catch (error) {
+        console.error('Erreur lors du chargement des PDFs existants:', error);
+        pdfs = []; // Ensure pdfs is an array even on error
+        displayExistingPDFs();
+    }
+}
+
+// Afficher les PDFs existants
+function displayExistingPDFs() {
+    const existingPDFs = document.getElementById('existingPDFs');
+    existingPDFs.innerHTML = '';
+
+    if (pdfs.length === 0) {
+        existingPDFs.innerHTML = '<p>Aucun PDF dans la liste. Ajoutez-en un nouveau !</p>';
+        return;
+    }
+
+    pdfs.forEach((pdf, index) => {
+        const pdfItem = document.createElement('div');
+        pdfItem.className = 'pdf-item';
+        pdfItem.innerHTML = `
+            <div>
+                <strong>${pdf.title}</strong>
+                <p>${pdf.description}</p>
+                <small>Fichier: ${pdf.file}</small>
+            </div>
+            <div class="pdf-actions">
+                <button class="btn btn-secondary" onclick="editPDF(${index})">Modifier</button>
+                <button class="btn btn-secondary" onclick="deletePDF(${index})">Supprimer</button>
+            </div>
+        `;
+        existingPDFs.appendChild(pdfItem);
+    });
+    // Show save button if there are changes (or just always show it if list is not empty)
+    if (pdfs.length > 0) {
+        document.getElementById('saveChangesBtn').style.display = 'inline-block';
+    } else {
+        document.getElementById('saveChangesBtn').style.display = 'none';
+    }
+}
+
+// Ajouter un nouveau PDF à la liste (en mémoire)
+function addPDF() {
+    const title = document.getElementById('pdfTitle').value.trim();
+    const description = document.getElementById('pdfDescription').value.trim();
+    const fileName = document.getElementById('pdfFileName').value.trim();
+
+    if (!title || !description || !fileName) {
+        showUploadStatus('Veuillez remplir tous les champs (Titre, Description, Nom du fichier PDF).', 'error');
+        return;
+    }
+
+    const newPdf = { title, description, file: fileName };
+    pdfs.push(newPdf);
+    displayExistingPDFs();
+    resetForm();
+    showUploadStatus('PDF ajouté à la liste en mémoire. N\'oubliez pas de sauvegarder les changements !', 'success');
+    document.getElementById('saveChangesBtn').style.display = 'inline-block'; // Show save button
+}
+
+// Supprimer un PDF de la liste (en mémoire)
+function deletePDF(index) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce PDF de la liste ?')) {
+        pdfs.splice(index, 1);
+        displayExistingPDFs();
+        showUploadStatus('PDF supprimé de la liste en mémoire. N\'oubliez pas de sauvegarder les changements !', 'success');
+        document.getElementById('saveChangesBtn').style.display = 'inline-block'; // Show save button
+    }
+}
+
+// Sauvegarder les changements en téléchargeant le nouveau fichier JSON
+function saveChanges() {
+    const jsonString = JSON.stringify(pdfs, null, 4); // Pretty print JSON
+
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = PDF_LIST_FILE;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showUploadStatus('Nouveau fichier ' + PDF_LIST_FILE + ' téléchargé ! Veuillez le remplacer manuellement dans le dossier assets/documents/.', 'success');
+    displayPostSaveInstructions();
+    document.getElementById('saveChangesBtn').style.display = 'none'; // Hide save button after saving
+}
+
+// Afficher les instructions après la sauvegarde
+function displayPostSaveInstructions() {
+    const notificationMessage = document.getElementById('notificationMessage');
+    notificationMessage.innerHTML = `
+        <h3>Étapes Suivantes pour Mettre à Jour le Site :</h3>
+        <ol>
+            <li>**Remplacez le fichier :** Prenez le fichier \`${PDF_LIST_FILE}\` que vous venez de télécharger et utilisez-le pour remplacer l'ancien fichier situé dans \`${PDF_DIR}\`.</li>
+            <li>**Lancez le déploiement :** Double-cliquez sur le script \`deployer.bat\` (situé à la racine de votre projet) pour que vos changements soient mis en ligne sur GitHub.</li>
+        </ol>
+        <p>C'est tout ! Votre site sera mis à jour après le déploiement.</p>
+    `;
+    notificationMessage.style.display = 'block';
+}
+
+// Afficher le statut (pour les messages d'erreur/succès temporaires)
+function showUploadStatus(message, type) {
+    const statusElement = document.getElementById('uploadStatus');
+    statusElement.textContent = message;
+    statusElement.className = 'upload-status'; // Reset classes
+    if (type) {
+        statusElement.classList.add(type);
+    }
+    statusElement.style.display = 'block';
+    // Hide after a few seconds
+    setTimeout(() => {
+        statusElement.style.display = 'none';
+    }, 5000);
+}
+
+// Réinitialiser le formulaire d'ajout de PDF
+function resetForm() {
+    document.getElementById('pdfTitle').value = '';
+    document.getElementById('pdfDescription').value = '';
+    document.getElementById('pdfFileName').value = '';
+    // Clear status message
+    document.getElementById('uploadStatus').style.display = 'none';
+}
+
+// Placeholder for edit function (not implemented yet)
+function editPDF(index) {
+    alert('Fonctionnalité de modification à implémenter');
+}
