@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Bibliothèque Biblique</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 100px auto 50px;
+            padding: 2rem;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .admin-form {
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .admin-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-secondary {
+            background-color: var(--light-color);
+            color: var(--text-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #d5dbdb;
+        }
+        
+        .upload-status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .pdf-list {
+            margin-top: 2rem;
+        }
+        
+        .pdf-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .pdf-actions button {
+            margin-left: 0.5rem;
+        }
+        
+        .login-form {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 2rem;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h1>Administration - Bibliothèque Biblique</h1>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Retour au site</a></li>
+                    <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link admin-btn">Déconnexion</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main id="adminContent">
+        <!-- Formulaire de connexion -->
+        <div id="loginSection" class="login-form">
+            <h2>Connexion Admin</h2>
+            <div class="form-group">
+                <label for="adminPassword">Mot de passe:</label>
+                <input type="password" id="adminPassword" required>
+            </div>
+            <button id="loginBtn" class="btn btn-primary">Se connecter</button>
+        </div>
+
+        <!-- Interface d'administration (cachée par défaut) -->
+        <div id="adminInterface" class="admin-container" style="display: none;">
+            <h2>Gestion des PDFs</h2>
+            
+            <div class="admin-form">
+                <h3>Ajouter un nouveau PDF</h3>
+                <div class="form-group">
+                    <label for="pdfTitle">Titre:</label>
+                    <input type="text" id="pdfTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="pdfDescription">Description:</label>
+                    <textarea id="pdfDescription" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="pdfFile">Fichier PDF:</label>
+                    <input type="file" id="pdfFile" accept=".pdf" required>
+                </div>
+                <div class="admin-actions">
+                    <button id="uploadBtn" class="btn btn-primary">Téléverser</button>
+                    <button id="resetBtn" class="btn btn-secondary">Réinitialiser</button>
+                </div>
+                <div id="uploadStatus" class="upload-status"></div>
+            </div>
+            
+            <div class="pdf-list">
+                <h3>PDFs existants</h3>
+                <div id="existingPDFs">
+                    <!-- Liste des PDFs existants -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="admin.js"></script>
+</body>
+</html>

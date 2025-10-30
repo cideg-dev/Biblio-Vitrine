@@ -1,0 +1,37 @@
+Instructions de déploiement
+
+    Configuration GitHub Pages:
+
+        Créez un nouveau dépôt sur GitHub ou utilisez votre dépôt existant
+
+        Activez GitHub Pages dans les paramètres du dépôt
+
+        Téléversez tous les fichiers dans votre dépôt
+
+    Configuration AdSense:
+
+        Remplacez ca-pub-VOTRE_ID_ADSENSE par votre identifiant AdSense réel
+
+        Ajoutez les balises AdSense supplémentaires selon les recommandations Google
+
+    Configuration Stripe:
+
+        Créez un compte Stripe et récupérez vos clés API
+
+        Remplacez pk_test_VOTRE_CLE_PUBLIQUE_STRIPE par votre clé publique Stripe
+
+        Implémentez le backend pour gérer les paiements (non inclus dans ce code frontend)
+
+    Sécurisation de l'interface admin:
+
+        Remplacez VOTRE_MOT_DE_PASSE_ADMIN par un mot de passe fort
+
+        Pour une sécurité renforcée, implémentez une authentification côté serveur
+
+    Automatisation GitHub:
+
+        Configurez GitHub Actions pour automatiser le déploiement
+
+        Implémentez l'API GitHub pour gérer les téléversements de fichiers
+
+Ce site offre une base solide pour votre bibliothèque biblique chrétienne en ligne avec toutes les fonctionnalités demandées. Vous pouvez personnaliser davantage le design et ajouter des fonctionnalités supplémentaires selon vos besoins.

@@ -1,0 +1,12 @@
+bibliotheque-biblique/
+├── index.html
+├── admin.html
+├── style.css
+├── script.js
+├── admin.js
+├── assets/
+│   ├── logo.png
+│   └── favicon.ico
+└── pdfs/
+    ├── liste-pdfs.json
+    └── [fichiers PDF]

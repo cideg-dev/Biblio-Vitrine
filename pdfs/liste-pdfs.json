@@ -1,0 +1,22 @@
+[
+    {
+        "title": "La Sainte Bible - Version Louis Segond",
+        "description": "Traduction classique de la Bible par Louis Segond",
+        "file": "bible-louis-segond.pdf"
+    },
+    {
+        "title": "Le Nouveau Testament",
+        "description": "Le Nouveau Testament dans la traduction de Louis Segond",
+        "file": "nouveau-testament.pdf"
+    },
+    {
+        "title": "Les Psaumes",
+        "description": "Livre des Psaumes avec commentaires",
+        "file": "psaumes.pdf"
+    },
+    {
+        "title": "Les Proverbes",
+        "description": "Livre des Proverbes de Salomon",
+        "file": "proverbes.pdf"
+    }
+]

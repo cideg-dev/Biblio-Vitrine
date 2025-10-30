@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bibliothèque Biblique Chrétienne - Accueil</title>
+    <link rel="stylesheet" href="style.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-VOTRE_ID_ADSENSE" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h1>Bibliothèque Biblique</h1>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="#accueil" class="nav-link">Accueil</a></li>
+                    <li class="nav-item"><a href="#bibliotheque" class="nav-link">Bibliothèque</a></li>
+                    <li class="nav-item"><a href="#apropos" class="nav-link">À propos</a></li>
+                    <li class="nav-item"><a href="#pro" class="nav-link">Version Pro</a></li>
+                    <li class="nav-item"><a href="admin.html" class="nav-link admin-btn">Admin</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="accueil" class="hero">
+            <div class="hero-content">
+                <h2>Bienvenue à la Bibliothèque Biblique Chrétienne</h2>
+                <p>Accédez gratuitement à une collection complète de livres bibliques en format PDF</p>
+                <a href="#bibliotheque" class="cta-button">Explorer la bibliothèque</a>
+            </div>
+        </section>
+
+        <section id="valeurs" class="values">
+            <div class="container">
+                <h2>Nos Valeurs</h2>
+                <div class="values-grid">
+                    <div class="value-card">
+                        <h3>Accès Libre</h3>
+                        <p>Tous nos documents bibliques sont disponibles gratuitement pour tous.</p>
+                    </div>
+                    <div class="value-card">
+                        <h3>Fidélité</h3>
+                        <p>Nous nous engageons à préserver l'intégrité des textes sacrés.</p>
+                    </div>
+                    <div class="value-card">
+                        <h3>Communauté</h3>
+                        <p>Un espace pour les croyants cherchant à approfondir leur foi.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="bibliotheque" class="library">
+            <div class="container">
+                <h2>Bibliothèque de Livres Bibliques</h2>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Rechercher un livre...">
+                </div>
+                <div class="adsense-ad">
+                    <!-- Espace publicitaire AdSense -->
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-VOTRE_ID_ADSENSE"
+                         data-ad-slot="1234567890"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+                <div id="pdfList" class="pdf-grid">
+                    <!-- Les PDFs seront chargés dynamiquement ici -->
+                </div>
+            </div>
+        </section>
+
+        <section id="apropos" class="about">
+            <div class="container">
+                <h2>À Propos de Notre Bibliothèque</h2>
+                <p>Notre bibliothèque biblique chrétienne en ligne a pour mission de rendre accessible à tous les textes sacrés de la tradition chrétienne. Nous croyons que la Parole de Dieu doit être disponible gratuitement pour tous ceux qui cherchent à approfondir leur foi et leur connaissance des Écritures.</p>
+                <p>Notre collection comprend des versions variées de la Bible, des commentaires bibliques, des études théologiques et d'autres ressources utiles pour la croissance spirituelle.</p>
+            </div>
+        </section>
+
+        <section id="pro" class="pro-section">
+            <div class="container">
+                <h2>Version Pro - Sans Publicités</h2>
+                <div class="pro-content">
+                    <div class="pro-benefits">
+                        <h3>Profitez d'une expérience de lecture optimale</h3>
+                        <ul>
+                            <li>Accès à tous les PDFs sans publicités</li>
+                            <li>Navigation plus fluide et rapide</li>
+                            <li>Téléchargements prioritaires</li>
+                            <li>Support à notre mission</li>
+                        </ul>
+                        <div class="price">Seulement 3$</div>
+                        <button id="proButton" class="pro-button">Devenir Membre Pro</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Bibliothèque Biblique Chrétienne. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- Modal pour afficher les PDF -->
+    <div id="pdfModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="script.js"></script>
+</body>
+</html>
