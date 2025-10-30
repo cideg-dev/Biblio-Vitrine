@@ -484,6 +484,66 @@ footer {
     margin-bottom: 0.5rem;
 }
 
+.notification-message {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background-color: rgba(0, 255, 194, 0.1); /* Light neon background */
+    border: 1px solid var(--secondary-color);
+    border-radius: var(--border-radius);
+    color: var(--text-color);
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.notification-message h3 {
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+}
+
+.notification-message ol {
+    margin-left: 1.5rem;
+}
+
+.notification-message li {
+    margin-bottom: 0.5rem;
+}
+
+/* Styles pour le lecteur PDF.js */
+#pdf-viewer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#pdf-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--primary-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+#pageInfo {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+#pdfCanvas {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    max-width: 100%;
+    height: auto;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .hamburger {

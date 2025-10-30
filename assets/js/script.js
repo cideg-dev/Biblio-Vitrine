@@ -13,6 +13,12 @@ document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', 
     navMenu.classList.remove('active');
 }));
 
+// Variables globales pour PDF.js
+let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumPending = null;
+const scale = 1.5;
+const canvas = document.getElementById('pdfCanvas');
+const ctx = canvas.getContext('2d');
+
 // Chargement des PDFs
 document.addEventListener('DOMContentLoaded', function() {
     loadPDFs();
@@ -31,6 +37,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (proButton) {
         proButton.addEventListener('click', initiateProPayment);
     }
+
+    // Gestion des boutons de navigation PDF
+    document.getElementById('prevPage').addEventListener('click', showPrevPage);
+    document.getElementById('nextPage').addEventListener('click', showNextPage);
+
+    // Fermer le modal
+    document.querySelector('.close').addEventListener('click', closePdfModal);
 });
 
 // Charger la liste des PDFs
@@ -63,7 +76,7 @@ function displayPDFs(pdfs) {
             </div>
         `;
         
-        pdfCard.addEventListener('click', () => openPDF(pdf.file));
+        pdfCard.addEventListener('click', () => openPDF('assets/documents/' + pdf.file));
         pdfList.appendChild(pdfCard);
     });
 }
@@ -85,25 +98,86 @@ function filterPDFs() {
     });
 }
 
-// Ouvrir un PDF dans le modal
-function openPDF(pdfFile) {
+// Ouvre le PDF
+async function openPDF(url) {
     const modal = document.getElementById('pdfModal');
-    const pdfViewer = document.getElementById('pdfViewer');
-    
-    pdfViewer.src = `assets/documents/${pdfFile}`;
     modal.style.display = 'block';
-    
+
     // Masquer les publicités si l'utilisateur est Pro
     if (isProUser()) {
         hideAds();
     }
+
+    // Charger le document PDF
+    try {
+        pdfDoc = await pdfjsLib.getDocument(url).promise;
+        document.getElementById('pageCount').textContent = pdfDoc.numPages;
+        renderPage(pageNum);
+    } catch (error) {
+        console.error('Erreur lors du chargement du PDF:', error);
+        alert('Impossible de charger le PDF.');
+        closePdfModal();
+    }
 }
 
-// Fermer le modal
-document.querySelector('.close').addEventListener('click', function() {
+// Rendre la page
+async function renderPage(num) {
+    pageIsRendering = true;
+    const page = await pdfDoc.getPage(num);
+    const viewport = page.getViewport({ scale });
+
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    const renderContext = {
+        canvasContext: ctx,
+        viewport
+    };
+
+    await page.render(renderContext).promise;
+    pageNum = num;
+    document.getElementById('pageNumber').textContent = pageNum;
+    pageIsRendering = false;
+
+    if (pageNumPending !== null) {
+        renderPage(pageNumPending);
+        pageNumPending = null;
+    }
+}
+
+// File d'attente pour le rendu des pages
+function queueRenderPage(num) {
+    if (pageIsRendering) {
+        pageNumPending = num;
+    } else {
+        renderPage(num);
+    }
+}
+
+// Afficher la page précédente
+function showPrevPage() {
+    if (pageNum <= 1) {
+        return;
+    }
+    queueRenderPage(--pageNum);
+}
+
+// Afficher la page suivante
+function showNextPage() {
+    if (pageNum >= pdfDoc.numPages) {
+        return;
+    }
+    queueRenderPage(++pageNum);
+}
+
+// Fermer le modal PDF
+function closePdfModal() {
     document.getElementById('pdfModal').style.display = 'none';
-    document.getElementById('pdfViewer').src = '';
-});
+    pdfDoc = null; // Libérer le document PDF
+    pageNum = 1; // Réinitialiser la page
+    document.getElementById('pageNumber').textContent = '';
+    document.getElementById('pageCount').textContent = '';
+}
 
 // Vérifier le statut Pro
 function checkProStatus() {

@@ -10,6 +10,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
     
     <link rel="stylesheet" href="assets/css/style.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-VOTRE_ID_ADSENSE" crossorigin="anonymous"></script>
@@ -128,7 +131,14 @@
     <div id="pdfModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
+            <div id="pdf-viewer-container">
+                <div id="pdf-controls">
+                    <button id="prevPage" class="btn btn-secondary">Précédent</button>
+                    <span id="pageInfo">Page <span id="pageNumber"></span> / <span id="pageCount"></span></span>
+                    <button id="nextPage" class="btn btn-secondary">Suivant</button>
+                </div>
+                <canvas id="pdfCanvas"></canvas>
+            </div>
         </div>
     </div>
 
