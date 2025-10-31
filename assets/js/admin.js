@@ -1,89 +1,51 @@
-// Global array to hold PDF data
 let pdfs = [];
-const PDF_LIST_FILE = 'liste-pdfs.json';
-const PDF_DIR = 'assets/documents/';
+const API_URL = 'http://localhost:3000/api/pdfs';
 
-// Gestion de l'interface d'administration
 document.addEventListener('DOMContentLoaded', function() {
-    // Vérifier si l'utilisateur est déjà connecté
     checkAdminAuth();
-
-    // Gestion de la connexion
     const loginBtn = document.getElementById('loginBtn');
     if (loginBtn) {
         loginBtn.addEventListener('click', handleAdminLogin);
     }
-
-    // Gestion de la déconnexion
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleAdminLogout);
     }
-
-    // Event listener for Add PDF button
-    const addPdfBtn = document.getElementById('addPdfBtn');
-    if (addPdfBtn) {
-        addPdfBtn.addEventListener('click', addPDF);
-    }
-
-    // Event listener for Save Changes button
     const saveChangesBtn = document.getElementById('saveChangesBtn');
     if (saveChangesBtn) {
         saveChangesBtn.addEventListener('click', saveChanges);
     }
-
-    // Event listener for Reset Form button
-    const resetBtn = document.getElementById('resetBtn');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', resetForm);
-    }
-
-    // Initial load of PDFs
-    loadExistingPDFs();
 });
 
-// Vérifier l'authentification admin
 function checkAdminAuth() {
-    const isAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
-
-    if (isAuthenticated) {
+    if (localStorage.getItem('adminAuthenticated') === 'true') {
         showAdminInterface();
     } else {
         showLoginForm();
     }
 }
 
-// Afficher le formulaire de connexion
 function showLoginForm() {
     document.getElementById('loginSection').style.display = 'block';
     document.getElementById('adminInterface').style.display = 'none';
 }
 
-// Afficher l'interface d'administration
-function showAdminInterface() {
+async function showAdminInterface() {
     document.getElementById('loginSection').style.display = 'none';
     document.getElementById('adminInterface').style.display = 'block';
-    // Hide notification message when showing interface
-    document.getElementById('notificationMessage').style.display = 'none';
+    await loadExistingPDFs();
 }
 
-// Gérer la connexion admin
 async function handleAdminLogin() {
     const password = document.getElementById('adminPassword').value;
-
     try {
         const response = await fetch('assets/config/auth.json');
-        if (!response.ok) {
-            throw new Error("Le fichier de configuration 'auth.json' est manquant ou illisible. Veuillez le créer en utilisant 'generateur-hash.html'.");
-        }
+        if (!response.ok) throw new Error("Le fichier de configuration 'auth.json' est manquant.");
         const config = await response.json();
         const storedHash = config.hash;
-
         const msgUint8 = new TextEncoder().encode(password);
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const enteredHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
+        const enteredHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
         if (enteredHash === storedHash) {
             localStorage.setItem('adminAuthenticated', 'true');
             showAdminInterface();
@@ -92,157 +54,129 @@ async function handleAdminLogin() {
         }
     } catch (error) {
         console.error("Erreur d'authentification:", error);
-        alert(error.message || 'Une erreur est survenue lors de la tentative de connexion.');
+        alert(error.message);
     }
 }
 
-// Gérer la déconnexion admin
 function handleAdminLogout() {
     localStorage.removeItem('adminAuthenticated');
     showLoginForm();
 }
 
-// Charger les PDFs existants
 async function loadExistingPDFs() {
     try {
-        const response = await fetch(PDF_DIR + PDF_LIST_FILE);
+        const response = await fetch(API_URL);
         if (!response.ok) {
-            // If file not found, assume empty list
-            pdfs = [];
-            console.warn(`Fichier ${PDF_LIST_FILE} non trouvé ou illisible. Initialisation d'une liste vide.`);
-        } else {
-            pdfs = await response.json();
+            throw new Error('Erreur du serveur lors du chargement des PDFs.');
         }
-        displayExistingPDFs();
+        pdfs = await response.json();
+        displayEditablePDFs();
     } catch (error) {
-        console.error('Erreur lors du chargement des PDFs existants:', error);
-        pdfs = []; // Ensure pdfs is an array even on error
-        displayExistingPDFs();
+        console.error('Erreur lors du chargement des PDFs:', error);
+        showNotification('Impossible de charger la liste des PDFs. Assurez-vous que le serveur backend est bien lancé (node server.js).', 'error');
     }
 }
 
-// Afficher les PDFs existants
-function displayExistingPDFs() {
-    const existingPDFs = document.getElementById('existingPDFs');
-    existingPDFs.innerHTML = '';
+function displayEditablePDFs() {
+    const container = document.getElementById('existingPDFs');
+    container.innerHTML = '';
 
-    if (pdfs.length === 0) {
-        existingPDFs.innerHTML = '<p>Aucun PDF dans la liste. Ajoutez-en un nouveau !</p>';
+    if (!pdfs || pdfs.length === 0) {
+        container.innerHTML = '<p>Aucun PDF dans la liste.</p>';
+        document.getElementById('saveChangesBtn').style.display = 'none';
         return;
     }
 
     pdfs.forEach((pdf, index) => {
-        const pdfItem = document.createElement('div');
-        pdfItem.className = 'pdf-item';
-        pdfItem.innerHTML = `
-            <div>
-                <strong>${pdf.title}</strong>
-                <p>${pdf.description}</p>
-                <small>Fichier: ${pdf.file}</small>
+        const item = document.createElement('div');
+        item.className = 'pdf-item';
+        item.dataset.index = index;
+
+        item.innerHTML = `
+            <div class="form-group">
+                <label>Titre:</label>
+                <input type="text" class="pdf-title-input" value="${escapeHTML(pdf.titre)}">
             </div>
-            <div class="pdf-actions">
-                <button class="btn btn-secondary" onclick="editPDF(${index})">Modifier</button>
+            <div class="form-group">
+                <label>Description:</label>
+                <textarea class="pdf-description-input">${escapeHTML(pdf.description)}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Nom du fichier (non modifiable):</label>
+                <input type="text" class="pdf-filename-input" value="${escapeHTML(pdf.nom_du_fichier)}" readonly>
+            </div>
+             <div class="pdf-actions">
                 <button class="btn btn-secondary" onclick="deletePDF(${index})">Supprimer</button>
             </div>
         `;
-        existingPDFs.appendChild(pdfItem);
+        container.appendChild(item);
     });
-    // Show save button if there are changes (or just always show it if list is not empty)
-    if (pdfs.length > 0) {
-        document.getElementById('saveChangesBtn').style.display = 'inline-block';
-    } else {
-        document.getElementById('saveChangesBtn').style.display = 'none';
+
+    document.getElementById('saveChangesBtn').style.display = 'block';
+}
+
+async function saveChanges() {
+    showNotification('Sauvegarde en cours...', 'info');
+    const newPdfsArray = [];
+    const items = document.querySelectorAll('.pdf-item');
+
+    items.forEach(item => {
+        const title = item.querySelector('.pdf-title-input').value;
+        const description = item.querySelector('.pdf-description-input').value;
+        const fileName = item.querySelector('.pdf-filename-input').value;
+        newPdfsArray.push({ titre: title, description: description, nom_du_fichier: fileName });
+    });
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newPdfsArray),
+        });
+
+        if (!response.ok) {
+            throw new Error('Le serveur a retourné une erreur.');
+        }
+
+        const result = await response.json();
+        showNotification(result.message, 'success');
+        pdfs = newPdfsArray;
+    } catch (error) {
+        console.error('Erreur lors de la sauvegarde:', error);
+        showNotification('Erreur lors de la sauvegarde. Vérifiez la console et l\'état du serveur.', 'error');
     }
 }
 
-// Ajouter un nouveau PDF à la liste (en mémoire)
-function addPDF() {
-    const title = document.getElementById('pdfTitle').value.trim();
-    const description = document.getElementById('pdfDescription').value.trim();
-    const fileName = document.getElementById('pdfFileName').value.trim();
-
-    if (!title || !description || !fileName) {
-        showUploadStatus('Veuillez remplir tous les champs (Titre, Description, Nom du fichier PDF).', 'error');
-        return;
-    }
-
-    const newPdf = { title, description, file: fileName };
-    pdfs.push(newPdf);
-    displayExistingPDFs();
-    resetForm();
-    showUploadStatus('PDF ajouté à la liste en mémoire. N\'oubliez pas de sauvegarder les changements !', 'success');
-    document.getElementById('saveChangesBtn').style.display = 'inline-block'; // Show save button
-}
-
-// Supprimer un PDF de la liste (en mémoire)
 function deletePDF(index) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce PDF de la liste ?')) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer "${pdfs[index].nom_du_fichier}" ? Cette action est temporaire jusqu\'à la sauvegarde.`)) {
         pdfs.splice(index, 1);
-        displayExistingPDFs();
-        showUploadStatus('PDF supprimé de la liste en mémoire. N\'oubliez pas de sauvegarder les changements !', 'success');
-        document.getElementById('saveChangesBtn').style.display = 'inline-block'; // Show save button
+        displayEditablePDFs();
     }
 }
 
-// Sauvegarder les changements en téléchargeant le nouveau fichier JSON
-function saveChanges() {
-    const jsonString = JSON.stringify(pdfs, null, 4); // Pretty print JSON
-
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = PDF_LIST_FILE;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    showUploadStatus('Nouveau fichier ' + PDF_LIST_FILE + ' téléchargé ! Veuillez le remplacer manuellement dans le dossier assets/documents/.', 'success');
-    displayPostSaveInstructions();
-    document.getElementById('saveChangesBtn').style.display = 'none'; // Hide save button after saving
-}
-
-// Afficher les instructions après la sauvegarde
-function displayPostSaveInstructions() {
-    const notificationMessage = document.getElementById('notificationMessage');
-    notificationMessage.innerHTML = `
-        <h3>Étapes Suivantes pour Mettre à Jour le Site :</h3>
-        <ol>
-            <li>**Remplacez le fichier :** Prenez le fichier \`${PDF_LIST_FILE}\` que vous venez de télécharger et utilisez-le pour remplacer l'ancien fichier situé dans \`${PDF_DIR}\`.</li>
-            <li>**Lancez le déploiement :** Double-cliquez sur le script \`deployer.bat\` (situé à la racine de votre projet) pour que vos changements soient mis en ligne sur GitHub.</li>
-        </ol>
-        <p>C'est tout ! Votre site sera mis à jour après le déploiement.</p>
-    `;
-    notificationMessage.style.display = 'block';
-}
-
-// Afficher le statut (pour les messages d'erreur/succès temporaires)
-function showUploadStatus(message, type) {
-    const statusElement = document.getElementById('uploadStatus');
+function showNotification(message, type) {
+    const statusElement = document.getElementById('notificationMessage');
+    if (!statusElement) return;
     statusElement.textContent = message;
-    statusElement.className = 'upload-status'; // Reset classes
-    if (type) {
-        statusElement.classList.add(type);
-    }
+    statusElement.className = `upload-status ${type}`;
     statusElement.style.display = 'block';
-    // Hide after a few seconds
+
     setTimeout(() => {
         statusElement.style.display = 'none';
     }, 5000);
 }
 
-// Réinitialiser le formulaire d'ajout de PDF
-function resetForm() {
-    document.getElementById('pdfTitle').value = '';
-    document.getElementById('pdfDescription').value = '';
-    document.getElementById('pdfFileName').value = '';
-    // Clear status message
-    document.getElementById('uploadStatus').style.display = 'none';
-}
-
-// Placeholder for edit function (not implemented yet)
-function editPDF(index) {
-    alert('Fonctionnalité de modification à implémenter');
+function escapeHTML(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>"]/g, function(match) {
+        return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[match];
+    });
 }
