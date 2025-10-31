@@ -15,11 +15,27 @@
     --font-family: 'Poppins', sans-serif;
 }
 
+/* --- ANIMATIONS --- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Reset et styles de base */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 body {
@@ -280,14 +296,19 @@ h2::after {
     background-color: var(--primary-color);
     border-radius: var(--border-radius);
     overflow: hidden;
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 0; /* Start hidden for animation */
+}
+
+.pdf-card.fade-in {
+    animation: fadeInUp 0.5s ease-out forwards;
 }
 
 .pdf-card:hover {
-    transform: translateY(-10px);
-    box-shadow: var(--shadow);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 28px rgba(0, 255, 194, 0.25);
 }
 
 .pdf-thumbnail {
@@ -314,6 +335,39 @@ h2::after {
 .pdf-description {
     font-size: 0.9rem;
     color: var(--text-secondary-color);
+}
+
+.pagination-container {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.pagination-container button {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: 1px solid var(--secondary-color);
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination-container button:hover:not(:disabled) {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+.pagination-container button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pagination-container span {
+    margin: 0 1rem;
+    color: var(--text-color);
+    vertical-align: middle;
 }
 
 /* Section À Propos */

@@ -70,7 +70,7 @@ function renderPdfGrid() {
     const endIndex = startIndex + itemsPerPage;
     const pageItems = filteredPdfs.slice(startIndex, endIndex);
 
-    pageItems.forEach(pdf => {
+    pageItems.forEach((pdf, index) => {
         const pdfCard = document.createElement('div');
         pdfCard.className = 'pdf-card';
         // Use nom_du_fichier from the new JSON structure
@@ -87,6 +87,11 @@ function renderPdfGrid() {
             </div>
         `;
         pdfCard.addEventListener('click', () => openPDF('assets/documents/' + pdf.nom_du_fichier));
+        
+        // Add staggered animation
+        pdfCard.style.animationDelay = `${index * 75}ms`;
+        pdfCard.classList.add('fade-in');
+
         pdfListContainer.appendChild(pdfCard);
     });
 }
