@@ -1,54 +1,147 @@
-// Gestion de la navigation mobile
-const hamburger = document.querySelector('.hamburger');
-const navMenu = document.querySelector('.nav-menu');
+// --- State Management ---
+let allPdfs = []; // The master list of all PDFs, fetched once.
+let filteredPdfs = []; // The list of PDFs after applying the search filter.
+let currentPage = 1;
+const itemsPerPage = 12; // Display 12 PDFs per page.
 
-hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('active');
-    navMenu.classList.toggle('active');
-});
-
-// Fermer le menu mobile en cliquant sur un lien
-document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', () => {
-    hamburger.classList.remove('active');
-    navMenu.classList.remove('active');
-}));
-
-// Variables globales pour PDF.js
-let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumPending = null;
-let currentScale = 1.5; // Remplacer const par let pour le zoom
-const canvas = document.getElementById('pdfCanvas');
-const ctx = canvas.getContext('2d');
-
-// Chargement des PDFs
+// --- Event Listeners ---
 document.addEventListener('DOMContentLoaded', function() {
-    loadPDFs();
-    
-    // Vérifier si l'utilisateur a un abonnement Pro
-    checkProStatus();
-    
-    // Gestion de la recherche
+    // Mobile navigation (unchanged)
+    const hamburger = document.querySelector('.hamburger');
+    const navMenu = document.querySelector('.nav-menu');
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navMenu.classList.toggle('active');
+    });
+    document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+    }));
+
+    // Initial data load
+    loadAndDisplayPDFs();
+
+    // Search listener
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
-        searchInput.addEventListener('input', debounce(filterPDFs, 300)); // Apply debounce here
+        searchInput.addEventListener('input', debounce(handleSearch, 300));
     }
     
-    // Gestion du bouton Pro
-    const proButton = document.getElementById('proButton');
-    if (proButton) {
-        proButton.addEventListener('click', initiateProPayment);
-    }
-
-    // Gestion des boutons de navigation PDF
-    document.getElementById('prevPage').addEventListener('click', showPrevPage);
-    document.getElementById('nextPage').addEventListener('click', showNextPage);
+    // PDF.js Modal Listeners (unchanged)
+    document.getElementById('prevPage').addEventListener('click', showPrevPdfPage);
+    document.getElementById('nextPage').addEventListener('click', showNextPdfPage);
     document.getElementById('zoomIn').addEventListener('click', zoomIn);
     document.getElementById('zoomOut').addEventListener('click', zoomOut);
-
-    // Fermer le modal
     document.querySelector('.close').addEventListener('click', closePdfModal);
 });
 
-// Debounce utility function
+// --- Data Loading and Rendering ---
+
+async function loadAndDisplayPDFs() {
+    try {
+        const response = await fetch('assets/documents/liste-pdfs.json');
+        if (!response.ok) throw new Error('Network response was not ok.');
+        allPdfs = await response.json();
+        filteredPdfs = [...allPdfs]; // Initially, filtered list is the full list
+        render();
+    } catch (error) {
+        console.error('Erreur lors du chargement des PDFs:', error);
+        document.getElementById('pdfList').innerHTML = '<p>Erreur lors du chargement de la bibliothèque.</p>';
+    }
+}
+
+// Main render function: re-renders the grid and pagination
+function render() {
+    renderPdfGrid();
+    renderPagination();
+}
+
+// Renders the grid for the current page
+function renderPdfGrid() {
+    const pdfListContainer = document.getElementById('pdfList');
+    pdfListContainer.innerHTML = '';
+
+    if (filteredPdfs.length === 0) {
+        pdfListContainer.innerHTML = '<p>Aucun résultat trouvé.</p>';
+        return;
+    }
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageItems = filteredPdfs.slice(startIndex, endIndex);
+
+    pageItems.forEach(pdf => {
+        const pdfCard = document.createElement('div');
+        pdfCard.className = 'pdf-card';
+        // Use nom_du_fichier from the new JSON structure
+        const title = pdf.titre || pdf.nom_du_fichier.replace('.pdf', '').replace(/_/g, ' ');
+        const description = pdf.description || 'Aucune description disponible.';
+        
+        pdfCard.innerHTML = `
+            <div class="pdf-thumbnail">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="pdf-info">
+                <div class="pdf-title">${title}</div>
+                <div class="pdf-description">${description}</div>
+            </div>
+        `;
+        pdfCard.addEventListener('click', () => openPDF('assets/documents/' + pdf.nom_du_fichier));
+        pdfListContainer.appendChild(pdfCard);
+    });
+}
+
+// Renders the pagination controls
+function renderPagination() {
+    const paginationContainer = document.getElementById('pagination-container');
+    paginationContainer.innerHTML = '';
+    const pageCount = Math.ceil(filteredPdfs.length / itemsPerPage);
+
+    if (pageCount <= 1) return; // No need for pagination if there's only one page
+
+    // Previous button
+    const prevButton = document.createElement('button');
+    prevButton.textContent = 'Précédent';
+    prevButton.disabled = currentPage === 1;
+    prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            render();
+        }
+    });
+    paginationContainer.appendChild(prevButton);
+
+    // Page numbers (simplified for now)
+    const pageInfo = document.createElement('span');
+    pageInfo.textContent = `Page ${currentPage} sur ${pageCount}`;
+    paginationContainer.appendChild(pageInfo);
+
+    // Next button
+    const nextButton = document.createElement('button');
+    nextButton.textContent = 'Suivant';
+    nextButton.disabled = currentPage === pageCount;
+    nextButton.addEventListener('click', () => {
+        if (currentPage < pageCount) {
+            currentPage++;
+            render();
+        }
+    });
+    paginationContainer.appendChild(nextButton);
+}
+
+// --- Search and Filtering ---
+
+function handleSearch(event) {
+    const searchTerm = event.target.value.toLowerCase();
+    filteredPdfs = allPdfs.filter(pdf => {
+        const title = (pdf.titre || pdf.nom_du_fichier).toLowerCase();
+        const description = (pdf.description || '').toLowerCase();
+        return title.includes(searchTerm) || description.includes(searchTerm);
+    });
+    currentPage = 1; // Reset to first page after a new search
+    render();
+}
+
 function debounce(func, delay) {
     let timeout;
     return function(...args) {
@@ -58,73 +151,19 @@ function debounce(func, delay) {
     };
 }
 
-// Charger la liste des PDFs
-async function loadPDFs() {
-    try {
-        const response = await fetch('assets/documents/liste-pdfs.json');
-        const pdfs = await response.json();
-        displayPDFs(pdfs);
-    } catch (error) {
-        console.error('Erreur lors du chargement des PDFs:', error);
-        document.getElementById('pdfList').innerHTML = '<p>Erreur lors du chargement de la bibliothèque.</p>';
-    }
-}
+// --- PDF.js Viewer Logic (largely unchanged) ---
+let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumPending = null;
+let currentScale = 1.5;
+const canvas = document.getElementById('pdfCanvas');
+const ctx = canvas.getContext('2d');
 
-// Afficher les PDFs dans la grille
-function displayPDFs(pdfs) {
-    const pdfList = document.getElementById('pdfList');
-    pdfList.innerHTML = '';
-    
-    pdfs.forEach(pdf => {
-        const pdfCard = document.createElement('div');
-        pdfCard.className = 'pdf-card';
-        pdfCard.innerHTML = `
-            <div class="pdf-thumbnail">
-                <i class="fas fa-book"></i>
-            </div>
-            <div class="pdf-info">
-                <div class="pdf-title">${pdf.title}</div>
-                <div class="pdf-description">${pdf.description}</div>
-            </div>
-        `;
-        
-        pdfCard.addEventListener('click', () => openPDF('assets/documents/' + pdf.file));
-        pdfList.appendChild(pdfCard);
-    });
-}
-
-// Filtrer les PDFs selon la recherche
-function filterPDFs() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const pdfCards = document.querySelectorAll('.pdf-card');
-    
-    pdfCards.forEach(card => {
-        const title = card.querySelector('.pdf-title').textContent.toLowerCase();
-        const description = card.querySelector('.pdf-description').textContent.toLowerCase();
-        
-        if (title.includes(searchTerm) || description.includes(searchTerm)) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-}
-
-// Ouvre le PDF
 async function openPDF(url) {
-    const modal = document.getElementById('pdfModal');
-    modal.style.display = 'block';
-
-    // Masquer les publicités si l'utilisateur est Pro
-    if (isProUser()) {
-        hideAds();
-    }
-
-    // Charger le document PDF
+    document.getElementById('pdfModal').style.display = 'block';
     try {
         pdfDoc = await pdfjsLib.getDocument(url).promise;
         document.getElementById('pageCount').textContent = pdfDoc.numPages;
-        renderPage(pageNum);
+        pageNum = 1;
+        renderPdfPage(pageNum);
     } catch (error) {
         console.error('Erreur lors du chargement du PDF:', error);
         alert('Impossible de charger le PDF.');
@@ -132,143 +171,56 @@ async function openPDF(url) {
     }
 }
 
-// Rendre la page
-async function renderPage(num) {
+async function renderPdfPage(num) {
     pageIsRendering = true;
     const page = await pdfDoc.getPage(num);
-    const viewport = page.getViewport({ scale: currentScale }); // Utiliser currentScale
-
+    const viewport = page.getViewport({ scale: currentScale });
     canvas.height = viewport.height;
     canvas.width = viewport.width;
-
-    const renderContext = {
-        canvasContext: ctx,
-        viewport
-    };
-
+    const renderContext = { canvasContext: ctx, viewport };
     await page.render(renderContext).promise;
-    pageNum = num;
-    document.getElementById('pageNumber').textContent = pageNum;
     pageIsRendering = false;
-
+    document.getElementById('pageNumber').textContent = num;
     if (pageNumPending !== null) {
-        renderPage(pageNumPending);
+        renderPdfPage(pageNumPending);
         pageNumPending = null;
     }
 }
 
-// File d'attente pour le rendu des pages
 function queueRenderPage(num) {
     if (pageIsRendering) {
         pageNumPending = num;
     } else {
-        renderPage(num);
+        renderPdfPage(num);
     }
 }
 
-// Afficher la page précédente
-function showPrevPage() {
-    if (pageNum <= 1) {
-        return;
-    }
-    queueRenderPage(--pageNum);
+function showPrevPdfPage() {
+    if (pageNum <= 1) return;
+    pageNum--;
+    queueRenderPage(pageNum);
 }
 
-// Afficher la page suivante
-function showNextPage() {
-    if (pageNum >= pdfDoc.numPages) {
-        return;
-    }
-    queueRenderPage(++pageNum);
+function showNextPdfPage() {
+    if (pageNum >= pdfDoc.numPages) return;
+    pageNum++;
+    queueRenderPage(pageNum);
 }
 
-// Fonctions de zoom
 function zoomIn() {
-    if (currentScale >= 3.0) { // Ajout d'une limite de zoom maximum
-        return;
-    }
+    if (currentScale >= 3.0) return;
     currentScale += 0.25;
-    renderPage(pageNum);
+    renderPdfPage(pageNum);
 }
 
 function zoomOut() {
-    if (currentScale <= 0.25) {
-        return;
-    }
+    if (currentScale <= 0.25) return;
     currentScale -= 0.25;
-    renderPage(pageNum);
+    renderPdfPage(pageNum);
 }
 
-// Fermer le modal PDF
 function closePdfModal() {
     document.getElementById('pdfModal').style.display = 'none';
-    pdfDoc = null; // Libérer le document PDF
-    pageNum = 1; // Réinitialiser la page
-    currentScale = 1.5; // Réinitialiser le zoom
-    document.getElementById('pageNumber').textContent = '';
-    document.getElementById('pageCount').textContent = '';
-}
-
-// Vérifier le statut Pro
-function checkProStatus() {
-    if (isProUser()) {
-        hideAds();
-        updateUIForProUser();
-    }
-}
-
-function isProUser() {
-    return localStorage.getItem('proUser') === 'true';
-}
-
-function hideAds() {
-    const ads = document.querySelectorAll('.adsense-ad');
-    ads.forEach(ad => {
-        ad.style.display = 'none';
-    });
-}
-
-function updateUIForProUser() {
-    const proButton = document.getElementById('proButton');
-    if (proButton) {
-        proButton.textContent = 'Membre Pro';
-        proButton.disabled = true;
-        proButton.style.backgroundColor = '#7f8c8d';
-    }
-}
-
-// Initialiser le paiement Pro
-function initiateProPayment() {
-    // Initialiser Stripe avec votre clé publique
-    const stripe = Stripe('pk_test_VOTRE_CLE_PUBLIQUE_STRIPE');
-    
-    // Créer une session de checkout
-    fetch('/create-checkout-session', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            price: 300, // 3 dollars en cents
-        }),
-    })
-    .then(response => response.json())
-    .then(session => {
-        return stripe.redirectToCheckout({ sessionId: session.id });
-    })
-    .then(result => {
-        if (result.error) {
-            alert(result.error.message);
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-    });
-}
-
-// Simuler le succès du paiement (à remplacer par votre logique réelle)
-function handlePaymentSuccess() {
-    localStorage.setItem('proUser', 'true');
-    checkProStatus();
-    alert('Merci pour votre achat! Vous avez maintenant accès à la version Pro.');
+    pdfDoc = null;
+    currentScale = 1.5;
 }
