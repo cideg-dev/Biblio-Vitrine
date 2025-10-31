@@ -15,7 +15,7 @@ document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', 
 
 // Variables globales pour PDF.js
 let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumPending = null;
-const scale = 1.5;
+let currentScale = 1.5; // Remplacer const par let pour le zoom
 const canvas = document.getElementById('pdfCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -41,6 +41,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Gestion des boutons de navigation PDF
     document.getElementById('prevPage').addEventListener('click', showPrevPage);
     document.getElementById('nextPage').addEventListener('click', showNextPage);
+    document.getElementById('zoomIn').addEventListener('click', zoomIn);
+    document.getElementById('zoomOut').addEventListener('click', zoomOut);
 
     // Fermer le modal
     document.querySelector('.close').addEventListener('click', closePdfModal);
@@ -134,7 +136,7 @@ async function openPDF(url) {
 async function renderPage(num) {
     pageIsRendering = true;
     const page = await pdfDoc.getPage(num);
-    const viewport = page.getViewport({ scale });
+    const viewport = page.getViewport({ scale: currentScale }); // Utiliser currentScale
 
     canvas.height = viewport.height;
     canvas.width = viewport.width;
@@ -180,11 +182,29 @@ function showNextPage() {
     queueRenderPage(++pageNum);
 }
 
+// Fonctions de zoom
+function zoomIn() {
+    if (currentScale >= 3.0) { // Ajout d'une limite de zoom maximum
+        return;
+    }
+    currentScale += 0.25;
+    renderPage(pageNum);
+}
+
+function zoomOut() {
+    if (currentScale <= 0.25) {
+        return;
+    }
+    currentScale -= 0.25;
+    renderPage(pageNum);
+}
+
 // Fermer le modal PDF
 function closePdfModal() {
     document.getElementById('pdfModal').style.display = 'none';
     pdfDoc = null; // Libérer le document PDF
     pageNum = 1; // Réinitialiser la page
+    currentScale = 1.5; // Réinitialiser le zoom
     document.getElementById('pageNumber').textContent = '';
     document.getElementById('pageCount').textContent = '';
 }
