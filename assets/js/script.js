@@ -4,6 +4,7 @@ let currentPage = 1
 const itemsPerPage = 12
 const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 const PDF_BASE = 'assets/documents/'
+const thumbCache = new Map()
 
 document.addEventListener('DOMContentLoaded', () => {
     // Mobile nav
@@ -127,7 +128,10 @@ function renderPdfGrid() {
         const desc = pdf.description || 'Aucune description disponible.'
         const fileUrl = PDF_BASE + pdf.nom_du_fichier
         card.innerHTML = `
-            <div class="pdf-thumbnail"><i class="fas fa-book"></i></div>
+            <div class="pdf-thumbnail" id="thumb-${i}">
+                <div class="thumb-placeholder"><i class="fas fa-book"></i></div>
+                <canvas class="thumb-canvas" hidden></canvas>
+            </div>
             <div class="pdf-info">
                 <div class="pdf-title">${esc(title)}</div>
                 <div class="pdf-description">${esc(desc)}</div>
@@ -142,7 +146,34 @@ function renderPdfGrid() {
             isMobile ? window.open(fileUrl, '_blank') : openPDF(fileUrl)
         })
         container.appendChild(card)
+        loadThumbnail(pdf.nom_du_fichier, i)
     })
+}
+
+// ─── PDF Thumbnails ───
+function loadThumbnail(filename, idx) {
+    const placeholder = document.getElementById('thumb-' + idx)
+    if (!placeholder) return
+
+    if (thumbCache.has(filename)) {
+        const dataUrl = thumbCache.get(filename)
+        placeholder.innerHTML = `<img src="${dataUrl}" alt="" class="pdf-thumb-img" loading="lazy">`
+        return
+    }
+
+    const url = PDF_BASE + filename
+    pdfjsLib.getDocument(url).promise.then(doc => {
+        doc.getPage(1).then(page => {
+            const vp = page.getViewport({ scale: 0.25 })
+            const c = document.createElement('canvas')
+            c.width = vp.width; c.height = vp.height
+            page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise.then(() => {
+                const dataUrl = c.toDataURL('image/jpeg', 0.5)
+                thumbCache.set(filename, dataUrl)
+                placeholder.innerHTML = `<img src="${dataUrl}" alt="" class="pdf-thumb-img" loading="lazy">`
+            })
+        })
+    }).catch(() => {})
 }
 
 function renderPagination() {
