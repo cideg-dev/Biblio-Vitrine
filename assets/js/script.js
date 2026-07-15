@@ -66,6 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Newsletter
     document.getElementById('newsletterForm')?.addEventListener('submit', handleNewsletter)
 
+    // Load testimonials
+    loadTestimonials()
+
     // Open external download in viewer
     window.downloadCurrentPdf = function() {
         if (window._currentPdfUrl) window.open(window._currentPdfUrl, '_blank')
@@ -323,6 +326,33 @@ function closePdfViewer() {
 function esc(s) {
     if (typeof s !== 'string') return ''
     return s.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]))
+}
+
+// ─── Testimonials ───
+async function loadTestimonials() {
+    const list = document.getElementById('testimonialsList')
+    if (!list) return
+    try {
+        const res = await fetch('assets/data/testimonials.json')
+        if (!res.ok) throw new Error('Not found')
+        const data = await res.json()
+        if (!data || !data.length) {
+            list.innerHTML = '<p class="testimonials-empty">Soyez le premier à témoigner !</p>'
+            return
+        }
+        list.innerHTML = data.map(t => `
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">"${esc(t.message)}"</p>
+                <div class="testimonial-author">
+                    <span class="testimonial-name">${esc(t.nom)}</span>
+                    <span class="testimonial-date">${t.date}</span>
+                </div>
+            </div>
+        `).join('')
+    } catch (e) {
+        list.innerHTML = '<p class="testimonials-empty">Impossible de charger les témoignages.</p>'
+    }
 }
 
 // ─── Donation progress ───

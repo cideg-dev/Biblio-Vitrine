@@ -8,6 +8,7 @@ const REPO_BRANCH = 'master'
 const LISTE_PATH = 'assets/documents/liste-pdfs.json'
 const DOCS_PATH = 'assets/documents/'
 const TOKEN_KEY = 'githubAdminToken'
+const TESTIMONIALS_PATH = 'assets/data/testimonials.json'
 
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth()
@@ -19,6 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cancelUploadBtn').addEventListener('click', cancelUpload)
     document.getElementById('metaSearch').addEventListener('input', e => { searchQuery = e.target.value.toLowerCase(); renderBookList() })
 
+    // Testimonials
+    document.getElementById('addTestimonialBtn').addEventListener('click', () => {
+        document.getElementById('addTestimonialForm').style.display = 'block'
+    })
+    document.getElementById('confirmAddTestimonial').addEventListener('click', addTestimonial)
+    document.getElementById('saveTestimonialsBtn').addEventListener('click', saveTestimonials)
+
     // Tabs
     document.querySelectorAll('.admin-tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -26,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'))
             tab.classList.add('active')
             document.getElementById('tab-' + tab.dataset.tab).classList.add('active')
+            if (tab.dataset.tab === 'testimonials') loadTestimonialsAdmin()
         })
     })
 
@@ -339,6 +348,89 @@ async function savePdfList() {
             branch: REPO_BRANCH
         })
     })
+}
+
+// ─── Testimonials Admin ───
+let testimonials = []
+
+async function loadTestimonialsAdmin() {
+    try {
+        const res = await githubFetch(TESTIMONIALS_PATH)
+        const data = await res.json()
+        const content = atob(data.content.replace(/\n/g, ''))
+        testimonials = JSON.parse(content)
+        renderTestimonialsAdmin()
+    } catch (e) {
+        document.getElementById('testimonialsAdminList').innerHTML = '<div class="admin-empty"><i class="fas fa-inbox"></i><p>Erreur chargement.</p></div>'
+    }
+}
+
+function renderTestimonialsAdmin() {
+    const container = document.getElementById('testimonialsAdminList')
+    document.getElementById('testimonialsCount').textContent = testimonials.length
+    if (!testimonials || !testimonials.length) {
+        container.innerHTML = '<div class="admin-empty"><i class="fas fa-quote-left"></i><p>Aucun témoignage.</p></div>'
+        return
+    }
+    container.innerHTML = testimonials.map((t, i) => `
+        <div class="testi-admin-item" data-index="${i}">
+            <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap">
+                <span class="testi-admin-num">${i + 1}</span>
+                <input class="testi-admin-name" value="${esc(t.nom)}" placeholder="Nom" style="flex:1;min-width:120px">
+                <span class="testi-admin-date">${t.date || ''}</span>
+                <button class="testi-admin-del" onclick="deleteTestimonial(${i})" title="Supprimer"><i class="fas fa-trash-alt"></i></button>
+            </div>
+            <textarea class="testi-admin-msg" rows="2" placeholder="Témoignage…" style="margin-top:0.5rem;width:100%">${esc(t.message)}</textarea>
+        </div>
+    `).join('')
+}
+
+function addTestimonial() {
+    const name = document.getElementById('testiName').value.trim()
+    const msg = document.getElementById('testiMessage').value.trim()
+    if (!name || !msg) return showNotif('Nom et message requis', 'error')
+    testimonials.push({ nom: name, message: msg, date: new Date().toISOString().slice(0, 10) })
+    document.getElementById('addTestimonialForm').style.display = 'none'
+    document.getElementById('testiName').value = ''
+    document.getElementById('testiMessage').value = ''
+    renderTestimonialsAdmin()
+    showNotif('Témoignage ajouté (non sauvegardé)', 'info')
+}
+
+function deleteTestimonial(index) {
+    if (!confirm('Supprimer ce témoignage ?')) return
+    testimonials.splice(index, 1)
+    renderTestimonialsAdmin()
+    showNotif('Témoignage retiré', 'info')
+}
+
+async function saveTestimonials() {
+    // Sync inputs
+    document.querySelectorAll('.testi-admin-item').forEach(el => {
+        const i = parseInt(el.dataset.index)
+        if (isNaN(i)) return
+        testimonials[i].nom = el.querySelector('.testi-admin-name').value
+        testimonials[i].message = el.querySelector('.testi-admin-msg').value
+    })
+    showNotif('Sauvegarde en cours…', 'info')
+    try {
+        const res = await githubFetch(TESTIMONIALS_PATH)
+        const data = await res.json()
+        const json = JSON.stringify(testimonials, null, 2)
+        const encoded = btoa(unescape(encodeURIComponent(json)))
+        await githubFetch(TESTIMONIALS_PATH, {
+            method: 'PUT',
+            body: JSON.stringify({
+                message: 'Mise à jour des témoignages',
+                content: encoded,
+                sha: data.sha,
+                branch: REPO_BRANCH
+            })
+        })
+        showNotif('✅ Témoignages sauvegardés', 'success')
+    } catch (e) {
+        showNotif('Erreur: ' + e.message, 'error')
+    }
 }
 
 // ─── UI ───

@@ -628,6 +628,109 @@ h2 {
 .donate-note.effectif { color: var(--primary); font-weight: 500; margin-bottom: 0; }
 .donate-thankyou { text-align: center; margin-top: 2.5rem; font-size: 1.1rem; color: var(--text); }
 
+/* ─── Communauté ─── */
+.community-section { padding: 5rem 0; }
+.community-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.2rem;
+    margin-top: 2rem;
+}
+.community-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: var(--radius-lg);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: all 0.3s;
+}
+.community-card:hover { border-color: rgba(255,255,255,0.1); transform: translateY(-3px); }
+.community-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+.community-card:nth-child(1) .community-icon { color: #25D366; }
+.community-card:nth-child(2) .community-icon { color: var(--text); }
+.community-card:nth-child(3) .community-icon { color: #ffc107; }
+.community-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text); }
+.community-card p { font-size: 0.85rem; color: var(--text2); margin-bottom: 1.2rem; }
+.community-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.4rem;
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+    font-family: var(--font);
+}
+.whatsapp-btn { background: #25D366; color: #fff; }
+.whatsapp-btn:hover { box-shadow: 0 4px 15px rgba(37,211,102,0.3); }
+.github-btn { background: #333; color: #fff; }
+.github-btn:hover { box-shadow: 0 4px 15px rgba(255,255,255,0.1); }
+.suggest-btn { background: #ffc107; color: #1a1a1a; }
+.suggest-btn:hover { box-shadow: 0 4px 15px rgba(255,193,7,0.3); }
+
+.testimonials-section {
+    margin-top: 3.5rem;
+    text-align: center;
+}
+.testimonials-section h3 {
+    font-size: 1.6rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+.testimonials-section h3 i { color: var(--primary); font-size: 1.2rem; }
+.testimonials-sub { color: var(--text2); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+.testimonial-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    text-align: left;
+    transition: border-color 0.3s;
+}
+.testimonial-card:hover { border-color: rgba(255,255,255,0.08); }
+.testimonial-stars { color: #ffc107; font-size: 0.85rem; margin-bottom: 0.6rem; letter-spacing: 3px; }
+.testimonial-text {
+    font-size: 0.88rem;
+    color: var(--text2);
+    line-height: 1.6;
+    font-style: italic;
+    margin-bottom: 0.8rem;
+}
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.6rem;
+    border-top: 1px solid rgba(255,255,255,0.04);
+}
+.testimonial-name { font-weight: 600; font-size: 0.82rem; color: var(--text); }
+.testimonial-date { font-size: 0.7rem; color: var(--text3); }
+.testimonials-empty { color: var(--text3); font-size: 0.9rem; }
+.testimonial-skeleton { color: var(--text3); font-size: 0.9rem; }
+.testimonial-cta {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: var(--radius-lg);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.testimonial-cta p { color: var(--text2); font-size: 0.9rem; margin-bottom: 0.8rem; }
+
 /* ─── Newsletter ─── */
 .newsletter { padding: 4rem 0; }
 .newsletter-card {
@@ -744,6 +847,32 @@ footer {
 .back-to-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
 .back-to-top:hover { border-color: var(--primary); color: var(--primary); }
 
+.whatsapp-float {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 5rem;
+    width: 52px;
+    height: 52px;
+    background: #25D366;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(37,211,102,0.3);
+    z-index: 999;
+    transition: all 0.3s;
+    animation: pulse 2s infinite;
+}
+.whatsapp-float:hover { transform: scale(1.1); color: #fff; }
+@keyframes pulse {
+    0% { box-shadow: 0 4px 20px rgba(37,211,102,0.3); }
+    50% { box-shadow: 0 4px 30px rgba(37,211,102,0.6); }
+    100% { box-shadow: 0 4px 20px rgba(37,211,102,0.3); }
+}
+
 /* ─── PDF Viewer ─── */
 #pdf-viewer-overlay {
     position: fixed; inset: 0;
@@ -841,6 +970,37 @@ footer {
     border: 1px solid rgba(255,255,255,0.04);
 }
 .login-form { max-width: 450px; }
+
+/* Admin testimonials */
+.testi-admin-item {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: var(--radius);
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.6rem;
+}
+.testi-admin-num {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text3);
+    background: var(--bg);
+    padding: 0.1rem 0.4rem;
+    border-radius: 100px;
+    min-width: 1.6rem;
+    text-align: center;
+}
+.testi-admin-date { font-size: 0.7rem; color: var(--text3); flex-shrink: 0; }
+.testi-admin-del {
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.3rem;
+    border-radius: var(--radius);
+    transition: all 0.2s;
+}
+.testi-admin-del:hover { color: var(--accent); background: var(--accent-dim); }
 .form-group { margin-bottom: 1.2rem; }
 label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; font-weight: 500; color: var(--text2); }
 input[type="text"], input[type="password"], textarea {

@@ -50,6 +50,7 @@
                     <li class="nav-item"><a href="#accueil" class="nav-link">Accueil</a></li>
                     <li class="nav-item"><a href="#bibliotheque" class="nav-link">Bibliothèque</a></li>
                     <li class="nav-item"><a href="#apropos" class="nav-link">À propos</a></li>
+                    <li class="nav-item"><a href="#communaute" class="nav-link"><i class="fas fa-users"></i> Communauté</a></li>
                     <li class="nav-item"><a href="#soutenir" class="nav-link donate-link"><i class="fas fa-heart"></i> Soutenir</a></li>
                     <li class="nav-item"><a href="admin.html" class="admin-btn">Admin</a></li>
                 </ul>
@@ -278,6 +279,56 @@
                 </div>
             </div>
         </section>
+
+        <!-- Communauté -->
+        <section id="communaute" class="community-section">
+            <div class="container">
+                <h2>Notre Communauté</h2>
+                <p class="section-subtitle">Rejoins d'autres lecteurs, partage ton témoignage, suggère des livres.</p>
+
+                <div class="community-grid">
+                    <div class="community-card">
+                        <div class="community-icon"><i class="fab fa-whatsapp"></i></div>
+                        <h3>Groupe WhatsApp</h3>
+                        <p>Échange, prières, annonces des nouveaux livres. Rejoins la famille.</p>
+                        <a href="https://chat.whatsapp.com/" target="_blank" rel="noopener" class="community-btn whatsapp-btn">
+                            <i class="fab fa-whatsapp"></i> Rejoindre le groupe
+                        </a>
+                    </div>
+                    <div class="community-card">
+                        <div class="community-icon"><i class="fab fa-github"></i></div>
+                        <h3>GitHub Discussions</h3>
+                        <p>Suggère des livres, signale des problèmes, participe à l'évolution du projet.</p>
+                        <a href="https://github.com/cideg-dev/Biblio-Vitrine/discussions" target="_blank" rel="noopener" class="community-btn github-btn">
+                            <i class="fab fa-github"></i> Discussions
+                        </a>
+                    </div>
+                    <div class="community-card">
+                        <div class="community-icon"><i class="fas fa-lightbulb"></i></div>
+                        <h3>Suggérer un livre</h3>
+                        <p>Tu aimerais trouver un livre en particulier ? Fais-nous une suggestion.</p>
+                        <a href="https://wa.me/2290162044524?text=Je%20souhaite%20sugg%C3%A9rer%20un%20livre%20:%20" target="_blank" rel="noopener" class="community-btn suggest-btn">
+                            <i class="fab fa-whatsapp"></i> Suggérer via WhatsApp
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Témoignages -->
+                <div class="testimonials-section">
+                    <h3><i class="fas fa-quote-left"></i> Témoignages</h3>
+                    <p class="testimonials-sub">Ce que disent les lecteurs de la bibliothèque.</p>
+                    <div id="testimonialsList" class="testimonials-grid">
+                        <div class="testimonial-skeleton">Chargement des témoignages…</div>
+                    </div>
+                    <div class="testimonial-cta">
+                        <p>Toi aussi, partage ton témoignage :</p>
+                        <a href="https://wa.me/2290162044524?text=Mon%20t%C3%A9moignage%20:" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;gap:0.4rem">
+                            <i class="fab fa-whatsapp"></i> Partager sur WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->
@@ -328,6 +379,11 @@
     <button id="backToTop" class="back-to-top" aria-label="Retour en haut">
         <i class="fas fa-arrow-up"></i>
     </button>
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/2290162044524" target="_blank" rel="noopener" class="whatsapp-float" aria-label="WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
 
     <!-- PDF Viewer -->
     <div id="pdf-viewer-overlay">
