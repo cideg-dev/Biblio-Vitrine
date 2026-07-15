@@ -1,0 +1,71 @@
+{
+  "hero": {
+    "title": "Notre Mission Humanitaire",
+    "subtitle": "Au-delà de la bibliothèque, nous œuvrons chaque jour pour transformer des vies au Bénin."
+  },
+  "intro": {
+    "title": "Qui nous sommes",
+    "paragraphs": [
+      "CIDEG & P.line est une organisation à but non lucratif basée à Natitingou, au Bénin. Notre foi chrétienne nous pousse à agir concrètement pour les plus vulnérables : <strong>femmes en difficulté, personnes handicapées et familles démunies</strong>.",
+      "Nous croyons que l'Évangile se vit autant par les actes que par les paroles. C'est pourquoi nous menons des actions sociales sur le terrain pour redonner dignité et espoir à ceux qui en ont besoin."
+    ]
+  },
+  "stats": [
+    { "number": "+50", "label": "Femmes accompagnées" },
+    { "number": "+30", "label": "Personnes handicapées soutenues" },
+    { "number": "+100", "label": "Familles aidées" },
+    { "number": "Depuis", "label": "2024" }
+  ],
+  "womenTitle": "Autonomisation des femmes",
+  "womenSubtitle": "Notre priorité absolue. Nous aidons les femmes vulnérables à retrouver leur indépendance et leur dignité.",
+  "womenItems": [
+    {
+      "icon": "sewing-needle",
+      "title": "Formation artisanale",
+      "desc": "Apprentissage de la couture, du tissage et de l'artisanat local pour générer des revenus."
+    },
+    {
+      "icon": "chart-line",
+      "title": "Micro-entrepreneuriat",
+      "desc": "Accompagnement dans le démarrage de petites activités génératrices de revenus."
+    },
+    {
+      "icon": "book-open",
+      "title": "Alphabétisation",
+      "desc": "Cours d'alphabétisation pour permettre aux femmes de lire, écrire et compter."
+    },
+    {
+      "icon": "hands-helping",
+      "title": "Soutien psychologique",
+      "desc": "Encadrement spirituel et moral pour les femmes victimes de violences ou d'abandon."
+    }
+  ],
+  "disabledTitle": "Aide aux personnes handicapées",
+  "disabledItems": [
+    "Aides techniques (fauteuils roulants, cannes, prothèses)",
+    "Accès aux soins de santé",
+    "Formation professionnelle adaptée",
+    "Intégration sociale et soutien familial"
+  ],
+  "poorTitle": "Soutien aux familles démunies",
+  "poorItems": [
+    "Distribution de nourriture et de vêtements",
+    "Aide à la scolarisation des enfants",
+    "Accompagnement médical et pharmacie",
+    "Soutien aux orphelins et familles d'accueil"
+  ],
+  "testimonials": [
+    {
+      "name": "Afi",
+      "text": "Grâce à la formation en couture, je peux aujourd'hui subvenir aux besoins de mes trois enfants. Je ne dépend plus de personne. Merci à toute l'équipe."
+    },
+    {
+      "name": "Marc",
+      "text": "Quand j'ai perdu l'usage de mes jambes, je croyais que ma vie était finie. L'équipe m'a offert un fauteuil roulant et m'a formé à la bijouterie. Aujourd'hui je vis de mon travail."
+    },
+    {
+      "name": "Rosine",
+      "text": "Après avoir tout perdu, nous avons reçu de la nourriture et des habits pour nos enfants. Mais surtout, on nous a redonné de l'espoir. Que Dieu bénisse ce ministère."
+    }
+  ]
+}

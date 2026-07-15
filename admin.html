@@ -66,6 +66,7 @@
                 <button class="admin-tab" data-tab="upload"><i class="fas fa-upload"></i> Upload PDF</button>
                 <button class="admin-tab" data-tab="donation"><i class="fas fa-heart"></i> Dons</button>
                 <button class="admin-tab" data-tab="testimonials"><i class="fas fa-quote-left"></i> Témoignages</button>
+                <button class="admin-tab" data-tab="mission"><i class="fas fa-hand-holding-heart"></i> Mission</button>
             </div>
 
             <!-- Tab: Metadata -->
@@ -197,6 +198,104 @@
                 </div>
                 <div id="testimonialsAdminList" class="admin-meta-list">
                     <div class="admin-empty"><i class="fas fa-quote-left"></i><p>Chargement des témoignages…</p></div>
+                </div>
+            <!-- Tab: Mission -->
+            <div id="tab-mission" class="admin-tab-content">
+                <div class="admin-tab-header">
+                    <h3><i class="fas fa-hand-holding-heart"></i> Page Mission</h3>
+                </div>
+                <div class="upload-card" style="margin-bottom:1.5rem">
+                    <div class="admin-tab-header"><h4 style="font-size:1rem">Introduction</h4></div>
+                    <div class="form-group">
+                        <label>Titre du hero</label>
+                        <input type="text" id="missionHeroTitle" placeholder="Notre Mission Humanitaire">
+                    </div>
+                    <div class="form-group">
+                        <label>Sous-titre du hero</label>
+                        <textarea id="missionHeroSub" rows="2" placeholder="Sous-titre…"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Titre introduction</label>
+                        <input type="text" id="missionIntroTitle" placeholder="Qui nous sommes">
+                    </div>
+                    <div class="form-group">
+                        <label>Paragraphe 1</label>
+                        <textarea id="missionIntroP1" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Paragraphe 2</label>
+                        <textarea id="missionIntroP2" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="upload-card" style="margin-bottom:1.5rem">
+                    <div class="admin-tab-header"><h4 style="font-size:1rem">Statistiques</h4></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                        <div class="form-group">
+                            <label>Stat 1 - Chiffre</label>
+                            <input type="text" id="stat1Num" placeholder="+50">
+                            <label style="margin-top:0.5rem;font-size:0.75rem">Label</label>
+                            <input type="text" id="stat1Label" placeholder="Femmes accompagnées">
+                        </div>
+                        <div class="form-group">
+                            <label>Stat 2 - Chiffre</label>
+                            <input type="text" id="stat2Num" placeholder="+30">
+                            <label style="margin-top:0.5rem;font-size:0.75rem">Label</label>
+                            <input type="text" id="stat2Label" placeholder="Personnes handicapées">
+                        </div>
+                        <div class="form-group">
+                            <label>Stat 3 - Chiffre</label>
+                            <input type="text" id="stat3Num" placeholder="+100">
+                            <label style="margin-top:0.5rem;font-size:0.75rem">Label</label>
+                            <input type="text" id="stat3Label" placeholder="Familles aidées">
+                        </div>
+                        <div class="form-group">
+                            <label>Stat 4 - Chiffre</label>
+                            <input type="text" id="stat4Num" placeholder="Depuis">
+                            <label style="margin-top:0.5rem;font-size:0.75rem">Label</label>
+                            <input type="text" id="stat4Label" placeholder="2024">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="upload-card" style="margin-bottom:1.5rem">
+                    <div class="admin-tab-header"><h4 style="font-size:1rem">Autonomisation des femmes</h4></div>
+                    <div class="form-group">
+                        <label>Titre</label>
+                        <input type="text" id="womenTitle" placeholder="Autonomisation des femmes">
+                    </div>
+                    <div class="form-group">
+                        <label>Sous-titre</label>
+                        <textarea id="womenSub" rows="2"></textarea>
+                    </div>
+                    <div id="womenItemsContainer"></div>
+                    <button id="addWomenItem" class="btn-secondary" style="margin-top:0.5rem"><i class="fas fa-plus"></i> Ajouter un axe</button>
+                </div>
+
+                <div class="upload-card" style="margin-bottom:1.5rem">
+                    <div class="admin-tab-header"><h4 style="font-size:1rem">Handicapés & Démunis</h4></div>
+                    <div class="form-group">
+                        <label>Titre section handicapés</label>
+                        <input type="text" id="disabledTitle" placeholder="Aide aux personnes handicapées">
+                    </div>
+                    <div id="disabledItemsContainer"></div>
+                    <button id="addDisabledItem" class="btn-secondary" style="margin-top:0.5rem"><i class="fas fa-plus"></i> Ajouter un point</button>
+                    <div class="form-group" style="margin-top:1.5rem">
+                        <label>Titre section démunis</label>
+                        <input type="text" id="poorTitle" placeholder="Soutien aux familles démunies">
+                    </div>
+                    <div id="poorItemsContainer"></div>
+                    <button id="addPoorItem" class="btn-secondary" style="margin-top:0.5rem"><i class="fas fa-plus"></i> Ajouter un point</button>
+                </div>
+
+                <div class="upload-card" style="margin-bottom:1.5rem">
+                    <div class="admin-tab-header"><h4 style="font-size:1rem">Témoignages</h4></div>
+                    <div id="misTestimonialsContainer"></div>
+                    <button id="addMisTestimonial" class="btn-secondary" style="margin-top:0.5rem"><i class="fas fa-plus"></i> Ajouter un témoignage</button>
+                </div>
+
+                <div style="text-align:center;margin-top:1rem">
+                    <button id="saveMissionBtn" class="btn-primary"><i class="fas fa-save"></i> Sauvegarder la page Mission</button>
                 </div>
             </div>
         </div>

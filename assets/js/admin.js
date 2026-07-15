@@ -10,6 +10,7 @@ const DOCS_PATH = 'assets/documents/'
 const TOKEN_KEY = 'githubAdminToken'
 const TESTIMONIALS_PATH = 'assets/data/testimonials.json'
 const DONATION_GOAL_PATH = 'assets/data/donation-goal.json'
+const MISSION_PATH = 'assets/data/mission.json'
 
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth()
@@ -32,6 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('saveDonationBtn').addEventListener('click', saveDonationGoal)
     document.getElementById('donationShowToggle').addEventListener('change', updateDonationPreview)
 
+    // Mission
+    document.getElementById('saveMissionBtn').addEventListener('click', saveMission)
+    document.getElementById('addWomenItem').addEventListener('click', () => addMissionListItem('womenItemsContainer', 'womenItem', ''))
+    document.getElementById('addDisabledItem').addEventListener('click', () => addMissionListItem('disabledItemsContainer', 'disabledItem', ''))
+    document.getElementById('addPoorItem').addEventListener('click', () => addMissionListItem('poorItemsContainer', 'poorItem', ''))
+    document.getElementById('addMisTestimonial').addEventListener('click', addMisTestimonial)
+
     // Tabs
     document.querySelectorAll('.admin-tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -41,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tab-' + tab.dataset.tab).classList.add('active')
             if (tab.dataset.tab === 'testimonials') loadTestimonialsAdmin()
             if (tab.dataset.tab === 'donation') loadDonationGoal()
+            if (tab.dataset.tab === 'mission') loadMission()
         })
     })
 
@@ -484,6 +493,234 @@ async function saveDonationGoal() {
             })
         })
         showNotif('✅ Objectif mis à jour', 'success')
+    } catch (e) {
+        showNotif('Erreur: ' + e.message, 'error')
+    }
+}
+
+// ─── Mission Admin ───
+let missionData = null
+
+async function loadMission() {
+    try {
+        const res = await githubFetch(MISSION_PATH)
+        const data = await res.json()
+        missionData = JSON.parse(atob(data.content.replace(/\n/g, '')))
+    } catch (e) {
+        missionData = {
+            hero: { title: 'Notre Mission Humanitaire', subtitle: '' },
+            intro: { title: 'Qui nous sommes', paragraphs: ['', ''] },
+            stats: [
+                { number: '+50', label: 'Femmes accompagnées' },
+                { number: '+30', label: 'Personnes handicapées soutenues' },
+                { number: '+100', label: 'Familles aidées' },
+                { number: 'Depuis', label: '2024' }
+            ],
+            womenTitle: 'Autonomisation des femmes',
+            womenSubtitle: '',
+            womenItems: [],
+            disabledTitle: 'Aide aux personnes handicapées',
+            disabledItems: [],
+            poorTitle: 'Soutien aux familles démunies',
+            poorItems: [],
+            testimonials: []
+        }
+    }
+    renderMissionForm()
+}
+
+function renderMissionForm() {
+    const d = missionData
+    document.getElementById('missionHeroTitle').value = d.hero?.title || ''
+    document.getElementById('missionHeroSub').value = d.hero?.subtitle || ''
+    document.getElementById('missionIntroTitle').value = d.intro?.title || ''
+    document.getElementById('missionIntroP1').value = d.intro?.paragraphs?.[0] || ''
+    document.getElementById('missionIntroP2').value = d.intro?.paragraphs?.[1] || ''
+    document.getElementById('stat1Num').value = d.stats?.[0]?.number || ''
+    document.getElementById('stat1Label').value = d.stats?.[0]?.label || ''
+    document.getElementById('stat2Num').value = d.stats?.[1]?.number || ''
+    document.getElementById('stat2Label').value = d.stats?.[1]?.label || ''
+    document.getElementById('stat3Num').value = d.stats?.[2]?.number || ''
+    document.getElementById('stat3Label').value = d.stats?.[2]?.label || ''
+    document.getElementById('stat4Num').value = d.stats?.[3]?.number || ''
+    document.getElementById('stat4Label').value = d.stats?.[3]?.label || ''
+    document.getElementById('womenTitle').value = d.womenTitle || ''
+    document.getElementById('womenSub').value = d.womenSubtitle || ''
+    document.getElementById('disabledTitle').value = d.disabledTitle || ''
+    document.getElementById('poorTitle').value = d.poorTitle || ''
+
+    // Dynamic lists
+    renderMissionList('womenItemsContainer', 'womenItem', d.womenItems, (item) =>
+        `<div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:start">
+            <select class="womenItem-icon" style="padding:0.5rem;background:var(--bg);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);color:var(--text);font-size:0.8rem;font-family:var(--font);width:80px">
+                <option value="sewing-needle" ${item.icon === 'sewing-needle' ? 'selected' : ''}>Couture</option>
+                <option value="chart-line" ${item.icon === 'chart-line' ? 'selected' : ''}>Graphique</option>
+                <option value="book-open" ${item.icon === 'book-open' ? 'selected' : ''}>Livre</option>
+                <option value="hands-helping" ${item.icon === 'hands-helping' ? 'selected' : ''}>Aide</option>
+                <option value="heart" ${item.icon === 'heart' ? 'selected' : ''}>Coeur</option>
+                <option value="graduation-cap" ${item.icon === 'graduation-cap' ? 'selected' : ''}>Éducation</option>
+            </select>
+            <div style="flex:1">
+                <input type="text" class="womenItem-title" value="${esc(item.title)}" placeholder="Titre" style="width:100%;margin-bottom:0.3rem;font-size:0.8rem;padding:0.4rem 0.6rem">
+                <textarea class="womenItem-desc" rows="2" placeholder="Description" style="width:100%;font-size:0.8rem;padding:0.4rem 0.6rem">${esc(item.desc || '')}</textarea>
+            </div>
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--accent);cursor:pointer;padding:0.3rem"><i class="fas fa-times"></i></button>
+        </div>`)
+
+    renderMissionList('disabledItemsContainer', 'disabledItem', d.disabledItems, (item) =>
+        `<div style="display:flex;gap:0.5rem;margin-bottom:0.3rem;align-items:center">
+            <input type="text" class="disabledItem-val" value="${esc(item)}" placeholder="Point…" style="flex:1;font-size:0.8rem;padding:0.4rem 0.6rem">
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--accent);cursor:pointer;padding:0.3rem"><i class="fas fa-times"></i></button>
+        </div>`)
+
+    renderMissionList('poorItemsContainer', 'poorItem', d.poorItems, (item) =>
+        `<div style="display:flex;gap:0.5rem;margin-bottom:0.3rem;align-items:center">
+            <input type="text" class="poorItem-val" value="${esc(item)}" placeholder="Point…" style="flex:1;font-size:0.8rem;padding:0.4rem 0.6rem">
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--accent);cursor:pointer;padding:0.3rem"><i class="fas fa-times"></i></button>
+        </div>`)
+
+    renderMissionList('misTestimonialsContainer', 'misTesti', d.testimonials, (item) =>
+        `<div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:start">
+            <div style="flex:1">
+                <div style="display:flex;gap:0.5rem;margin-bottom:0.3rem">
+                    <input type="text" class="misTesti-name" value="${esc(item.name)}" placeholder="Nom" style="flex:1;font-size:0.8rem;padding:0.4rem 0.6rem">
+                </div>
+                <textarea class="misTesti-text" rows="2" placeholder="Témoignage…" style="width:100%;font-size:0.8rem;padding:0.4rem 0.6rem">${esc(item.text || '')}</textarea>
+            </div>
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--accent);cursor:pointer;padding:0.3rem"><i class="fas fa-times"></i></button>
+        </div>`)
+}
+
+function renderMissionList(containerId, cls, items, renderFn) {
+    const container = document.getElementById(containerId)
+    container.innerHTML = ''
+    items.forEach(item => {
+        const div = document.createElement('div')
+        div.innerHTML = renderFn(item)
+        container.appendChild(div)
+    })
+}
+
+function addMissionListItem(containerId, cls, defaultValue) {
+    const container = document.getElementById(containerId)
+    const div = document.createElement('div')
+    if (cls === 'womenItem') {
+        div.innerHTML = `<div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:start">
+            <select class="womenItem-icon" style="padding:0.5rem;background:var(--bg);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);color:var(--text);font-size:0.8rem;font-family:var(--font);width:80px">
+                <option value="sewing-needle">Couture</option>
+                <option value="chart-line">Graphique</option>
+                <option value="book-open">Livre</option>
+                <option value="hands-helping">Aide</option>
+                <option value="heart">Coeur</option>
+                <option value="graduation-cap">Éducation</option>
+            </select>
+            <div style="flex:1">
+                <input type="text" class="womenItem-title" placeholder="Titre" style="width:100%;margin-bottom:0.3rem;font-size:0.8rem;padding:0.4rem 0.6rem">
+                <textarea class="womenItem-desc" rows="2" placeholder="Description" style="width:100%;font-size:0.8rem;padding:0.4rem 0.6rem"></textarea>
+            </div>
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--accent);cursor:pointer;padding:0.3rem"><i class="fas fa-times"></i></button>
+        </div>`
+    } else if (cls === 'disabledItem') {
+        div.innerHTML = `<div style="display:flex;gap:0.5rem;margin-bottom:0.3rem;align-items:center">
+            <input type="text" class="disabledItem-val" placeholder="Point…" style="flex:1;font-size:0.8rem;padding:0.4rem 0.6rem">
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--accent);cursor:pointer;padding:0.3rem"><i class="fas fa-times"></i></button>
+        </div>`
+    } else if (cls === 'poorItem') {
+        div.innerHTML = `<div style="display:flex;gap:0.5rem;margin-bottom:0.3rem;align-items:center">
+            <input type="text" class="poorItem-val" placeholder="Point…" style="flex:1;font-size:0.8rem;padding:0.4rem 0.6rem">
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--accent);cursor:pointer;padding:0.3rem"><i class="fas fa-times"></i></button>
+        </div>`
+    }
+    container.appendChild(div)
+}
+
+function addMisTestimonial() {
+    const container = document.getElementById('misTestimonialsContainer')
+    const div = document.createElement('div')
+    div.innerHTML = `<div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:start">
+        <div style="flex:1">
+            <div style="display:flex;gap:0.5rem;margin-bottom:0.3rem">
+                <input type="text" class="misTesti-name" placeholder="Nom" style="flex:1;font-size:0.8rem;padding:0.4rem 0.6rem">
+            </div>
+            <textarea class="misTesti-text" rows="2" placeholder="Témoignage…" style="width:100%;font-size:0.8rem;padding:0.4rem 0.6rem"></textarea>
+        </div>
+        <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--accent);cursor:pointer;padding:0.3rem"><i class="fas fa-times"></i></button>
+    </div>`
+    container.appendChild(div)
+}
+
+function collectMissionData() {
+    const womenItems = []
+    document.querySelectorAll('#womenItemsContainer > div').forEach(el => {
+        const icon = el.querySelector('.womenItem-icon')
+        const title = el.querySelector('.womenItem-title')
+        const desc = el.querySelector('.womenItem-desc')
+        if (title && title.value.trim()) womenItems.push({ icon: icon?.value || 'heart', title: title.value, desc: desc?.value || '' })
+    })
+    const disabledItems = []
+    document.querySelectorAll('#disabledItemsContainer > div').forEach(el => {
+        const val = el.querySelector('.disabledItem-val')
+        if (val && val.value.trim()) disabledItems.push(val.value)
+    })
+    const poorItems = []
+    document.querySelectorAll('#poorItemsContainer > div').forEach(el => {
+        const val = el.querySelector('.poorItem-val')
+        if (val && val.value.trim()) poorItems.push(val.value)
+    })
+    const testimonials = []
+    document.querySelectorAll('#misTestimonialsContainer > div').forEach(el => {
+        const name = el.querySelector('.misTesti-name')
+        const text = el.querySelector('.misTesti-text')
+        if (name && name.value.trim() && text && text.value.trim()) testimonials.push({ name: name.value, text: text.value })
+    })
+    return {
+        hero: {
+            title: document.getElementById('missionHeroTitle').value,
+            subtitle: document.getElementById('missionHeroSub').value
+        },
+        intro: {
+            title: document.getElementById('missionIntroTitle').value,
+            paragraphs: [
+                document.getElementById('missionIntroP1').value,
+                document.getElementById('missionIntroP2').value
+            ]
+        },
+        stats: [
+            { number: document.getElementById('stat1Num').value, label: document.getElementById('stat1Label').value },
+            { number: document.getElementById('stat2Num').value, label: document.getElementById('stat2Label').value },
+            { number: document.getElementById('stat3Num').value, label: document.getElementById('stat3Label').value },
+            { number: document.getElementById('stat4Num').value, label: document.getElementById('stat4Label').value }
+        ],
+        womenTitle: document.getElementById('womenTitle').value,
+        womenSubtitle: document.getElementById('womenSub').value,
+        womenItems,
+        disabledTitle: document.getElementById('disabledTitle').value,
+        disabledItems,
+        poorTitle: document.getElementById('poorTitle').value,
+        poorItems,
+        testimonials
+    }
+}
+
+async function saveMission() {
+    const data = collectMissionData()
+    showNotif('Sauvegarde en cours…', 'info')
+    try {
+        const res = await githubFetch(MISSION_PATH)
+        const file = await res.json()
+        const json = JSON.stringify(data, null, 2)
+        const encoded = btoa(unescape(encodeURIComponent(json)))
+        await githubFetch(MISSION_PATH, {
+            method: 'PUT',
+            body: JSON.stringify({
+                message: 'Mise à jour page Mission',
+                content: encoded,
+                sha: file.sha,
+                branch: REPO_BRANCH
+            })
+        })
+        missionData = data
+        showNotif('✅ Page Mission sauvegardée', 'success')
     } catch (e) {
         showNotif('Erreur: ' + e.message, 'error')
     }
