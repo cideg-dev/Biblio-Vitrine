@@ -9,6 +9,7 @@ const LISTE_PATH = 'assets/documents/liste-pdfs.json'
 const DOCS_PATH = 'assets/documents/'
 const TOKEN_KEY = 'githubAdminToken'
 const TESTIMONIALS_PATH = 'assets/data/testimonials.json'
+const DONATION_GOAL_PATH = 'assets/data/donation-goal.json'
 
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth()
@@ -27,6 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('confirmAddTestimonial').addEventListener('click', addTestimonial)
     document.getElementById('saveTestimonialsBtn').addEventListener('click', saveTestimonials)
 
+    // Donation
+    document.getElementById('saveDonationBtn').addEventListener('click', saveDonationGoal)
+    document.getElementById('donationShowToggle').addEventListener('change', updateDonationPreview)
+
     // Tabs
     document.querySelectorAll('.admin-tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -35,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tab.classList.add('active')
             document.getElementById('tab-' + tab.dataset.tab).classList.add('active')
             if (tab.dataset.tab === 'testimonials') loadTestimonialsAdmin()
+            if (tab.dataset.tab === 'donation') loadDonationGoal()
         })
     })
 
@@ -428,6 +434,56 @@ async function saveTestimonials() {
             })
         })
         showNotif('✅ Témoignages sauvegardés', 'success')
+    } catch (e) {
+        showNotif('Erreur: ' + e.message, 'error')
+    }
+}
+
+// ─── Donation Goal ───
+async function loadDonationGoal() {
+    try {
+        const res = await githubFetch(DONATION_GOAL_PATH)
+        const data = await res.json()
+        const content = JSON.parse(atob(data.content.replace(/\n/g, '')))
+        document.getElementById('donationCurrentInput').value = content.current || 0
+        document.getElementById('donationTargetInput').value = content.target || 150000
+        document.getElementById('donationShowToggle').checked = content.show || false
+        updateDonationPreview()
+    } catch (e) {
+        document.getElementById('donationCurrentInput').value = 8750
+        document.getElementById('donationTargetInput').value = 150000
+        document.getElementById('donationShowToggle').checked = false
+        updateDonationPreview()
+    }
+}
+
+function updateDonationPreview() {
+    const show = document.getElementById('donationShowToggle').checked
+    document.getElementById('donationPreviewLabel').textContent = show ? 'Visible sur le site' : 'Masqué'
+    document.getElementById('donationPreviewLabel').style.color = show ? 'var(--primary)' : 'var(--text3)'
+}
+
+async function saveDonationGoal() {
+    const current = parseInt(document.getElementById('donationCurrentInput').value) || 0
+    const target = parseInt(document.getElementById('donationTargetInput').value) || 150000
+    const show = document.getElementById('donationShowToggle').checked
+    const goal = { current, target, show, lastUpdated: new Date().toISOString().slice(0, 10) }
+    showNotif('Sauvegarde en cours…', 'info')
+    try {
+        const res = await githubFetch(DONATION_GOAL_PATH)
+        const data = await res.json()
+        const json = JSON.stringify(goal, null, 2)
+        const encoded = btoa(unescape(encodeURIComponent(json)))
+        await githubFetch(DONATION_GOAL_PATH, {
+            method: 'PUT',
+            body: JSON.stringify({
+                message: 'Mise à jour objectif de dons',
+                content: encoded,
+                sha: data.sha,
+                branch: REPO_BRANCH
+            })
+        })
+        showNotif('✅ Objectif mis à jour', 'success')
     } catch (e) {
         showNotif('Erreur: ' + e.message, 'error')
     }

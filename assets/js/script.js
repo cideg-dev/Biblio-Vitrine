@@ -69,6 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load testimonials
     loadTestimonials()
 
+    // Load donation goal
+    loadDonationGoal()
+
     // Open external download in viewer
     window.downloadCurrentPdf = function() {
         if (window._currentPdfUrl) window.open(window._currentPdfUrl, '_blank')
@@ -356,27 +359,25 @@ async function loadTestimonials() {
 }
 
 // ─── Donation progress ───
-// Simulate a dynamic progress (stored in localStorage to persist)
-function updateDonationProgress() {
-    let current = parseInt(localStorage.getItem('donationTotal') || '0')
-    const target = 150000
-    const pct = Math.min(100, (current / target) * 100)
-    const fill = document.getElementById('progressFill')
-    const display = document.getElementById('donationCurrent')
-    if (fill) fill.style.width = pct + '%'
-    if (display) display.textContent = current.toLocaleString()
+// Loaded from GitHub (donation-goal.json). Admin controls the amount and visibility.
+async function loadDonationGoal() {
+    const section = document.querySelector('.donate-goal')
+    if (!section) return
+    try {
+        const res = await fetch('assets/data/donation-goal.json')
+        if (!res.ok) throw new Error('Not found')
+        const data = await res.json()
+        const fill = document.getElementById('progressFill')
+        const display = document.getElementById('donationCurrent')
+        if (fill) fill.style.width = Math.min(100, (data.current / data.target) * 100) + '%'
+        if (display) display.textContent = (data.current || 0).toLocaleString()
+        // Show/hide the goal section
+        section.style.display = data.show ? '' : 'none'
+    } catch (e) {
+        // Fallback: hide silently
+        if (section) section.style.display = 'none'
+    }
 }
-
-// Call this on load and after donations
-document.addEventListener('DOMContentLoaded', () => {
-    updateDonationProgress()
-    // Simulate: increment by random amount periodically to show progress is alive
-    setInterval(() => {
-        let c = parseInt(localStorage.getItem('donationTotal') || '0')
-        localStorage.setItem('donationTotal', String(c + Math.floor(Math.random() * 500)))
-        updateDonationProgress()
-    }, 300000) // every 5 minutes
-})
 
 // Add verse transition styles
 const style = document.createElement('style')
