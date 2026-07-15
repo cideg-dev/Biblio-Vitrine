@@ -3,37 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CIDEG & P.line — Bibliothèque Biblique Chrétienne Gratuite</title>
-    <meta name="description" content="Accédez gratuitement à une collection de livres bibliques en PDF. Études théologiques, commentaires bibliques et ressources pour approfondir votre foi.">
-    <meta name="keywords" content="Bible, PDF biblique, livres chrétiens, études bibliques, théologie, ressources chrétiennes gratuites">
+    <title>Bibliothèque Biblique — CIDEG & P.line | Livres chrétiens gratuits</title>
+    <meta name="description" content="Accédez gratuitement à 238+ livres bibliques en PDF. Études théologiques, commentaires, développement spirituel. Téléchargement libre et sans inscription.">
+    <meta name="keywords" content="Bible, PDF biblique, livres chrétiens gratuits, études bibliques, théologie, ressources chrétiennes, téléchargement">
     <meta name="author" content="CIDEG & P.line">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://cideg-dev.github.io/Biblio-Vitrine/">
     <link rel="icon" href="assets/images/Lumiere_sur_parole.png">
-    <!-- Open Graph -->
-    <meta property="og:title" content="CIDEG & P.line — Bibliothèque Biblique Chrétienne Gratuite">
-    <meta property="og:description" content="Accédez gratuitement à une collection de livres bibliques en PDF.">
+    <meta property="og:title" content="Bibliothèque Biblique — CIDEG & P.line">
+    <meta property="og:description" content="238+ livres bibliques gratuits en PDF. Études, commentaires et ressources pour approfondir votre foi.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cideg-dev.github.io/Biblio-Vitrine/">
-    <meta property="og:image" content="https://cideg-dev.github.io/Biblio-Vitrine/assets/images/Lumiere_sur_parole.png">
-    <!-- Twitter Card -->
+    <meta property="og:image" content="https://cideg-dev.github.io/Biblio-Vitrine/assets/images/og-banner.jpg">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="CIDEG & P.line — Bibliothèque Biblique Chrétienne Gratuite">
-    <meta name="twitter:description" content="Accédez gratuitement à une collection de livres bibliques en PDF.">
-    <meta name="twitter:image" content="https://cideg-dev.github.io/Biblio-Vitrine/assets/images/Lumiere_sur_parole.png">
-    <!-- Google Fonts & Font Awesome -->
+    <meta name="twitter:title" content="Bibliothèque Biblique — CIDEG & P.line">
+    <meta name="twitter:description" content="238+ livres bibliques gratuits en PDF.">
+    <meta name="twitter:image" content="https://cideg-dev.github.io/Biblio-Vitrine/assets/images/og-banner.jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
-    
     <link rel="stylesheet" href="assets/css/style.css">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3392272461637612"
-     crossorigin="anonymous"></script>
-    <meta name="google-adsense-account" content="ca-pub-3392272461637612">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -42,26 +34,23 @@
         "description": "Bibliothèque biblique chrétienne gratuite en ligne.",
         "url": "https://cideg-dev.github.io/Biblio-Vitrine/",
         "email": "cideg.p.line@gmail.com",
-        "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Natitingou",
-            "addressCountry": "BJ"
-        }
+        "address": { "@type": "PostalAddress", "addressLocality": "Natitingou", "addressCountry": "BJ" }
     }
     </script>
 </head>
 <body>
+    <!-- Navigation -->
     <header>
         <nav class="navbar">
             <div class="nav-container">
                 <div class="logo">
-                    <img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line Logo" class="logo-img">
+                    <img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="logo-img">
                 </div>
                 <ul class="nav-menu">
                     <li class="nav-item"><a href="#accueil" class="nav-link">Accueil</a></li>
                     <li class="nav-item"><a href="#bibliotheque" class="nav-link">Bibliothèque</a></li>
                     <li class="nav-item"><a href="#apropos" class="nav-link">À propos</a></li>
-                    <li class="nav-item"><a href="#soutenir" class="nav-link">Soutenir</a></li>
+                    <li class="nav-item"><a href="#soutenir" class="nav-link donate-link"><i class="fas fa-heart"></i> Soutenir</a></li>
                     <li class="nav-item"><a href="admin.html" class="admin-btn">Admin</a></li>
                 </ul>
                 <div class="hamburger">
@@ -74,122 +63,272 @@
     </header>
 
     <main>
+        <!-- Hero Section -->
         <section id="accueil" class="hero">
+            <div class="hero-bg"></div>
             <div class="hero-content">
-                <h2>Bienvenue à CIDEG & P.line</h2>
-                <p>Accédez gratuitement à une collection complète de livres bibliques en format PDF</p>
-                <a href="#bibliotheque" class="cta-button">Explorer la bibliothèque</a>
+                <div class="hero-badge">100% Gratuit · Sans inscription</div>
+                <h1>La Parole de Dieu<br><span class="highlight">à portée de tous</span></h1>
+                <p class="hero-subtitle">Explorez notre bibliothèque de <strong class="pdf-count-hero">238+</strong> livres bibliques en PDF. Études théologiques, commentaires, développement spirituel — <strong>entièrement gratuits</strong>.</p>
+                <div class="hero-actions">
+                    <a href="#bibliotheque" class="btn-primary btn-lg"><i class="fas fa-book-open"></i> Explorer la bibliothèque</a>
+                    <a href="#soutenir" class="btn-outline btn-lg"><i class="fas fa-heart"></i> Soutenir la mission</a>
+                </div>
+            </div>
+            <div class="hero-scroll-indicator">
+                <span>Découvrir</span>
+                <i class="fas fa-chevron-down"></i>
             </div>
         </section>
 
-        <section id="valeurs" class="values">
+        <!-- Stats Bar -->
+        <section class="stats-bar">
             <div class="container">
-                <h2>Nos Valeurs</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number">238+</span>
+                        <span class="stat-label">Livres disponibles</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Gratuit</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">∞</span>
+                        <span class="stat-label">Sans limite</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bible Verse -->
+        <section class="verse-section">
+            <div class="container">
+                <div class="verse-card">
+                    <i class="fas fa-quote-left verse-quote-icon"></i>
+                    <blockquote id="dailyVerse">« Ta parole est une lampe à mes pieds, et une lumière sur mon sentier. »</blockquote>
+                    <cite id="dailyVerseRef">— Psaume 119:105</cite>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Valeurs -->
+        <section id="apropos" class="values">
+            <div class="container">
+                <h2>Notre Mission</h2>
+                <p class="section-subtitle">Rendre la connaissance biblique accessible à tous, sans barrière financière.</p>
                 <div class="values-grid">
                     <div class="value-card">
+                        <div class="value-icon"><i class="fas fa-lock-open"></i></div>
                         <h3>Accès Libre</h3>
-                        <p>Tous nos documents bibliques sont disponibles gratuitement pour tous.</p>
+                        <p>Tous nos documents sont disponibles gratuitement pour tous, sans inscription ni abonnement.</p>
                     </div>
                     <div class="value-card">
-                        <h3>Fidélité</h3>
-                        <p>Nous nous engageons à préserver l'intégrité des textes sacrés.</p>
+                        <div class="value-icon"><i class="fas fa-bible"></i></div>
+                        <h3>Fidélité aux Écritures</h3>
+                        <p>Nous préservons l'intégrité des textes sacrés dans leur richesse théologique et spirituelle.</p>
                     </div>
                     <div class="value-card">
+                        <div class="value-icon"><i class="fas fa-hands-helping"></i></div>
                         <h3>Communauté</h3>
-                        <p>Un espace pour les croyants cherchant à approfondir leur foi.</p>
+                        <p>Un espace pour les croyants cherchant à approfondir leur foi et à grandir spirituellement.</p>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- Bibliothèque -->
         <section id="bibliotheque" class="library">
             <div class="container">
-                <h2>Bibliothèque de Livres Bibliques</h2>
-                <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="Rechercher un livre...">
-                </div>
-                <div class="adsense-ad">
-                    <!-- Espace publicitaire AdSense -->
-                    <ins class="adsbygoogle"
-                         style="display:block"
-                         data-ad-client="ca-app-pub-3392272461637612"
-                         data-ad-slot="2372770671"
-                         data-ad-format="auto"
-                         data-full-width-responsive="true"></ins>
-                    <script>
-                         (adsbygoogle = window.adsbygoogle || []).push({});
-                    </script>
+                <h2>Bibliothèque Biblique</h2>
+                <p class="section-subtitle">Parcourez notre collection de <strong id="totalPdfCount">238</strong> livres et ressources chrétiennes.</p>
+                <div class="library-controls">
+                    <div class="search-bar">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" placeholder="Rechercher par titre, auteur, thème…">
+                    </div>
                 </div>
                 <div id="pdfList" class="pdf-grid">
-                    <!-- Les PDFs seront chargés dynamiquement ici -->
+                    <!-- PDF cards loaded by JS -->
                 </div>
                 <div id="pagination-container" class="pagination-container"></div>
             </div>
         </section>
 
-        <section id="apropos" class="about">
+        <!-- Témoignages -->
+        <section class="testimonials">
             <div class="container">
-                <h2>À Propos de CIDEG & P.line</h2>
-                <p>CIDEG & P.line a pour mission de rendre accessible à tous les textes sacrés de la tradition chrétienne. Nous croyons que la Parole de Dieu doit être disponible gratuitement pour tous ceux qui cherchent à approfondir leur foi et leur connaissance des Écritures.</p>
-                <p>Notre collection comprend des versions variées de la Bible, des commentaires bibliques, des études théologiques et d'autres ressources utiles pour la croissance spirituelle.</p>
-            </div>
-        </section>
-
-        <section id="soutenir" class="donate-section">
-            <div class="container">
-                <h2>Soutenez Notre Mission</h2>
-                <p class="donate-intro">Ce site est et restera <strong>100% gratuit</strong>. Si ces ressources vous ont été utiles, vous pouvez soutenir notre travail par un don volontaire. Chaque contribution, même modeste, nous aide à maintenir et enrichir cette bibliothèque pour tous.</p>
-                <div class="donate-methods">
-                    <div class="donate-card">
-                        <div class="donate-icon"><i class="fab fa-paypal"></i></div>
-                        <h3>PayPal</h3>
-                        <p>Don sécurisé par carte ou compte PayPal.</p>
-                        <form action="https://www.paypal.com/donate" method="post" target="_top">
-                            <input type="hidden" name="business" value="davi.ekue@gmail.com"/>
-                            <input type="hidden" name="no_recurring" value="0"/>
-                            <input type="hidden" name="item_name" value="Soutien à CIDEG & P.line"/>
-                            <input type="hidden" name="currency_code" value="USD"/>
-                            <button type="submit" class="donate-btn paypal-btn">Donner avec PayPal</button>
-                        </form>
+                <h2>Ils ont été bénis</h2>
+                <p class="section-subtitle">Des lecteurs comme vous partagent leur expérience.</p>
+                <div class="testimonials-grid">
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        <p>« Une ressource incroyable ! J'ai trouvé des études que je cherchais depuis des années, le tout gratuitement. Que Dieu bénisse ce ministère. »</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar"><i class="fas fa-user-circle"></i></div>
+                            <div>
+                                <strong>Marc K.</strong>
+                                <span>Cotonou, Bénin</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="donate-card">
-                        <div class="donate-icon"><i class="fas fa-credit-card"></i></div>
-                        <h3>Carte Bancaire</h3>
-                        <p>Accepté via PayPal (Visa, Mastercard, Amex). Choisissez l'option "Carte" dans PayPal.</p>
-                        <a href="https://www.paypal.com/donate/?business=davi.ekue@gmail.com&no_recurring=0&currency_code=USD" target="_blank" class="donate-btn paypal-btn">Donner par Carte</a>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        <p>« Cette bibliothèque m'a permis de approfondir ma connaissance de la Parole. Le format PDF est parfait pour étudier hors ligne. »</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar"><i class="fas fa-user-circle"></i></div>
+                            <div>
+                                <strong>Esther D.</strong>
+                                <span>Lomé, Togo</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="donate-card">
-                        <div class="donate-icon"><i class="fas fa-mobile-alt"></i></div>
-                        <h3>Mobile Money</h3>
-                        <p>Envoyez votre don directement par transfert mobile.</p>
-                        <div class="mobile-money-details">
-                            <p><strong>MTN MoMo :</strong> +229 01 62 04 45 24</p>
-                            <p><em>Titulaire : DAVI Ekué</em></p>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        <p>« Un travail remarquable ! Je recommande à tous les chrétiens qui veulent grandir dans la foi. Et en plus c'est gratuit ! »</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar"><i class="fas fa-user-circle"></i></div>
+                            <div>
+                                <strong>Paul A.</strong>
+                                <span>Ouagadougou, Burkina</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+
+        <!-- Section Dons (impact storytelling) -->
+        <section id="soutenir" class="donate-section">
+            <div class="container">
+                <h2>Soutenez l'Œuvre</h2>
+                <p class="section-subtitle">Ce site est et restera 100% gratuit. Mais nous avons besoin de vous pour le maintenir et l'enrichir.</p>
+
+                <div class="donate-impact">
+                    <div class="impact-text">
+                        <h3>Votre don permet :</h3>
+                        <ul class="impact-list">
+                            <li><i class="fas fa-check-circle"></i> D'héberger la bibliothèque pour des milliers de lecteurs</li>
+                            <li><i class="fas fa-check-circle"></i> D'ajouter régulièrement de nouveaux livres</li>
+                            <li><i class="fas fa-check-circle"></i> D'améliorer le site et l'expérience de lecture</li>
+                            <li><i class="fas fa-check-circle"></i> De maintenir l'accès gratuit pour tous</li>
+                        </ul>
+                    </div>
+                    <div class="donate-goal">
+                        <div class="goal-header">
+                            <span>Objectif mensuel</span>
+                            <span><strong id="donationCurrent">0</strong> / 150 000 FCFA</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                        <p class="goal-note">Chaque don, même modeste, nous rapproche du but.</p>
+                    </div>
+                </div>
+
+                <div class="donate-methods">
+                    <div class="donate-card featured">
+                        <div class="donate-icon"><i class="fab fa-paypal"></i></div>
+                        <h3>PayPal & Carte</h3>
+                        <p>Sécurisé · International · Visa, Mastercard, PayPal</p>
+                        <form action="https://www.paypal.com/donate" method="post" target="_top">
+                            <input type="hidden" name="business" value="davi.ekue@gmail.com"/>
+                            <input type="hidden" name="no_recurring" value="0"/>
+                            <input type="hidden" name="item_name" value="Soutien Bibliothèque Biblique"/>
+                            <input type="hidden" name="currency_code" value="USD"/>
+                            <div class="donate-amounts">
+                                <button type="button" class="amount-btn" data-amount="5">5 $</button>
+                                <button type="button" class="amount-btn" data-amount="10">10 $</button>
+                                <button type="button" class="amount-btn" data-amount="25">25 $</button>
+                                <button type="button" class="amount-btn" data-amount="50">50 $</button>
+                            </div>
+                            <button type="submit" class="donate-btn paypal-btn"><i class="fab fa-paypal"></i> Donner avec PayPal</button>
+                        </form>
+                    </div>
+                    <div class="donate-card">
+                        <div class="donate-icon"><i class="fas fa-mobile-alt"></i></div>
+                        <h3>Mobile Money</h3>
+                        <p>Bénin · MTN MoMo · Instantané</p>
+                        <div class="mobile-money-details">
+                            <div class="momocode">
+                                <span class="momocode-label">MTN MoMo</span>
+                                <span class="momocode-number">+229 01 62 04 45 24</span>
+                            </div>
+                            <p class="momocode-name">Titulaire : DAVI Ekué</p>
+                        </div>
+                        <p class="donate-note effectif">✓ Transfert direct et immédiat</p>
+                    </div>
+                </div>
+                <p class="donate-thankyou">Merci du fond du cœur pour votre générosité. 🙏</p>
+            </div>
+        </section>
+
+        <!-- Newsletter -->
+        <section class="newsletter">
+            <div class="container">
+                <div class="newsletter-card">
+                    <h2>Restez informé</h2>
+                    <p>Soyez averti des nouveaux ajouts à la bibliothèque et des ressources gratuites.</p>
+                    <form id="newsletterForm" class="newsletter-form">
+                        <input type="email" id="newsletterEmail" placeholder="Votre adresse email" required>
+                        <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> S'abonner</button>
+                    </form>
+                    <p class="newsletter-note">Pas de spam. Désabonnement à tout moment.</p>
+                </div>
+            </div>
+        </section>
     </main>
 
+    <!-- Footer -->
     <footer>
         <div class="container">
-            <p>&copy; 2023 CIDEG & P.line. Tous droits réservés.</p>
-            <div class="footer-links">
-                <a href="privacy-policy.html">Politique de Confidentialité</a> |
-                <a href="cookies-policy.html">Cookies</a> |
-                <a href="terms-of-use.html">Conditions d'Utilisation</a> |
-                <a href="legal-notice.html">Mentions Légales</a>
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="footer-logo">
+                    <p>Rendre la Parole de Dieu accessible à tous, gratuitement.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Liens</h4>
+                    <a href="#accueil">Accueil</a>
+                    <a href="#bibliotheque">Bibliothèque</a>
+                    <a href="#apropos">À propos</a>
+                    <a href="#soutenir">Soutenir</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Légal</h4>
+                    <a href="privacy-policy.html">Confidentialité</a>
+                    <a href="cookies-policy.html">Cookies</a>
+                    <a href="terms-of-use.html">Conditions</a>
+                    <a href="legal-notice.html">Mentions légales</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <a href="mailto:cideg.p.line@gmail.com"><i class="fas fa-envelope"></i> cideg.p.line@gmail.com</a>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CIDEG & P.line. « Ta parole est une lampe à mes pieds. » — Psaume 119:105</p>
             </div>
         </div>
     </footer>
 
-    <!-- Bouton retour en haut -->
+    <!-- Donate Floating Button -->
+    <a href="#soutenir" class="donate-float" aria-label="Faire un don">
+        <i class="fas fa-heart"></i>
+        <span>Don</span>
+    </a>
+
+    <!-- Back to Top -->
     <button id="backToTop" class="back-to-top" aria-label="Retour en haut">
         <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- visionneuse PDF en plein écran -->
+    <!-- PDF Viewer -->
     <div id="pdf-viewer-overlay">
         <div id="pdf-viewer-controls">
             <button id="back-to-library" class="btn btn-secondary"><i class="fas fa-arrow-left"></i></button>
@@ -206,7 +345,6 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="assets/js/script.js"></script>
 </body>
