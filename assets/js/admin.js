@@ -1,283 +1,229 @@
-let pdfs = [];
-const BASE_URL = 'http://localhost:3000';
-const API_URL = `${BASE_URL}/api/pdfs`;
-const AUTH_TOKEN_KEY = 'adminToken';
+let pdfs = []
+const REPO_OWNER = 'cideg-dev'
+const REPO_NAME = 'Biblio-Vitrine'
+const REPO_BRANCH = 'master'
+const LISTE_PATH = 'assets/documents/liste-pdfs.json'
+const DOCS_PATH = 'assets/documents/'
+const TOKEN_KEY = 'githubAdminToken'
 
-document.addEventListener('DOMContentLoaded', function() {
-    checkAdminAuth();
-    const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) {
-        loginBtn.addEventListener('click', handleAdminLogin);
-    }
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleAdminLogout);
-    }
-    const saveChangesBtn = document.getElementById('saveChangesBtn');
-    if (saveChangesBtn) {
-        saveChangesBtn.addEventListener('click', saveChanges);
-    }
-    const addPdfBtn = document.getElementById('addPdfBtn');
-    if (addPdfBtn) {
-        addPdfBtn.addEventListener('click', handleAddPdf);
-    }
-});
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth()
+    document.getElementById('loginBtn').addEventListener('click', handleLogin)
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout)
+    document.getElementById('saveChangesBtn').addEventListener('click', saveChanges)
+    document.getElementById('addPdfBtn').addEventListener('click', handleAddPdf)
+})
 
 function getToken() {
-    return localStorage.getItem(AUTH_TOKEN_KEY);
+    return localStorage.getItem(TOKEN_KEY)
 }
 
-function checkAdminAuth() {
-    if (getToken()) {
-        showAdminInterface();
-    } else {
-        showLoginForm();
-    }
+function checkAuth() {
+    getToken() ? showAdmin() : showLogin()
 }
 
-function showLoginForm() {
-    document.getElementById('loginSection').style.display = 'block';
-    document.getElementById('adminInterface').style.display = 'none';
+function showLogin() {
+    document.getElementById('loginSection').style.display = 'block'
+    document.getElementById('adminInterface').style.display = 'none'
 }
 
-async function showAdminInterface() {
-    document.getElementById('loginSection').style.display = 'none';
-    document.getElementById('adminInterface').style.display = 'block';
-    await loadExistingPDFs();
+async function showAdmin() {
+    document.getElementById('loginSection').style.display = 'none'
+    document.getElementById('adminInterface').style.display = 'block'
+    await loadPDFs()
 }
 
-async function handleAdminLogin() {
-    const password = document.getElementById('adminPassword').value;
-    try {
-        const response = await fetch(`${BASE_URL}/api/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password })
-        });
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.error || 'Mot de passe incorrect');
+function handleLogin() {
+    const token = document.getElementById('githubToken').value.trim()
+    if (!token) return alert('Token requis')
+    localStorage.setItem(TOKEN_KEY, token)
+    showAdmin()
+}
+
+function handleLogout() {
+    localStorage.removeItem(TOKEN_KEY)
+    showLogin()
+}
+
+async function githubFetch(path, options = {}) {
+    const token = getToken()
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+        ...options,
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            ...options.headers
         }
-        localStorage.setItem(AUTH_TOKEN_KEY, data.token);
-        showAdminInterface();
-    } catch (error) {
-        console.error("Erreur d'authentification:", error);
-        alert(error.message);
+    })
+    if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem(TOKEN_KEY)
+        showLogin()
+        throw new Error('Token invalide ou expiré')
     }
+    return res
 }
 
-function handleAdminLogout() {
-    localStorage.removeItem(AUTH_TOKEN_KEY);
-    showLoginForm();
-}
-
-async function loadExistingPDFs() {
+async function loadPDFs() {
     try {
-        const response = await fetch(API_URL);
-        if (!response.ok) {
-            throw new Error('Erreur du serveur lors du chargement des PDFs.');
-        }
-        pdfs = await response.json();
-        displayEditablePDFs();
-    } catch (error) {
-        console.error('Erreur lors du chargement des PDFs:', error);
-        showNotification('Impossible de charger la liste des PDFs.', 'error');
+        const res = await githubFetch(LISTE_PATH)
+        const data = await res.json()
+        const content = atob(data.content.replace(/\n/g, ''))
+        pdfs = JSON.parse(content)
+        displayPDFs()
+    } catch (e) {
+        console.error(e)
+        showNotification('Erreur chargement liste PDFs', 'error')
     }
 }
 
-function displayEditablePDFs() {
-    const container = document.getElementById('existingPDFs');
-    container.innerHTML = '';
-
-    if (!pdfs || pdfs.length === 0) {
-        container.innerHTML = '<p>Aucun PDF dans la liste.</p>';
-        document.getElementById('saveChangesBtn').style.display = 'none';
-        return;
+function displayPDFs() {
+    const container = document.getElementById('existingPDFs')
+    container.innerHTML = ''
+    if (!pdfs || !pdfs.length) {
+        container.innerHTML = '<p>Aucun PDF.</p>'
+        document.getElementById('saveChangesBtn').style.display = 'none'
+        return
     }
-
-    pdfs.forEach((pdf, index) => {
-        const item = document.createElement('div');
-        item.className = 'pdf-item';
-        item.dataset.index = index;
-
+    pdfs.forEach((pdf, i) => {
+        const item = document.createElement('div')
+        item.className = 'pdf-item'
         item.innerHTML = `
             <div class="form-group">
-                <label>Titre:</label>
-                <input type="text" class="pdf-title-input" value="${escapeHTML(pdf.titre)}">
+                <label>Titre :</label>
+                <input type="text" class="pdf-title-input" value="${esc(pdf.titre)}">
             </div>
             <div class="form-group">
-                <label>Description:</label>
-                <textarea class="pdf-description-input">${escapeHTML(pdf.description)}</textarea>
+                <label>Description :</label>
+                <textarea class="pdf-description-input">${esc(pdf.description)}</textarea>
             </div>
             <div class="form-group">
-                <label>Nom du fichier (non modifiable):</label>
-                <input type="text" class="pdf-filename-input" value="${escapeHTML(pdf.nom_du_fichier)}" readonly>
+                <label>Fichier :</label>
+                <input type="text" class="pdf-filename-input" value="${esc(pdf.nom_du_fichier)}" readonly>
             </div>
             <div class="pdf-actions">
-                <button class="btn btn-secondary" onclick="deletePDF(${index})">Supprimer</button>
-            </div>
-        `;
-        container.appendChild(item);
-    });
-
-    document.getElementById('saveChangesBtn').style.display = 'block';
-}
-
-async function saveChanges() {
-    showNotification('Sauvegarde en cours...', 'info');
-    const newPdfsArray = [];
-    const items = document.querySelectorAll('.pdf-item');
-
-    items.forEach(item => {
-        const title = item.querySelector('.pdf-title-input').value;
-        const description = item.querySelector('.pdf-description-input').value;
-        const fileName = item.querySelector('.pdf-filename-input').value;
-        newPdfsArray.push({ titre: title, description: description, nom_du_fichier: fileName });
-    });
-
-    try {
-        const token = getToken();
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(newPdfsArray),
-        });
-
-        if (response.status === 401 || response.status === 403) {
-            localStorage.removeItem(AUTH_TOKEN_KEY);
-            showLoginForm();
-            throw new Error('Session expirée. Veuillez vous reconnecter.');
-        }
-
-        if (!response.ok) {
-            throw new Error('Le serveur a retourné une erreur.');
-        }
-
-        const result = await response.json();
-        showNotification(result.message, 'success');
-        pdfs = newPdfsArray;
-    } catch (error) {
-        console.error('Erreur lors de la sauvegarde:', error);
-        showNotification(error.message, 'error');
-    }
+                <button class="btn btn-secondary" onclick="deletePDF(${i})">Supprimer</button>
+            </div>`
+        container.appendChild(item)
+    })
+    document.getElementById('saveChangesBtn').style.display = 'block'
 }
 
 function deletePDF(index) {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer "${pdfs[index].nom_du_fichier}" ?`)) {
-        pdfs.splice(index, 1);
-        displayEditablePDFs();
+    if (confirm(`Supprimer "${pdfs[index].nom_du_fichier}" ?`)) {
+        pdfs.splice(index, 1)
+        displayPDFs()
+    }
+}
+
+async function saveChanges() {
+    showNotification('Sauvegarde...', 'info')
+    const items = document.querySelectorAll('.pdf-item')
+    const newList = []
+    items.forEach(item => {
+        newList.push({
+            titre: item.querySelector('.pdf-title-input').value,
+            description: item.querySelector('.pdf-description-input').value,
+            nom_du_fichier: item.querySelector('.pdf-filename-input').value
+        })
+    })
+    try {
+        const res = await githubFetch(LISTE_PATH)
+        const data = await res.json()
+        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(newList, null, 2))))
+        await githubFetch(LISTE_PATH, {
+            method: 'PUT',
+            body: JSON.stringify({
+                message: 'Mise à jour des métadonnées des PDFs',
+                content: encoded,
+                sha: data.sha,
+                branch: REPO_BRANCH
+            })
+        })
+        pdfs = newList
+        showNotification('Métadonnées sauvegardées', 'success')
+    } catch (e) {
+        showNotification('Erreur sauvegarde: ' + e.message, 'error')
     }
 }
 
 async function handleAddPdf() {
-    const fileInput = document.getElementById('newPdfFile');
-    const titleInput = document.getElementById('newPdfTitle');
-    const descriptionInput = document.getElementById('newPdfDescription');
+    const fileInput = document.getElementById('newPdfFile')
+    const titleInput = document.getElementById('newPdfTitle')
+    const descInput = document.getElementById('newPdfDescription')
+    const file = fileInput.files[0]
+    const title = titleInput.value.trim()
+    const desc = descInput.value.trim()
 
-    const file = fileInput.files[0];
-    const title = titleInput.value.trim();
-    const description = descriptionInput.value.trim();
+    if (!file) return showNotification('Sélectionne un fichier PDF', 'error')
+    if (!title) return showNotification('Entre un titre', 'error')
 
-    if (!file) {
-        showNotification('Veuillez sélectionner un fichier PDF.', 'error');
-        return;
-    }
-    if (!title) {
-        showNotification('Veuillez entrer un titre.', 'error');
-        return;
-    }
-
-    showNotification('Upload en cours...', 'info');
+    showNotification('Upload en cours...', 'info')
 
     try {
-        const token = getToken();
+        const filename = file.name
+        const path = DOCS_PATH + filename
 
-        const formData = new FormData();
-        formData.append('pdf', file);
+        const reader = new FileReader()
+        reader.onload = async (e) => {
+            const base64 = e.target.result.split(',')[1]
 
-        const uploadRes = await fetch(`${BASE_URL}/api/upload`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: formData
-        });
+            let sha
+            try {
+                const existRes = await githubFetch(path)
+                const existData = await existRes.json()
+                if (existRes.ok) sha = existData.sha
+            } catch { }
 
-        if (uploadRes.status === 401 || uploadRes.status === 403) {
-            localStorage.removeItem(AUTH_TOKEN_KEY);
-            showLoginForm();
-            throw new Error('Session expirée. Veuillez vous reconnecter.');
+            await githubFetch(path, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    message: `Ajout PDF: ${filename}`,
+                    content: base64,
+                    sha,
+                    branch: REPO_BRANCH
+                })
+            })
+
+            pdfs.push({ titre: title, description: desc || 'Aucune description disponible.', nom_du_fichier: filename })
+            await savePdfList()
+
+            fileInput.value = ''
+            titleInput.value = ''
+            descInput.value = ''
+            displayPDFs()
+            showNotification('PDF ajouté avec succès', 'success')
         }
-
-        if (!uploadRes.ok) {
-            const err = await uploadRes.json();
-            throw new Error(err.error || 'Erreur lors de l\'upload.');
-        }
-
-        const uploadData = await uploadRes.json();
-
-        pdfs.push({
-            titre: title,
-            description: description || 'Aucune description disponible.',
-            nom_du_fichier: uploadData.filename
-        });
-
-        await savePdfsToServer();
-        displayEditablePDFs();
-
-        fileInput.value = '';
-        titleInput.value = '';
-        descriptionInput.value = '';
-
-        showNotification('PDF ajouté avec succès.', 'success');
-    } catch (error) {
-        console.error('Erreur lors de l\'ajout du PDF:', error);
-        showNotification(error.message, 'error');
+        reader.readAsDataURL(file)
+    } catch (e) {
+        showNotification('Erreur upload: ' + e.message, 'error')
     }
 }
 
-async function savePdfsToServer() {
-    const token = getToken();
-    const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(pdfs)
-    });
-    if (response.status === 401 || response.status === 403) {
-        localStorage.removeItem(AUTH_TOKEN_KEY);
-        showLoginForm();
-        throw new Error('Session expirée.');
-    }
-    if (!response.ok) {
-        throw new Error('Erreur lors de la sauvegarde.');
-    }
+async function savePdfList() {
+    const res = await githubFetch(LISTE_PATH)
+    const data = await res.json()
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(pdfs, null, 2))))
+    await githubFetch(LISTE_PATH, {
+        method: 'PUT',
+        body: JSON.stringify({
+            message: 'Mise à jour liste-pdfs.json',
+            content: encoded,
+            sha: data.sha,
+            branch: REPO_BRANCH
+        })
+    })
 }
 
-function showNotification(message, type) {
-    const statusElement = document.getElementById('notificationMessage');
-    if (!statusElement) return;
-    statusElement.textContent = message;
-    statusElement.className = `upload-status ${type}`;
-    statusElement.style.display = 'block';
-
-    setTimeout(() => {
-        statusElement.style.display = 'none';
-    }, 5000);
+function showNotification(msg, type) {
+    const el = document.getElementById('notificationMessage')
+    if (!el) return
+    el.textContent = msg
+    el.className = `upload-status ${type}`
+    el.style.display = 'block'
+    setTimeout(() => el.style.display = 'none', 5000)
 }
 
-function escapeHTML(str) {
-    if (typeof str !== 'string') return '';
-    return str.replace(/[&<>"]/g, function(match) {
-        return {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;'
-        }[match];
-    });
+function esc(str) {
+    if (typeof str !== 'string') return ''
+    return str.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]))
 }

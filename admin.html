@@ -27,12 +27,19 @@
     </header>
 
     <main id="adminContent">
-        <!-- Formulaire de connexion -->
+        <!-- Formulaire de connexion GitHub -->
         <div id="loginSection" class="login-form">
-            <h2>Connexion Admin</h2>
+            <h2>Connexion Admin via GitHub</h2>
+            <p style="font-size:0.85rem;margin-bottom:1rem;">
+                Crée un token sur 
+                <a href="https://github.com/settings/tokens?scopes=repo&description=Biblio-Vitrine-Admin" target="_blank" rel="noopener">
+                    GitHub Settings → Tokens
+                </a>
+                (coche <code>repo</code>)
+            </p>
             <div class="form-group">
-                <label for="adminPassword">Mot de passe:</label>
-                <input type="password" id="adminPassword" required>
+                <label for="githubToken">GitHub Personal Access Token :</label>
+                <input type="password" id="githubToken" placeholder="ghp_..." required>
             </div>
             <button id="loginBtn" class="btn btn-primary">Se connecter</button>
         </div>
