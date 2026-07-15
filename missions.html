@@ -39,6 +39,7 @@
                     <li class="nav-item"><a href="index.html" class="nav-link">Accueil</a></li>
                     <li class="nav-item"><a href="index.html#bibliotheque" class="nav-link">Bibliothèque</a></li>
                     <li class="nav-item"><a href="missions.html" class="nav-link active">Notre Mission</a></li>
+                    <li class="nav-item"><a href="blog.html" class="nav-link"><i class="fas fa-newspaper"></i> Blog</a></li>
                     <li class="nav-item"><a href="index.html#communaute" class="nav-link"><i class="fas fa-users"></i> Communauté</a></li>
                     <li class="nav-item"><a href="index.html#soutenir" class="nav-link donate-link"><i class="fas fa-heart"></i> Soutenir</a></li>
                     <li class="nav-item"><a href="admin.html" class="admin-btn">Admin</a></li>
@@ -360,5 +361,10 @@
         }
         loadMissionPage()
     </script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00f5c8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js')</script>
 </body>
 </html>

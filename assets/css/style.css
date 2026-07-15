@@ -474,6 +474,53 @@ body.light-mode .skeleton-box { background: linear-gradient(90deg, #e8e8e0 25%, 
 #sortSelect:focus { outline: none; border-color: var(--primary); }
 body.light-mode .cat-btn { border-color: rgba(0,0,0,0.08); }
 body.light-mode #sortSelect { border-color: rgba(0,0,0,0.08); }
+body.light-mode #authorFilter { border-color: rgba(0,0,0,0.08); }
+
+/* ─── View Toggle ─── */
+.view-toggle { display: flex; border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius); overflow: hidden; }
+body.light-mode .view-toggle { border-color: rgba(0,0,0,0.08); }
+.view-btn {
+    background: transparent;
+    border: none;
+    color: var(--text3);
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    font-family: var(--font);
+}
+.view-btn.active { background: var(--primary); color: var(--bg); }
+.view-btn:not(.active):hover { color: var(--text); }
+
+/* ─── Surprise Button ─── */
+.surprise-btn {
+    background: linear-gradient(135deg, var(--primary-dim), rgba(255,110,199,0.1));
+    border: 1px solid rgba(0,245,200,0.15);
+    color: var(--primary);
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--radius);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.surprise-btn:hover {
+    background: var(--primary);
+    color: var(--bg);
+    box-shadow: 0 0 20px rgba(0,245,200,0.3);
+    transform: translateY(-2px);
+}
+
+/* ─── List View ─── */
+.pdf-grid.list-view { grid-template-columns: 1fr; }
+.pdf-grid.list-view .pdf-card { display: flex; flex-direction: row; }
+.pdf-grid.list-view .pdf-thumbnail { width: 120px; height: 120px; flex-shrink: 0; }
+.pdf-grid.list-view .pdf-info { flex: 1; padding: 1rem; }
+.pdf-grid.list-view .pdf-description { -webkit-line-clamp: 3; }
 
 /* ─── PDF Author & Category Tag ─── */
 .pdf-author {

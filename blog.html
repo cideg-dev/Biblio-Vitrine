@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog — CIDEG & P.line | Actualités et Ressources</title>
+    <meta name="description" content="Actualités, nouveaux livres, actions humanitaires et ressources spirituelles de CIDEG & P.line.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://cideg-dev.github.io/Biblio-Vitrine/blog.html">
+    <link rel="icon" href="assets/images/Lumiere_sur_parole.png" type="image/png">
+    <meta property="og:title" content="Blog — CIDEG & P.line">
+    <meta property="og:description" content="Actualités, nouveaux livres, actions humanitaires et ressources spirituelles.">
+    <meta property="og:url" content="https://cideg-dev.github.io/Biblio-Vitrine/blog.html">
+    <meta property="og:image" content="https://cideg-dev.github.io/Biblio-Vitrine/assets/images/Lumiere_sur_parole.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00f5c8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXL9EB8SQY"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config','G-KXL9EB8SQY');</script>
+    <style>
+        .blog-hero { padding: 10rem 0 4rem; text-align: center; }
+        .blog-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; max-width: 700px; margin: 0 auto; padding-bottom: 4rem; }
+        .blog-card { background: var(--surface); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-lg); padding: 2rem; transition: all 0.3s; }
+        .blog-card:hover { border-color: rgba(0,245,200,0.12); transform: translateY(-3px); }
+        .blog-card h2 { font-size: 1.3rem; text-align: left; margin-bottom: 0.3rem; }
+        .blog-card h2 a { color: var(--text); text-decoration: none; }
+        .blog-card h2 a:hover { color: var(--primary); }
+        .blog-date { font-size: 0.75rem; color: var(--text3); margin-bottom: 0.6rem; }
+        .blog-excerpt { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
+        .blog-card .btn-outline { margin-top: 1rem; font-size: 0.82rem; padding: 0.5rem 1.2rem; }
+        .blog-post { max-width: 700px; margin: 0 auto; padding: 8rem 1rem 4rem; }
+        .blog-post h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .blog-post .blog-date { margin-bottom: 1.5rem; }
+        .blog-post .blog-content { font-size: 1rem; color: var(--text2); line-height: 1.8; }
+        .blog-post .blog-content p { margin-bottom: 1rem; }
+        .blog-post .blog-content h2, .blog-post .blog-content h3 { color: var(--text); margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        .blog-back { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--text2); text-decoration: none; font-size: 0.85rem; margin-bottom: 2rem; }
+        .blog-back:hover { color: var(--primary); }
+        .blog-empty { text-align: center; padding: 4rem; color: var(--text3); }
+    </style>
+</head>
+<body>
+    <a href="#blogMain" class="skip-link">Aller au contenu</a>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo"><a href="index.html"><img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="logo-img"></a></div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Accueil</a></li>
+                    <li class="nav-item"><a href="index.html#bibliotheque" class="nav-link">Bibliothèque</a></li>
+                    <li class="nav-item"><a href="missions.html" class="nav-link">Mission</a></li>
+                    <li class="nav-item"><a href="blog.html" class="nav-link active">Blog</a></li>
+                    <li class="nav-item"><a href="index.html#communaute" class="nav-link">Communauté</a></li>
+                    <li class="nav-item"><a href="index.html#soutenir" class="nav-link donate-link"><i class="fas fa-heart"></i> Soutenir</a></li>
+                    <li class="nav-item"><a href="admin.html" class="admin-btn">Admin</a></li>
+                </ul>
+                <div class="hamburger"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+            </div>
+        </nav>
+    </header>
+
+    <main id="blogMain">
+        <section class="blog-hero">
+            <div class="container">
+                <h1>Blog & Actualités</h1>
+                <p class="section-subtitle">Nouveaux livres, actions humanitaires, réflexions et ressources spirituelles.</p>
+            </div>
+        </section>
+        <div class="container" id="blogContainer">
+            <div style="text-align:center;padding:4rem"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="footer-logo">
+                    <p>Rendre la Parole de Dieu accessible à tous, gratuitement.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Liens</h4>
+                    <a href="index.html">Accueil</a>
+                    <a href="index.html#bibliotheque">Bibliothèque</a>
+                    <a href="missions.html">Mission</a>
+                    <a href="blog.html">Blog</a>
+                    <a href="index.html#soutenir">Soutenir</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Légal</h4>
+                    <a href="privacy-policy.html">Confidentialité</a>
+                    <a href="cookies-policy.html">Cookies</a>
+                    <a href="terms-of-use.html">Conditions</a>
+                    <a href="legal-notice.html">Mentions légales</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <a href="mailto:cideg.p.line@gmail.com"><i class="fas fa-envelope"></i> cideg.p.line@gmail.com</a>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CIDEG & P.line. « Ta parole est une lampe à mes pieds. » — Psaume 119:105</p>
+            </div>
+        </div>
+    </footer>
+
+    <button id="backToTop" class="back-to-top" aria-label="Retour en haut"><i class="fas fa-arrow-up"></i></button>
+    <a href="https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W" target="_blank" rel="noopener" class="whatsapp-float" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+
+    <script>
+        const params = new URLSearchParams(window.location.search)
+        const postId = params.get('post')
+
+        function esc(s) { if (typeof s !== 'string') return ''; return s.replace(/[&<>"]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m])) }
+
+        document.getElementById('backToTop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }))
+        window.addEventListener('scroll', () => document.getElementById('backToTop').classList.toggle('visible', window.scrollY > 400))
+
+        document.querySelector('.hamburger')?.addEventListener('click', () => {
+            document.querySelector('.hamburger').classList.toggle('active')
+            document.querySelector('.nav-menu').classList.toggle('active')
+        })
+        document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', () => {
+            document.querySelector('.hamburger')?.classList.remove('active')
+            document.querySelector('.nav-menu')?.classList.remove('active')
+        }))
+
+        async function loadBlog() {
+            try {
+                const res = await fetch('assets/data/articles.json')
+                if (!res.ok) throw new Error('Not found')
+                const articles = await res.json()
+                const container = document.getElementById('blogContainer')
+                if (postId !== null) {
+                    const idx = parseInt(postId)
+                    const a = articles[idx]
+                    if (!a) { container.innerHTML = '<div class="blog-empty"><i class="fas fa-exclamation-triangle"></i><p>Article introuvable.</p></div>'; return }
+                    container.innerHTML = `<article class="blog-post">
+                        <a href="blog.html" class="blog-back"><i class="fas fa-arrow-left"></i> Retour au blog</a>
+                        <h1>${esc(a.title)}</h1>
+                        <div class="blog-date">${esc(a.date || '')}</div>
+                        <div class="blog-content">${a.content || ''}</div>
+                    </article>`
+                } else {
+                    if (!articles.length) {
+                        container.innerHTML = '<div class="blog-empty"><i class="fas fa-newspaper"></i><p>Aucun article pour le moment. Revenez bientôt !</p></div>'
+                        return
+                    }
+                    container.innerHTML = '<div class="blog-grid">' + articles.map((a, i) => `
+                        <div class="blog-card">
+                            <h2><a href="blog.html?post=${i}">${esc(a.title)}</a></h2>
+                            <div class="blog-date">${esc(a.date || '')}</div>
+                            <p class="blog-excerpt">${esc(a.excerpt || a.content?.replace(/<[^>]*>/g, '').slice(0, 200) || '')}</p>
+                            <a href="blog.html?post=${i}" class="btn-outline" style="display:inline-flex;gap:0.3rem">Lire la suite <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    `).join('') + '</div>'
+                }
+            } catch (e) {
+                document.getElementById('blogContainer').innerHTML = '<div class="blog-empty"><i class="fas fa-exclamation-triangle"></i><p>Impossible de charger le blog.</p></div>'
+            }
+        }
+        loadBlog()
+    </script>
+    <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js')</script>
+</body>
+</html>

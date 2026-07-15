@@ -24,6 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initSkipLink()
   initSmoothScroll()
   initSort()
+  initSurprise()
+  initViewToggle()
+  initAuthorFilter()
+  // initHomeContent sera appelé après chargement des PDFs
 
   if (isMobile) {
     const hint = document.getElementById('viewerHint')
@@ -122,6 +126,79 @@ function initScrollAnimations() {
   document.querySelectorAll('.anim-fade').forEach(el => observer.observe(el))
 }
 
+// ─── Surprise Button ───
+function initSurprise() {
+  const btn = document.getElementById('surpriseBtn')
+  if (!btn) return
+  btn.addEventListener('click', () => {
+    if (!allPdfs.length) return
+    const idx = Math.floor(Math.random() * allPdfs.length)
+    const pdf = allPdfs[idx]
+    const fileUrl = PDF_BASE + pdf.nom_du_fichier
+    isMobile ? window.open(fileUrl, '_blank') : openPDF(fileUrl)
+  })
+}
+
+// ─── View Toggle ───
+function initViewToggle() {
+  const grid = document.getElementById('gridViewBtn')
+  const list = document.getElementById('listViewBtn')
+  if (!grid || !list) return
+  grid.addEventListener('click', () => {
+    grid.classList.add('active'); list.classList.remove('active')
+    document.getElementById('pdfList').classList.remove('list-view')
+  })
+  list.addEventListener('click', () => {
+    list.classList.add('active'); grid.classList.remove('active')
+    document.getElementById('pdfList').classList.add('list-view')
+  })
+}
+
+// ─── Author Filter ───
+function initAuthorFilter() {
+  const sel = document.getElementById('authorFilter')
+  if (!sel) return
+  setTimeout(() => {
+    const authors = [...new Set(allPdfs.map(p => p.auteur).filter(Boolean))]
+    authors.sort()
+    sel.innerHTML = '<option value="">Tous les auteurs</option>' + authors.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join('')
+  }, 500)
+  sel.addEventListener('change', () => {
+    currentPage = 1
+    filterAndSort()
+  })
+}
+
+// ─── Home Content (accueil.json) ───
+function initHomeContent() {
+  fetch('assets/data/accueil.json').then(r => r.ok ? r.json() : null).then(d => {
+    if (!d) return
+    const badge = document.querySelector('.hero-badge')
+    const title = document.querySelector('.hero-content h1')
+    const subtitle = document.querySelector('.hero-subtitle')
+    const missionTitle = document.querySelector('#apropos h2')
+    const missionSub = document.querySelector('#apropos .section-subtitle')
+    const donateTitle = document.querySelector('#soutenir h2')
+    const donateSub = document.querySelector('#soutenir .section-subtitle')
+    const newsletterTitle = document.querySelector('.newsletter-card h2')
+    const newsletterText = document.querySelector('.newsletter-card p')
+    const impacts = document.querySelector('.impact-list')
+
+    if (badge && d.heroBadge) badge.textContent = d.heroBadge
+    if (title && d.heroTitle) title.innerHTML = d.heroTitle.replace(/\n/g, '<br>').replace('à portée de tous', '<span class="highlight">à portée de tous</span>')
+    if (subtitle && d.heroSubtitle) subtitle.innerHTML = d.heroSubtitle.replace('%count%', allPdfs.length)
+    if (missionTitle && d.missionTitle) missionTitle.textContent = d.missionTitle
+    if (missionSub && d.missionSubtitle) missionSub.textContent = d.missionSubtitle
+    if (donateTitle && d.donateTitle) donateTitle.textContent = d.donateTitle
+    if (donateSub && d.donateSubtitle) donateSub.textContent = d.donateSubtitle
+    if (newsletterTitle && d.newsletterTitle) newsletterTitle.textContent = d.newsletterTitle
+    if (newsletterText && d.newsletterText) newsletterText.textContent = d.newsletterText
+    if (impacts && d.donateImpact) {
+      impacts.innerHTML = d.donateImpact.map(item => `<li><i class="fas fa-check-circle" aria-hidden="true"></i> ${item}</li>`).join('')
+    }
+  }).catch(() => {})
+}
+
 // ─── Data Loading ───
 async function loadAndDisplayPDFs() {
   showSkeletonLoader()
@@ -132,8 +209,17 @@ async function loadAndDisplayPDFs() {
     filteredPdfs = [...allPdfs]
     document.getElementById('totalPdfCount').textContent = allPdfs.length
     document.querySelectorAll('.pdf-count-hero').forEach(el => el.textContent = allPdfs.length + '+')
-    renderCategories()
-    render()
+  renderCategories()
+  render()
+  // Populate author filter now that allPdfs is loaded
+  const authSel = document.getElementById('authorFilter')
+  if (authSel) {
+    const authors = [...new Set(allPdfs.map(p => p.auteur).filter(Boolean))]
+    authors.sort()
+    authSel.innerHTML = '<option value="">Tous les auteurs</option>' + authors.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join('')
+  }
+  // Update home content now that count is known
+  initHomeContent()
   } catch (e) {
     console.error(e)
     document.getElementById('pdfList').innerHTML = '<p class="error-message">Impossible de charger la bibliothèque.</p>'
@@ -189,6 +275,10 @@ function filterAndSort() {
   let list = [...allPdfs]
   if (currentCategory !== 'Toutes') {
     list = list.filter(p => (p.categorie || 'Non classé') === currentCategory)
+  }
+  const authorFilter = document.getElementById('authorFilter')
+  if (authorFilter && authorFilter.value) {
+    list = list.filter(p => (p.auteur || '') === authorFilter.value)
   }
   switch (currentSort) {
     case 'alpha-asc': list.sort((a, b) => (a.titre || a.nom_du_fichier).localeCompare(b.titre || b.nom_du_fichier)); break

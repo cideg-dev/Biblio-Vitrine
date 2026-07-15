@@ -49,6 +49,7 @@
                     <li class="nav-item"><a href="#bibliotheque" class="nav-link">Bibliothèque</a></li>
                     <li class="nav-item"><a href="#apropos" class="nav-link">À propos</a></li>
                     <li class="nav-item"><a href="missions.html" class="nav-link"><i class="fas fa-hand-holding-heart"></i> Mission</a></li>
+                    <li class="nav-item"><a href="blog.html" class="nav-link"><i class="fas fa-newspaper"></i> Blog</a></li>
                     <li class="nav-item"><a href="#communaute" class="nav-link"><i class="fas fa-users"></i> Communauté</a></li>
                     <li class="nav-item"><a href="#soutenir" class="nav-link donate-link"><i class="fas fa-heart"></i> Soutenir</a></li>
                     <li class="nav-item"><a href="admin.html" class="admin-btn">Admin</a></li>
@@ -139,13 +140,21 @@
                     </div>
                     <div class="library-filters">
                         <div class="cat-filter" id="categoryFilter" role="tablist" aria-label="Filtrer par catégorie"></div>
-                        <div class="sort-wrapper">
-                            <label for="sortSelect" class="sort-label">Trier</label>
-                            <select id="sortSelect" aria-label="Trier par">
-                                <option value="defaut">Par défaut</option>
-                                <option value="alpha-asc">A → Z</option>
-                                <option value="alpha-desc">Z → A</option>
-                            </select>
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;justify-content:center">
+                            <select id="authorFilter" aria-label="Filtrer par auteur" style="background:var(--surface);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);color:var(--text);padding:0.4rem 0.7rem;font-size:0.78rem;font-family:var(--font)"><option value="">Tous les auteurs</option></select>
+                            <div class="sort-wrapper">
+                                <label for="sortSelect" class="sort-label">Trier</label>
+                                <select id="sortSelect" aria-label="Trier par">
+                                    <option value="defaut">Par défaut</option>
+                                    <option value="alpha-asc">A → Z</option>
+                                    <option value="alpha-desc">Z → A</option>
+                                </select>
+                            </div>
+                            <div class="view-toggle" role="group" aria-label="Affichage">
+                                <button id="gridViewBtn" class="view-btn active" aria-label="Vue grille" title="Vue grille"><i class="fas fa-th"></i></button>
+                                <button id="listViewBtn" class="view-btn" aria-label="Vue liste" title="Vue liste"><i class="fas fa-list"></i></button>
+                            </div>
+                            <button id="surpriseBtn" class="surprise-btn" title="Surprends-moi !" aria-label="Ouvrir un livre au hasard"><i class="fas fa-dice"></i> Surprends-moi</button>
                         </div>
                     </div>
                 </div>
@@ -364,7 +373,12 @@
         <div id="pdf-canvas-container"><canvas id="pdfCanvas"></canvas></div>
     </div>
 
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00f5c8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="assets/js/script.js"></script>
+    <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js')</script>
 </body>
 </html>

@@ -56,6 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tab.dataset.tab === 'mission') loadMission()
       if (tab.dataset.tab === 'config') loadConfig()
       if (tab.dataset.tab === 'gallery') loadGalleryAdmin()
+      if (tab.dataset.tab === 'home') loadHome()
+      if (tab.dataset.tab === 'blog') loadBlog()
     })
   })
 
@@ -70,6 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('galleryGitUploadBtn').addEventListener('click', uploadGalleryToGitHub)
   document.getElementById('galleryGitFile').addEventListener('change', handleGalleryFileSelect)
+  document.getElementById('saveHomeBtn').addEventListener('click', saveHome)
+  document.getElementById('addHomeValue').addEventListener('click', addHomeValueItem)
+  document.getElementById('addArticleBtn').addEventListener('click', addArticle)
+  document.getElementById('saveArticlesBtn').addEventListener('click', saveArticles)
 
   document.querySelector('.hamburger')?.addEventListener('click', () => {
     document.querySelector('.hamburger').classList.toggle('active')
@@ -667,6 +673,154 @@ async function saveGallerySettings() {
   const paths = document.getElementById('galleryPathsInput').value.split('\n').map(s => s.trim()).filter(Boolean)
   await saveJSON(GALLERY_PATH + 'gallery.json', { images: paths, updatedAt: new Date().toISOString() }, 'Mise à jour galerie')
   showNotif('Configuration galerie sauvegardée', 'success')
+}
+
+// ─── Home (Accueil) Admin ───
+let homeData = null
+const HOME_PATH = 'assets/data/accueil.json'
+
+async function loadHome() {
+  homeData = await loadJSON(HOME_PATH) || {
+    heroBadge: '100% Gratuit · Sans inscription',
+    heroTitle: 'La Parole de Dieu\nà portée de tous',
+    heroSubtitle: '',
+    missionTitle: 'Notre Mission',
+    missionSubtitle: '',
+    values: [],
+    donateTitle: 'Soutenez l\'Œuvre',
+    donateSubtitle: '',
+    donateImpact: [],
+    newsletterTitle: 'Restez informé',
+    newsletterText: ''
+  }
+  renderHomeForm()
+}
+
+function renderHomeForm() {
+  const d = homeData
+  document.getElementById('homeHeroBadge').value = d.heroBadge || ''
+  document.getElementById('homeHeroTitle').value = d.heroTitle || ''
+  document.getElementById('homeHeroSub').value = d.heroSubtitle || ''
+  document.getElementById('homeMissionTitle').value = d.missionTitle || ''
+  document.getElementById('homeMissionSub').value = d.missionSubtitle || ''
+  document.getElementById('homeDonateTitle').value = d.donateTitle || ''
+  document.getElementById('homeDonateSub').value = d.donateSubtitle || ''
+  document.getElementById('homeImpacts').value = (d.donateImpact || []).join('\n')
+  document.getElementById('homeNewsletterTitle').value = d.newsletterTitle || ''
+  document.getElementById('homeNewsletterText').value = d.newsletterText || ''
+  const container = document.getElementById('homeValuesContainer')
+  container.innerHTML = ''
+  ;(d.values || []).forEach(v => {
+    addHomeValueItemDOM(v.icon || 'lock-open', v.title || '', v.desc || '')
+  })
+}
+
+function addHomeValueItemDOM(icon, title, desc) {
+  const container = document.getElementById('homeValuesContainer')
+  const div = document.createElement('div')
+  div.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:start;padding:0.8rem;background:var(--bg);border-radius:var(--radius)'
+  div.innerHTML = `
+    <div style="flex:1">
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.3rem">
+        <input type="text" class="hv-icon" value="${esc(icon)}" placeholder="Icon FA (ex: lock-open)" style="width:40%;font-size:0.8rem;padding:0.4rem 0.6rem">
+        <input type="text" class="hv-title" value="${esc(title)}" placeholder="Titre" style="flex:1;font-size:0.8rem;padding:0.4rem 0.6rem">
+      </div>
+      <textarea class="hv-desc" rows="2" placeholder="Description" style="width:100%;font-size:0.8rem;padding:0.4rem 0.6rem">${esc(desc)}</textarea>
+    </div>
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--accent);cursor:pointer;padding:0.3rem"><i class="fas fa-times"></i></button>`
+  container.appendChild(div)
+}
+
+function addHomeValueItem() {
+  addHomeValueItemDOM('lock-open', '', '')
+}
+
+async function saveHome() {
+  const values = []
+  document.querySelectorAll('#homeValuesContainer > div').forEach(el => {
+    const icon = el.querySelector('.hv-icon')?.value || 'lock-open'
+    const title = el.querySelector('.hv-title')?.value || ''
+    const desc = el.querySelector('.hv-desc')?.value || ''
+    if (title) values.push({ icon, title, desc })
+  })
+  const data = {
+    heroBadge: document.getElementById('homeHeroBadge').value,
+    heroTitle: document.getElementById('homeHeroTitle').value,
+    heroSubtitle: document.getElementById('homeHeroSub').value,
+    missionTitle: document.getElementById('homeMissionTitle').value,
+    missionSubtitle: document.getElementById('homeMissionSub').value,
+    values,
+    donateTitle: document.getElementById('homeDonateTitle').value,
+    donateSubtitle: document.getElementById('homeDonateSub').value,
+    donateImpact: document.getElementById('homeImpacts').value.split('\n').map(s => s.trim()).filter(Boolean),
+    newsletterTitle: document.getElementById('homeNewsletterTitle').value,
+    newsletterText: document.getElementById('homeNewsletterText').value
+  }
+  showNotif('Sauvegarde en cours…', 'info')
+  try {
+    await saveJSON(HOME_PATH, data, 'Mise à jour page d\'accueil')
+    homeData = data
+    showNotif('Page d\'accueil sauvegardée', 'success')
+  } catch (e) { showNotif('Erreur: ' + e.message, 'error') }
+}
+
+// ─── Blog Admin ───
+let articles = []
+const ARTICLES_PATH = 'assets/data/articles.json'
+
+async function loadBlog() {
+  articles = await loadJSON(ARTICLES_PATH) || []
+  renderBlogAdmin()
+}
+
+function renderBlogAdmin() {
+  document.getElementById('blogCount').textContent = articles.length
+  const container = document.getElementById('articlesAdminContainer')
+  if (!articles.length) {
+    container.innerHTML = '<div class="admin-empty"><i class="fas fa-newspaper"></i><p>Aucun article. Cliquez sur "Nouvel article".</p></div>'
+    return
+  }
+  container.innerHTML = articles.map((a, i) => `
+    <div class="testi-admin-item" data-article-index="${i}">
+      <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;margin-bottom:0.5rem">
+        <span class="testi-admin-num">${i + 1}</span>
+        <input class="art-title" value="${esc(a.title)}" placeholder="Titre" style="flex:1;min-width:150px">
+        <input class="art-date" value="${esc(a.date || '')}" placeholder="Date" style="width:120px;font-size:0.78rem">
+        <button onclick="deleteArticle(${i})" style="background:none;border:none;color:var(--accent);cursor:pointer"><i class="fas fa-trash-alt"></i></button>
+      </div>
+      <textarea class="art-excerpt" rows="2" placeholder="Résumé" style="width:100%;margin-bottom:0.3rem;font-size:0.8rem">${esc(a.excerpt || '')}</textarea>
+      <textarea class="art-content" rows="4" placeholder="Contenu (Markdown ou HTML simple)" style="width:100%;font-size:0.8rem">${esc(a.content || '')}</textarea>
+    </div>
+  `).join('')
+}
+
+function addArticle() {
+  articles.push({ title: 'Nouvel article', date: new Date().toISOString().slice(0, 10), excerpt: '', content: '' })
+  renderBlogAdmin()
+  showNotif('Article ajouté (non sauvegardé)', 'info')
+}
+
+function deleteArticle(index) {
+  if (!confirm('Supprimer cet article ?')) return
+  articles.splice(index, 1)
+  renderBlogAdmin()
+  showNotif('Article retiré', 'info')
+}
+
+async function saveArticles() {
+  document.querySelectorAll('.testi-admin-item[data-article-index]').forEach(el => {
+    const i = parseInt(el.dataset.articleIndex)
+    if (isNaN(i)) return
+    articles[i].title = el.querySelector('.art-title').value
+    articles[i].date = el.querySelector('.art-date').value
+    articles[i].excerpt = el.querySelector('.art-excerpt').value
+    articles[i].content = el.querySelector('.art-content').value
+  })
+  showNotif('Sauvegarde en cours…', 'info')
+  try {
+    await saveJSON(ARTICLES_PATH, articles, 'Mise à jour des articles')
+    showNotif('Articles sauvegardés', 'success')
+  } catch (e) { showNotif('Erreur: ' + e.message, 'error') }
 }
 
 // ─── UI ───

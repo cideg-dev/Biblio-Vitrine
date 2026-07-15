@@ -1,0 +1,23 @@
+{
+  "heroBadge": "100% Gratuit · Sans inscription",
+  "heroTitle": "La Parole de Dieu\nà portée de tous",
+  "heroSubtitle": "Explorez notre bibliothèque de %count%+ livres bibliques en PDF. Études théologiques, commentaires, développement spirituel — entièrement gratuits.",
+  "missionTitle": "Notre Mission",
+  "missionSubtitle": "Rendre la connaissance biblique accessible à tous, sans barrière financière.",
+  "values": [
+    { "icon": "lock-open", "title": "Accès Libre", "desc": "Tous nos documents sont disponibles gratuitement pour tous, sans inscription ni abonnement." },
+    { "icon": "bible", "title": "Fidélité aux Écritures", "desc": "Nous préservons l'intégrité des textes sacrés dans leur richesse théologique et spirituelle." },
+    { "icon": "hands-helping", "title": "Communauté", "desc": "Un espace pour les croyants cherchant à approfondir leur foi et à grandir spirituellement." }
+  ],
+  "donateTitle": "Soutenez l'Œuvre",
+  "donateSubtitle": "Ce site est et restera 100% gratuit. Mais nous avons besoin de vous pour le maintenir et l'enrichir.",
+  "donateImpact": [
+    "D'héberger la bibliothèque pour des milliers de lecteurs",
+    "D'ajouter régulièrement de nouveaux livres",
+    "D'améliorer le site et l'expérience de lecture",
+    "De maintenir l'accès gratuit pour tous"
+  ],
+  "newsletterTitle": "Restez informé",
+  "newsletterText": "Soyez averti des nouveaux ajouts à la bibliothèque et des ressources gratuites.",
+  "updatedAt": "2024-01-01"
+}

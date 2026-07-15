@@ -18,7 +18,8 @@
                     <img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="logo-img">
                 </div>
                 <ul class="nav-menu">
-                    <li class="nav-item"><a href="index.html" class="nav-link"><i class="fas fa-arrow-left"></i> Retour au site</a></li>
+                    <li class="nav-item"><a href="index.html" class="nav-link"><i class="fas fa-arrow-left"></i> Accueil</a></li>
+                    <li class="nav-item"><a href="blog.html" class="nav-link"><i class="fas fa-newspaper"></i> Blog</a></li>
                     <li class="nav-item"><a href="#" id="logoutBtn" class="admin-btn">Déconnexion</a></li>
                 </ul>
                 <div class="hamburger"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
@@ -52,6 +53,8 @@
                 <button class="admin-tab" data-tab="donation"><i class="fas fa-heart"></i> Dons</button>
                 <button class="admin-tab" data-tab="testimonials"><i class="fas fa-quote-left"></i> Témoignages</button>
                 <button class="admin-tab" data-tab="mission"><i class="fas fa-hand-holding-heart"></i> Mission</button>
+                <button class="admin-tab" data-tab="home"><i class="fas fa-home"></i> Accueil</button>
+                <button class="admin-tab" data-tab="blog"><i class="fas fa-newspaper"></i> Blog</button>
                 <button class="admin-tab" data-tab="gallery"><i class="fas fa-images"></i> Galerie</button>
                 <button class="admin-tab" data-tab="config"><i class="fas fa-cog"></i> Config</button>
             </div>
@@ -185,6 +188,49 @@
                 </div>
             </div>
 
+            <!-- Tab: Accueil -->
+            <div id="tab-home" class="admin-tab-content">
+                <div class="admin-tab-header"><h3><i class="fas fa-home"></i> Page d'Accueil</h3></div>
+                <div class="upload-card" style="margin-bottom:1.5rem">
+                    <div class="admin-tab-header"><h4 style="font-size:1rem">Hero</h4></div>
+                    <div class="form-group"><label>Badge</label><input type="text" id="homeHeroBadge" placeholder="100% Gratuit · Sans inscription"></div>
+                    <div class="form-group"><label>Titre (utilise \n pour le saut de ligne)</label><input type="text" id="homeHeroTitle" placeholder="La Parole de Dieu\nà portée de tous"></div>
+                    <div class="form-group"><label>Sous-titre (%count% sera remplacé par le nombre de PDFs)</label><textarea id="homeHeroSub" rows="3" placeholder="Explorez notre bibliothèque de %count%+ livres…"></textarea></div>
+                </div>
+                <div class="upload-card" style="margin-bottom:1.5rem">
+                    <div class="admin-tab-header"><h4 style="font-size:1rem">Section Mission (À propos)</h4></div>
+                    <div class="form-group"><label>Titre</label><input type="text" id="homeMissionTitle" placeholder="Notre Mission"></div>
+                    <div class="form-group"><label>Sous-titre</label><textarea id="homeMissionSub" rows="2" placeholder="Rendre la connaissance biblique accessible…"></textarea></div>
+                    <div class="form-group"><label>Valeurs (éditez directement les icônes Font Awesome)</label>
+                    <div id="homeValuesContainer"></div>
+                    <button id="addHomeValue" class="btn-secondary" style="margin-top:0.5rem"><i class="fas fa-plus"></i> Ajouter une valeur</button>
+                </div>
+                <div class="upload-card" style="margin-bottom:1.5rem">
+                    <div class="admin-tab-header"><h4 style="font-size:1rem">Section Dons</h4></div>
+                    <div class="form-group"><label>Titre</label><input type="text" id="homeDonateTitle" placeholder="Soutenez l'Œuvre"></div>
+                    <div class="form-group"><label>Sous-titre</label><textarea id="homeDonateSub" rows="2" placeholder="Ce site est et restera 100% gratuit…"></textarea></div>
+                    <div class="form-group"><label>Impacts (un par ligne)</label><textarea id="homeImpacts" rows="4" placeholder="D'héberger la bibliothèque…"></textarea></div>
+                </div>
+                <div class="upload-card" style="margin-bottom:1.5rem">
+                    <div class="admin-tab-header"><h4 style="font-size:1rem">Newsletter</h4></div>
+                    <div class="form-group"><label>Titre</label><input type="text" id="homeNewsletterTitle" placeholder="Restez informé"></div>
+                    <div class="form-group"><label>Texte</label><textarea id="homeNewsletterText" rows="2" placeholder="Soyez averti des nouveaux ajouts…"></textarea></div>
+                </div>
+                <div style="text-align:center;margin-top:1rem">
+                    <button id="saveHomeBtn" class="btn-primary"><i class="fas fa-save"></i> Sauvegarder l'accueil</button>
+                </div>
+            </div>
+
+            <!-- Tab: Blog -->
+            <div id="tab-blog" class="admin-tab-content">
+                <div class="admin-tab-header"><h3><i class="fas fa-newspaper"></i> Articles du Blog</h3><span class="admin-tab-badge" id="blogCount">0</span></div>
+                <div style="margin-bottom:1.5rem">
+                    <button id="addArticleBtn" class="btn-primary"><i class="fas fa-plus"></i> Nouvel article</button>
+                    <button id="saveArticlesBtn" class="btn-primary" style="margin-left:0.5rem"><i class="fas fa-save"></i> Tout sauvegarder</button>
+                </div>
+                <div id="articlesAdminContainer"></div>
+            </div>
+
             <!-- Tab: Galerie -->
             <div id="tab-gallery" class="admin-tab-content">
                 <div class="admin-tab-header"><h3><i class="fas fa-images"></i> Photos de la mission</h3></div>
@@ -220,6 +266,11 @@
         </div>
     </main>
 
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00f5c8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="assets/js/admin.js"></script>
+    <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js')</script>
 </body>
 </html>

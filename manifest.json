@@ -1,0 +1,17 @@
+{
+  "name": "Bibliothèque Biblique — CIDEG & P.line",
+  "short_name": "CIDEG & P.line",
+  "description": "Bibliothèque biblique chrétienne gratuite — 238+ livres PDF. Aussi mission humanitaire au Bénin.",
+  "start_url": "/Biblio-Vitrine/",
+  "scope": "/Biblio-Vitrine/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0a0f",
+  "theme_color": "#00f5c8",
+  "categories": ["religion", "education", "books"],
+  "lang": "fr-FR",
+  "icons": [
+    { "src": "assets/images/Lumiere_sur_parole.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/images/Lumiere_sur_parole.png", "sizes": "192x192", "type": "image/png", "purpose": "any" }
+  ]
+}
