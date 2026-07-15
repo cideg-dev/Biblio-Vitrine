@@ -628,6 +628,121 @@ h2 {
 .donate-note.effectif { color: var(--primary); font-weight: 500; margin-bottom: 0; }
 .donate-thankyou { text-align: center; margin-top: 2.5rem; font-size: 1.1rem; color: var(--text); }
 
+/* ─── Missions ─── */
+.mission-hero {
+    padding: 10rem 0 5rem;
+    background: linear-gradient(135deg, var(--bg) 0%, rgba(0,245,200,0.04) 50%, var(--bg) 100%);
+    text-align: center;
+}
+.mission-badge {
+    display: inline-block;
+    background: var(--primary-dim);
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.3rem 1rem;
+    border-radius: 100px;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.mission-hero h1 { font-size: 3.2rem; margin-bottom: 1rem; }
+.mission-hero-sub { font-size: 1.1rem; color: var(--text2); max-width: 600px; margin: 0 auto; }
+.mission-intro { padding: 5rem 0; }
+.mission-intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+}
+.mission-intro-text h2 { font-size: 2rem; margin-bottom: 1rem; text-align: left; }
+.mission-intro-text p { color: var(--text2); line-height: 1.8; margin-bottom: 0.8rem; }
+.mission-intro-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+.mis-stat {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+}
+.mis-stat-num { display: block; font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+.mis-stat-label { font-size: 0.8rem; color: var(--text3); }
+.mission-focus { padding: 4rem 0; }
+.mission-grid { padding: 3rem 0 5rem; }
+.mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.focus-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    transition: all 0.3s;
+}
+.focus-card.featured {
+    border-color: rgba(0,245,200,0.1);
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(0,245,200,0.02) 100%);
+}
+.focus-card:hover { border-color: rgba(255,255,255,0.08); }
+.focus-icon { font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem; }
+.focus-card h2 { font-size: 1.8rem; margin-bottom: 0.5rem; text-align: left; }
+.focus-card h3 { font-size: 1.3rem; margin-bottom: 0.8rem; }
+.focus-sub { color: var(--text2); font-size: 0.95rem; margin-bottom: 2rem; }
+.focus-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+.focus-item {
+    padding: 1.2rem;
+    background: var(--bg);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.03);
+}
+.focus-item i { font-size: 1.3rem; color: var(--primary); margin-bottom: 0.5rem; }
+.focus-item h4 { font-size: 0.95rem; margin-bottom: 0.3rem; }
+.focus-item p { font-size: 0.82rem; color: var(--text3); line-height: 1.5; }
+.focus-list { list-style: none; padding: 0; margin: 1rem 0 0; }
+.focus-list li {
+    font-size: 0.85rem;
+    color: var(--text2);
+    padding: 0.3rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+.focus-list li i { color: var(--primary); font-size: 0.75rem; margin-top: 0.2rem; flex-shrink: 0; }
+.mission-testimonials { padding: 4rem 0; text-align: center; }
+.mission-testimonials h2 { margin-bottom: 2rem; }
+.mission-cta { padding: 4rem 0; }
+.cta-card {
+    background: linear-gradient(135deg, var(--primary-dim) 0%, rgba(255,110,199,0.05) 100%);
+    border: 1px solid rgba(0,245,200,0.1);
+    border-radius: var(--radius-lg);
+    padding: 3rem;
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+}
+.cta-card h2 { font-size: 1.8rem; margin-bottom: 0.8rem; }
+.cta-card p { color: var(--text2); margin-bottom: 1.5rem; font-size: 0.95rem; }
+.cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.2rem; }
+.cta-contact { font-size: 0.82rem !important; color: var(--text3) !important; margin-bottom: 0 !important; }
+.cta-contact a { color: var(--primary); }
+.nav-link.active { color: var(--primary); }
+
+@media (max-width: 768px) {
+    .mission-hero { padding: 8rem 0 3rem; }
+    .mission-hero h1 { font-size: 2.2rem; }
+    .mission-intro-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .mission-intro-stats { grid-template-columns: 1fr 1fr; }
+    .mgrid { grid-template-columns: 1fr; }
+    .focus-details { grid-template-columns: 1fr; }
+    .cta-card { padding: 2rem 1.5rem; }
+}
+
 /* ─── Communauté ─── */
 .community-section { padding: 5rem 0; }
 .community-grid {
