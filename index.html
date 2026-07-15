@@ -30,40 +30,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "CIDEG & P.line",
-        "description": "Bibliothèque biblique chrétienne gratuite et mission humanitaire au Bénin.",
-        "url": "https://cideg-dev.github.io/Biblio-Vitrine/",
-        "email": "cideg.p.line@gmail.com",
-        "logo": "https://cideg-dev.github.io/Biblio-Vitrine/assets/images/Lumiere_sur_parole.png",
-        "address": { "@type": "PostalAddress", "addressLocality": "Natitingou", "addressCountry": "BJ" },
-        "sameAs": ["https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W"]
-    }
-    </script>
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Bibliothèque Biblique Chrétienne",
-        "url": "https://cideg-dev.github.io/Biblio-Vitrine/",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://cideg-dev.github.io/Biblio-Vitrine/?search={search_term_string}",
-            "query-input": "required name=search_term_string"
-        }
-    }
-    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"CIDEG & P.line","description":"Bibliothèque biblique chrétienne gratuite et mission humanitaire au Bénin.","url":"https://cideg-dev.github.io/Biblio-Vitrine/","email":"cideg.p.line@gmail.com","logo":"https://cideg-dev.github.io/Biblio-Vitrine/assets/images/Lumiere_sur_parole.png","address":{"@type":"PostalAddress","addressLocality":"Natitingou","addressCountry":"BJ"},"sameAs":["https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W"]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Bibliothèque Biblique Chrétienne","url":"https://cideg-dev.github.io/Biblio-Vitrine/","potentialAction":{"@type":"SearchAction","target":"https://cideg-dev.github.io/Biblio-Vitrine/?search={search_term_string}","query-input":"required name=search_term_string"}}</script>
 </head>
 <body>
-    <!-- Navigation -->
+    <a href="#main-content" id="skipLink" class="skip-link">Aller au contenu principal</a>
+
     <header>
-        <nav class="navbar">
+        <nav class="navbar" aria-label="Navigation principale">
             <div class="nav-container">
                 <div class="logo">
-                    <img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="logo-img">
+                    <a href="index.html" aria-label="Accueil"><img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="logo-img"></a>
                 </div>
                 <ul class="nav-menu">
                     <li class="nav-item"><a href="#accueil" class="nav-link">Accueil</a></li>
@@ -73,19 +52,18 @@
                     <li class="nav-item"><a href="#communaute" class="nav-link"><i class="fas fa-users"></i> Communauté</a></li>
                     <li class="nav-item"><a href="#soutenir" class="nav-link donate-link"><i class="fas fa-heart"></i> Soutenir</a></li>
                     <li class="nav-item"><a href="admin.html" class="admin-btn">Admin</a></li>
+                    <li class="nav-item"><button id="themeToggle" class="theme-btn" aria-label="Mode clair"></button></li>
                 </ul>
-                <div class="hamburger">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
+                <div class="hamburger" aria-label="Menu" role="button" tabindex="0">
+                    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
                 </div>
             </div>
         </nav>
     </header>
 
-    <main>
-        <!-- Hero Section -->
-        <section id="accueil" class="hero">
+    <main id="main-content">
+        <!-- Hero -->
+        <section id="accueil" class="hero" aria-label="Accueil">
             <div class="hero-bg"></div>
             <div class="hero-content">
                 <div class="hero-badge">100% Gratuit · Sans inscription</div>
@@ -96,45 +74,36 @@
                     <a href="#soutenir" class="btn-outline btn-lg"><i class="fas fa-heart"></i> Soutenir la mission</a>
                 </div>
             </div>
-            <div class="hero-scroll-indicator">
+            <div class="hero-scroll-indicator" aria-hidden="true">
                 <span>Découvrir</span>
                 <i class="fas fa-chevron-down"></i>
             </div>
         </section>
 
         <!-- Stats Bar -->
-        <section class="stats-bar">
+        <section class="stats-bar anim-fade" aria-label="Statistiques">
             <div class="container">
                 <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-number">238+</span>
-                        <span class="stat-label">Livres disponibles</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">100%</span>
-                        <span class="stat-label">Gratuit</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">∞</span>
-                        <span class="stat-label">Sans limite</span>
-                    </div>
+                    <div class="stat-item"><span class="stat-number">238+</span><span class="stat-label">Livres disponibles</span></div>
+                    <div class="stat-item"><span class="stat-number">100%</span><span class="stat-label">Gratuit</span></div>
+                    <div class="stat-item"><span class="stat-number">∞</span><span class="stat-label">Sans limite</span></div>
                 </div>
             </div>
         </section>
 
         <!-- Bible Verse -->
-        <section class="verse-section">
+        <section class="verse-section anim-fade" aria-label="Verset du jour">
             <div class="container">
                 <div class="verse-card">
-                    <i class="fas fa-quote-left verse-quote-icon"></i>
+                    <i class="fas fa-quote-left verse-quote-icon" aria-hidden="true"></i>
                     <blockquote id="dailyVerse">« Ta parole est une lampe à mes pieds, et une lumière sur mon sentier. »</blockquote>
                     <cite id="dailyVerseRef">— Psaume 119:105</cite>
                 </div>
             </div>
         </section>
 
-        <!-- Section Valeurs -->
-        <section id="apropos" class="values">
+        <!-- Valeurs -->
+        <section id="apropos" class="values anim-fade" aria-label="Notre Mission">
             <div class="container">
                 <h2>Notre Mission</h2>
                 <p class="section-subtitle">Rendre la connaissance biblique accessible à tous, sans barrière financière.</p>
@@ -159,80 +128,79 @@
         </section>
 
         <!-- Bibliothèque -->
-        <section id="bibliotheque" class="library">
+        <section id="bibliotheque" class="library anim-fade" aria-label="Bibliothèque">
             <div class="container">
                 <h2>Bibliothèque Biblique</h2>
                 <p class="section-subtitle">Parcourez notre collection de <strong id="totalPdfCount">238</strong> livres et ressources chrétiennes.</p>
                 <div class="library-controls">
                     <div class="search-bar">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" id="searchInput" placeholder="Rechercher par titre, auteur, thème…">
+                        <i class="fas fa-search search-icon" aria-hidden="true"></i>
+                        <input type="text" id="searchInput" placeholder="Rechercher par titre, auteur, thème…" aria-label="Rechercher un livre">
+                    </div>
+                    <div class="library-filters">
+                        <div class="cat-filter" id="categoryFilter" role="tablist" aria-label="Filtrer par catégorie"></div>
+                        <div class="sort-wrapper">
+                            <label for="sortSelect" class="sort-label">Trier</label>
+                            <select id="sortSelect" aria-label="Trier par">
+                                <option value="defaut">Par défaut</option>
+                                <option value="alpha-asc">A → Z</option>
+                                <option value="alpha-desc">Z → A</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div id="pdfList" class="pdf-grid">
-                    <!-- PDF cards loaded by JS -->
-                </div>
-                <div id="pagination-container" class="pagination-container"></div>
+                <div id="pdfList" class="pdf-grid" role="list" aria-label="Liste des livres"></div>
+                <div id="pagination-container" class="pagination-container" role="navigation" aria-label="Pagination"></div>
             </div>
         </section>
 
         <!-- Témoignages -->
-        <section class="testimonials">
+        <section class="testimonials anim-fade" aria-label="Témoignages">
             <div class="container">
                 <h2>Ils ont été bénis</h2>
                 <p class="section-subtitle">Des lecteurs comme vous partagent leur expérience.</p>
                 <div class="testimonials-grid">
                     <div class="testimonial-card">
-                        <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        <div class="testimonial-stars" aria-label="5 étoiles"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
                         <p>« Une ressource incroyable ! J'ai trouvé des études que je cherchais depuis des années, le tout gratuitement. Que Dieu bénisse ce ministère. »</p>
                         <div class="testimonial-author">
                             <div class="testimonial-avatar"><i class="fas fa-user-circle"></i></div>
-                            <div>
-                                <strong>Marc K.</strong>
-                                <span>Cotonou, Bénin</span>
-                            </div>
+                            <div><strong>Marc K.</strong><span>Cotonou, Bénin</span></div>
                         </div>
                     </div>
                     <div class="testimonial-card">
-                        <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        <div class="testimonial-stars" aria-label="5 étoiles"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
                         <p>« Cette bibliothèque m'a permis de approfondir ma connaissance de la Parole. Le format PDF est parfait pour étudier hors ligne. »</p>
                         <div class="testimonial-author">
                             <div class="testimonial-avatar"><i class="fas fa-user-circle"></i></div>
-                            <div>
-                                <strong>Esther D.</strong>
-                                <span>Lomé, Togo</span>
-                            </div>
+                            <div><strong>Esther D.</strong><span>Lomé, Togo</span></div>
                         </div>
                     </div>
                     <div class="testimonial-card">
-                        <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        <div class="testimonial-stars" aria-label="5 étoiles"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
                         <p>« Un travail remarquable ! Je recommande à tous les chrétiens qui veulent grandir dans la foi. Et en plus c'est gratuit ! »</p>
                         <div class="testimonial-author">
                             <div class="testimonial-avatar"><i class="fas fa-user-circle"></i></div>
-                            <div>
-                                <strong>Paul A.</strong>
-                                <span>Ouagadougou, Burkina</span>
-                            </div>
+                            <div><strong>Paul A.</strong><span>Ouagadougou, Burkina</span></div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Section Dons (impact storytelling) -->
-        <section id="soutenir" class="donate-section">
+        <!-- Dons -->
+        <section id="soutenir" class="donate-section anim-fade" aria-label="Soutenir">
             <div class="container">
                 <h2>Soutenez l'Œuvre</h2>
                 <p class="section-subtitle">Ce site est et restera 100% gratuit. Mais nous avons besoin de vous pour le maintenir et l'enrichir.</p>
-
                 <div class="donate-impact">
                     <div class="impact-text">
                         <h3>Votre don permet :</h3>
                         <ul class="impact-list">
-                            <li><i class="fas fa-check-circle"></i> D'héberger la bibliothèque pour des milliers de lecteurs</li>
-                            <li><i class="fas fa-check-circle"></i> D'ajouter régulièrement de nouveaux livres</li>
-                            <li><i class="fas fa-check-circle"></i> D'améliorer le site et l'expérience de lecture</li>
-                            <li><i class="fas fa-check-circle"></i> De maintenir l'accès gratuit pour tous</li>
+                            <li><i class="fas fa-check-circle" aria-hidden="true"></i> D'héberger la bibliothèque pour des milliers de lecteurs</li>
+                            <li><i class="fas fa-check-circle" aria-hidden="true"></i> D'ajouter régulièrement de nouveaux livres</li>
+                            <li><i class="fas fa-check-circle" aria-hidden="true"></i> D'améliorer le site et l'expérience de lecture</li>
+                            <li><i class="fas fa-check-circle" aria-hidden="true"></i> De maintenir l'accès gratuit pour tous</li>
                         </ul>
                     </div>
                     <div class="donate-goal">
@@ -246,25 +214,19 @@
                         <p class="goal-note">Chaque don, même modeste, nous rapproche du but.</p>
                     </div>
                 </div>
-
                 <div class="donate-methods">
                     <div class="donate-card featured">
                         <div class="donate-icon"><i class="fab fa-paypal"></i></div>
                         <h3>PayPal & Carte</h3>
                         <p>Sécurisé · International · Visa, Mastercard, PayPal</p>
-                        <div class="paypal-email-info">
-                            <i class="fas fa-envelope"></i>
-                            <span>Envoyez à : <strong>davi.ekue@gmail.com</strong></span>
-                        </div>
+                        <div class="paypal-email-info"><i class="fas fa-envelope"></i><span>Envoyez à : <strong>davi.ekue@gmail.com</strong></span></div>
                         <div class="donate-amounts">
-                            <button type="button" class="amount-btn" data-amount="5">5 $</button>
-                            <button type="button" class="amount-btn" data-amount="10">10 $</button>
-                            <button type="button" class="amount-btn" data-amount="25">25 $</button>
-                            <button type="button" class="amount-btn" data-amount="50">50 $</button>
+                            <button type="button" class="amount-btn" data-amount="5" aria-label="5 dollars">5 $</button>
+                            <button type="button" class="amount-btn" data-amount="10" aria-label="10 dollars">10 $</button>
+                            <button type="button" class="amount-btn" data-amount="25" aria-label="25 dollars">25 $</button>
+                            <button type="button" class="amount-btn" data-amount="50" aria-label="50 dollars">50 $</button>
                         </div>
-                        <a id="paypalBtn" class="donate-btn paypal-btn" href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=davi.ekue@gmail.com&currency_code=USD&item_name=Soutien%20Biblioth%C3%A8que%20Biblique" target="_blank" rel="noopener">
-                            <i class="fab fa-paypal"></i> Payer avec PayPal
-                        </a>
+                        <a id="paypalBtn" class="donate-btn paypal-btn" href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=davi.ekue@gmail.com&currency_code=USD&item_name=Soutien%20Biblioth%C3%A8que%20Biblique" target="_blank" rel="noopener"><i class="fab fa-paypal"></i> Payer avec PayPal</a>
                         <p class="donate-note">✓ Fonctionne depuis tous les pays · Carte bancaire acceptée sans compte PayPal</p>
                     </div>
                     <div class="donate-card">
@@ -287,18 +249,18 @@
                     <div class="trust-badge"><i class="fas fa-percent"></i> 100% des dons vont aux projets</div>
                     <div class="trust-badge"><i class="fas fa-hand-holding-heart"></i> Organisation à but non lucratif</div>
                 </div>
-                <p class="donate-thankyou">Merci du fond du cœur pour votre générosité. 🙏</p>
+                <p class="donate-thankyou">Merci du fond du cœur pour votre générosité.</p>
             </div>
         </section>
 
         <!-- Newsletter -->
-        <section class="newsletter">
+        <section class="newsletter anim-fade" aria-label="Newsletter">
             <div class="container">
                 <div class="newsletter-card">
                     <h2>Restez informé</h2>
                     <p>Soyez averti des nouveaux ajouts à la bibliothèque et des ressources gratuites.</p>
                     <form id="newsletterForm" class="newsletter-form">
-                        <input type="email" id="newsletterEmail" placeholder="Votre adresse email" required>
+                        <input type="email" id="newsletterEmail" placeholder="Votre adresse email" required aria-label="Votre email">
                         <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> S'abonner</button>
                     </form>
                     <p class="newsletter-note">Pas de spam. Désabonnement à tout moment.</p>
@@ -307,57 +269,43 @@
         </section>
 
         <!-- Communauté -->
-        <section id="communaute" class="community-section">
+        <section id="communaute" class="community-section anim-fade" aria-label="Communauté">
             <div class="container">
                 <h2>Notre Communauté</h2>
                 <p class="section-subtitle">Rejoins d'autres lecteurs, partage ton témoignage, suggère des livres.</p>
-
                 <div class="community-grid">
                     <div class="community-card">
                         <div class="community-icon"><i class="fab fa-whatsapp"></i></div>
                         <h3>Groupe WhatsApp</h3>
                         <p>Échange, prières, annonces des nouveaux livres. Rejoins la famille.</p>
-                        <a href="https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W" target="_blank" rel="noopener" class="community-btn whatsapp-btn">
-                            <i class="fab fa-whatsapp"></i> Rejoindre le groupe
-                        </a>
+                        <a href="https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W" target="_blank" rel="noopener" class="community-btn whatsapp-btn"><i class="fab fa-whatsapp"></i> Rejoindre le groupe</a>
                     </div>
                     <div class="community-card">
                         <div class="community-icon"><i class="fab fa-github"></i></div>
                         <h3>GitHub Discussions</h3>
                         <p>Suggère des livres, signale des problèmes, participe à l'évolution du projet.</p>
-                        <a href="https://github.com/cideg-dev/Biblio-Vitrine/discussions" target="_blank" rel="noopener" class="community-btn github-btn">
-                            <i class="fab fa-github"></i> Discussions
-                        </a>
+                        <a href="https://github.com/cideg-dev/Biblio-Vitrine/discussions" target="_blank" rel="noopener" class="community-btn github-btn"><i class="fab fa-github"></i> Discussions</a>
                     </div>
                     <div class="community-card">
                         <div class="community-icon"><i class="fas fa-lightbulb"></i></div>
                         <h3>Suggérer un livre</h3>
                         <p>Tu aimerais trouver un livre en particulier ? Fais-nous une suggestion.</p>
-                        <a href="https://wa.me/2290162044524?text=Je%20souhaite%20sugg%C3%A9rer%20un%20livre%20:%20" target="_blank" rel="noopener" class="community-btn suggest-btn">
-                            <i class="fab fa-whatsapp"></i> Suggérer via WhatsApp
-                        </a>
+                        <a href="https://wa.me/2290162044524?text=Je%20souhaite%20sugg%C3%A9rer%20un%20livre%20:%20" target="_blank" rel="noopener" class="community-btn suggest-btn"><i class="fab fa-whatsapp"></i> Via WhatsApp</a>
                     </div>
                 </div>
-
-                <!-- Témoignages -->
                 <div class="testimonials-section">
-                    <h3><i class="fas fa-quote-left"></i> Témoignages</h3>
+                    <h3><i class="fas fa-quote-left" aria-hidden="true"></i> Témoignages</h3>
                     <p class="testimonials-sub">Ce que disent les lecteurs de la bibliothèque.</p>
-                    <div id="testimonialsList" class="testimonials-grid">
-                        <div class="testimonial-skeleton">Chargement des témoignages…</div>
-                    </div>
+                    <div id="testimonialsList" class="testimonials-grid"><div class="testimonial-skeleton">Chargement des témoignages…</div></div>
                     <div class="testimonial-cta">
                         <p>Toi aussi, partage ton témoignage :</p>
-                        <a href="https://wa.me/2290162044524?text=Mon%20t%C3%A9moignage%20:" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;gap:0.4rem">
-                            <i class="fab fa-whatsapp"></i> Partager sur WhatsApp
-                        </a>
+                        <a href="https://wa.me/2290162044524?text=Mon%20t%C3%A9moignage%20:" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;gap:0.4rem"><i class="fab fa-whatsapp"></i> Partager sur WhatsApp</a>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="footer-grid">
@@ -396,39 +344,24 @@
         </div>
     </footer>
 
-    <!-- Donate Floating Button -->
-    <a href="#soutenir" class="donate-float" aria-label="Faire un don">
-        <i class="fas fa-heart"></i>
-        <span>Don</span>
-    </a>
+    <a href="#soutenir" class="donate-float" aria-label="Faire un don"><i class="fas fa-heart"></i><span>Don</span></a>
+    <button id="backToTop" class="back-to-top" aria-label="Retour en haut"><i class="fas fa-arrow-up"></i></button>
+    <a href="https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W" target="_blank" rel="noopener" class="whatsapp-float" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
 
-    <!-- Back to Top -->
-    <button id="backToTop" class="back-to-top" aria-label="Retour en haut">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-
-    <!-- WhatsApp Float -->
-    <a href="https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W" target="_blank" rel="noopener" class="whatsapp-float" aria-label="WhatsApp">
-        <i class="fab fa-whatsapp"></i>
-    </a>
-
-    <!-- PDF Viewer -->
     <div id="pdf-viewer-overlay">
         <div id="pdf-viewer-controls">
-            <button id="back-to-library" class="btn btn-secondary"><i class="fas fa-arrow-left"></i></button>
+            <button id="back-to-library" class="btn btn-secondary" aria-label="Fermer le lecteur"><i class="fas fa-arrow-left"></i></button>
             <div class="spacer"></div>
-            <button id="prevPage" class="btn btn-secondary"><i class="fas fa-chevron-left"></i></button>
+            <button id="prevPage" class="btn btn-secondary" aria-label="Page précédente"><i class="fas fa-chevron-left"></i></button>
             <span id="pageInfo">Page <span id="pageNumber"></span> / <span id="pageCount"></span></span>
-            <button id="nextPage" class="btn btn-secondary"><i class="fas fa-chevron-right"></i></button>
+            <button id="nextPage" class="btn btn-secondary" aria-label="Page suivante"><i class="fas fa-chevron-right"></i></button>
             <div class="spacer"></div>
-            <button id="zoomOut" class="btn btn-secondary"><i class="fas fa-search-minus"></i></button>
-            <button id="zoomIn" class="btn btn-secondary"><i class="fas fa-search-plus"></i></button>
-            <button id="downloadPdfBtn" class="btn btn-secondary" title="Télécharger"><i class="fas fa-download"></i></button>
+            <button id="zoomOut" class="btn btn-secondary" aria-label="Zoom arrière"><i class="fas fa-search-minus"></i></button>
+            <button id="zoomIn" class="btn btn-secondary" aria-label="Zoom avant"><i class="fas fa-search-plus"></i></button>
+            <button id="downloadPdfBtn" class="btn btn-secondary" aria-label="Télécharger"><i class="fas fa-download"></i></button>
         </div>
-        <div class="pdf-viewer-hint"><i class="fas fa-info-circle"></i> <span id="viewerHint">Tapez pour afficher/masquer les contrôles</span></div>
-        <div id="pdf-canvas-container">
-            <canvas id="pdfCanvas"></canvas>
-        </div>
+        <div class="pdf-viewer-hint"><i class="fas fa-info-circle"></i> <span id="viewerHint">Flèches pour naviguer, Esc pour fermer</span></div>
+        <div id="pdf-canvas-container"><canvas id="pdfCanvas"></canvas></div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>

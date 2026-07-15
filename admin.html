@@ -18,95 +18,63 @@
                     <img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="logo-img">
                 </div>
                 <ul class="nav-menu">
-                    <li class="nav-item"><a href="index.html" class="nav-link">← Retour au site</a></li>
+                    <li class="nav-item"><a href="index.html" class="nav-link"><i class="fas fa-arrow-left"></i> Retour au site</a></li>
                     <li class="nav-item"><a href="#" id="logoutBtn" class="admin-btn">Déconnexion</a></li>
                 </ul>
-                <div class="hamburger">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                </div>
+                <div class="hamburger"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
             </div>
         </nav>
     </header>
 
     <main id="adminContent">
-        <!-- Login -->
         <div id="loginSection" class="login-form">
             <div class="login-card">
                 <div class="login-icon"><i class="fas fa-lock"></i></div>
                 <h2>Connexion Admin</h2>
                 <p class="login-desc">Connecte-toi avec ton token GitHub pour gérer la bibliothèque.</p>
-                <p class="login-help">
-                    <i class="fas fa-info-circle"></i>
-                    <a href="https://github.com/settings/tokens?scopes=repo&description=Biblio-Vitrine-Admin" target="_blank" rel="noopener">Créer un token</a>
-                    (coche <code>repo</code>)
-                </p>
-                <div class="form-group">
-                    <label for="githubToken">Token GitHub</label>
-                    <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required>
-                </div>
+                <p class="login-help"><i class="fas fa-info-circle"></i> <a href="https://github.com/settings/tokens?scopes=repo&description=Biblio-Vitrine-Admin" target="_blank" rel="noopener">Créer un token</a> (coche <code>repo</code>)</p>
+                <div class="form-group"><label for="githubToken">Token GitHub</label><input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required></div>
                 <button id="loginBtn" class="btn-primary" style="width:100%;justify-content:center">Se connecter</button>
             </div>
         </div>
 
-        <!-- Admin Dashboard -->
         <div id="adminInterface" class="admin-dashboard" style="display:none">
             <div id="notificationMessage" class="upload-status" style="display:none"></div>
 
-            <!-- Stats row -->
             <div class="admin-stats">
                 <div class="admin-stat"><span class="admin-stat-num" id="statTotal">0</span><span class="admin-stat-label">PDFs</span></div>
-                <div class="admin-stat"><span class="admin-stat-num" id="statRepo">---</span><span class="admin-stat-label">Dernier commit</span></div>
+                <div class="admin-stat"><span class="admin-stat-num" id="statRepo">---</span><span class="admin-stat-label">Activité</span></div>
             </div>
 
-            <!-- Tabs -->
             <div class="admin-tabs">
                 <button class="admin-tab active" data-tab="metadata"><i class="fas fa-list"></i> Métadonnées</button>
-                <button class="admin-tab" data-tab="upload"><i class="fas fa-upload"></i> Upload PDF</button>
+                <button class="admin-tab" data-tab="upload"><i class="fas fa-upload"></i> Upload</button>
                 <button class="admin-tab" data-tab="donation"><i class="fas fa-heart"></i> Dons</button>
                 <button class="admin-tab" data-tab="testimonials"><i class="fas fa-quote-left"></i> Témoignages</button>
                 <button class="admin-tab" data-tab="mission"><i class="fas fa-hand-holding-heart"></i> Mission</button>
+                <button class="admin-tab" data-tab="gallery"><i class="fas fa-images"></i> Galerie</button>
+                <button class="admin-tab" data-tab="config"><i class="fas fa-cog"></i> Config</button>
             </div>
 
             <!-- Tab: Metadata -->
             <div id="tab-metadata" class="admin-tab-content active">
-                <div class="admin-tab-header">
-                    <h3><i class="fas fa-edit"></i> Modifier les titres et descriptions</h3>
-                    <span class="admin-tab-badge" id="metaCount">0</span>
-                </div>
+                <div class="admin-tab-header"><h3><i class="fas fa-edit"></i> Modifier les métadonnées</h3><span class="admin-tab-badge" id="metaCount">0</span></div>
                 <div class="meta-split">
                     <div class="meta-panel-list">
-                        <div class="admin-search">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="metaSearch" placeholder="Rechercher un livre…">
-                        </div>
+                        <div class="admin-search"><i class="fas fa-search"></i><input type="text" id="metaSearch" placeholder="Rechercher…"></div>
                         <div id="bookList" class="book-list"></div>
                     </div>
                     <div class="meta-panel-edit" id="editPanel">
-                        <div class="edit-placeholder">
-                            <i class="fas fa-hand-pointer"></i>
-                            <p>Clique sur un livre dans la liste pour le modifier</p>
-                        </div>
+                        <div class="edit-placeholder"><i class="fas fa-hand-pointer"></i><p>Clique sur un livre dans la liste pour le modifier</p></div>
                         <div class="edit-form" id="editForm" style="display:none">
-                            <div class="edit-header">
-                                <span id="editFileLabel" class="edit-file-label"><i class="fas fa-file-pdf"></i> </span>
-                            </div>
-                            <div class="form-group">
-                                <label>Titre du document</label>
-                                <input type="text" id="editTitle" placeholder="Titre du document">
-                            </div>
-                            <div class="form-group">
-                                <label>Description</label>
-                                <textarea id="editDescription" rows="4" placeholder="Description du contenu…"></textarea>
-                            </div>
+                            <div class="edit-header"><span id="editFileLabel" class="edit-file-label"><i class="fas fa-file-pdf"></i></span></div>
+                            <div class="form-group"><label>Titre</label><input type="text" id="editTitle" placeholder="Titre du document"></div>
+                            <div class="form-group"><label>Auteur</label><input type="text" id="editAuthor" placeholder="Auteur du document"></div>
+                            <div class="form-group"><label>Catégorie</label><select id="editCategory" style="width:100%;padding:0.7rem 1rem;background:var(--bg);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);color:var(--text);font-size:0.9rem;font-family:var(--font)"></select></div>
+                            <div class="form-group"><label>Description</label><textarea id="editDescription" rows="4" placeholder="Description du contenu…"></textarea></div>
                             <div class="edit-actions">
-                                <button id="saveChangesBtn" class="btn-primary">
-                                    <i class="fas fa-save"></i> Sauvegarder
-                                </button>
-                                <button id="deleteFromListBtn" class="btn-danger">
-                                    <i class="fas fa-trash-alt"></i> Retirer de la liste
-                                </button>
+                                <button id="saveChangesBtn" class="btn-primary"><i class="fas fa-save"></i> Sauvegarder</button>
+                                <button id="deleteFromListBtn" class="btn-danger"><i class="fas fa-trash-alt"></i> Retirer</button>
                             </div>
                         </div>
                     </div>
@@ -115,30 +83,20 @@
 
             <!-- Tab: Upload -->
             <div id="tab-upload" class="admin-tab-content">
-                <div class="admin-tab-header">
-                    <h3><i class="fas fa-cloud-upload-alt"></i> Ajouter un PDF</h3>
-                </div>
+                <div class="admin-tab-header"><h3><i class="fas fa-cloud-upload-alt"></i> Ajouter un PDF</h3></div>
                 <div class="upload-card">
                     <div class="upload-dropzone" id="dropzone">
                         <i class="fas fa-file-pdf"></i>
                         <p>Glisse un PDF ici ou <strong>clique pour choisir</strong></p>
-                        <span>Fichier .pdf uniquement</span>
+                        <span>Fichier .pdf uniquement | 50 Mo max</span>
                         <input type="file" id="newPdfFile" accept=".pdf" hidden>
                     </div>
                     <div class="upload-fields" style="display:none">
-                        <div class="form-group">
-                            <label>Titre du document</label>
-                            <input type="text" id="newPdfTitle" placeholder="Ex: Comment étudier la Bible">
-                        </div>
-                        <div class="form-group">
-                            <label>Description</label>
-                            <textarea id="newPdfDescription" placeholder="Brève description du contenu…"></textarea>
-                        </div>
+                        <div class="form-group"><label>Titre</label><input type="text" id="newPdfTitle" placeholder="Ex: Comment étudier la Bible"></div>
+                        <div class="form-group"><label>Description</label><textarea id="newPdfDescription" placeholder="Brève description…"></textarea></div>
                         <div class="upload-info" id="uploadInfo"></div>
                         <div class="upload-progress" id="uploadProgress" style="display:none">
-                            <div class="progress-track">
-                                <div class="progress-bar" id="progressBar"></div>
-                            </div>
+                            <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
                             <span class="progress-text" id="progressText">0%</span>
                         </div>
                         <div class="upload-actions">
@@ -148,154 +106,115 @@
                     </div>
                 </div>
             </div>
+
             <!-- Tab: Dons -->
             <div id="tab-donation" class="admin-tab-content">
-                <div class="admin-tab-header">
-                    <h3><i class="fas fa-heart"></i> Objectif de dons</h3>
-                </div>
+                <div class="admin-tab-header"><h3><i class="fas fa-heart"></i> Objectif de dons</h3></div>
                 <div class="upload-card">
-                    <div class="form-group">
-                        <label>Montant actuel (FCFA)</label>
-                        <input type="number" id="donationCurrentInput" min="0" step="100">
-                    </div>
-                    <div class="form-group">
-                        <label>Objectif (FCFA)</label>
-                        <input type="number" id="donationTargetInput" min="0" step="1000" value="150000">
-                    </div>
+                    <div class="form-group"><label>Montant actuel (FCFA)</label><input type="number" id="donationCurrentInput" min="0" step="100"></div>
+                    <div class="form-group"><label>Objectif (FCFA)</label><input type="number" id="donationTargetInput" min="0" step="1000" value="150000"></div>
                     <div class="form-group" style="display:flex;align-items:center;gap:0.8rem;padding:0.8rem;background:var(--bg);border-radius:var(--radius)">
                         <label style="margin:0;cursor:pointer;flex:1;display:flex;align-items:center;gap:0.5rem">
                             <input type="checkbox" id="donationShowToggle">
-                            <i class="fas fa-eye"></i> Afficher l'objectif sur le site
+                            <i class="fas fa-eye"></i> Afficher sur le site
                         </label>
                         <span id="donationPreviewLabel" style="font-size:0.75rem;color:var(--text3)">Masqué</span>
                     </div>
-                    <div class="form-group" style="margin-bottom:0">
-                        <button id="saveDonationBtn" class="btn-primary"><i class="fas fa-save"></i> Sauvegarder</button>
-                    </div>
+                    <div class="form-group" style="margin-bottom:0"><button id="saveDonationBtn" class="btn-primary"><i class="fas fa-save"></i> Sauvegarder</button></div>
                 </div>
             </div>
 
             <!-- Tab: Témoignages -->
             <div id="tab-testimonials" class="admin-tab-content">
-                <div class="admin-tab-header">
-                    <h3><i class="fas fa-quote-left"></i> Gérer les témoignages</h3>
-                    <span class="admin-tab-badge" id="testimonialsCount">0</span>
-                </div>
+                <div class="admin-tab-header"><h3><i class="fas fa-quote-left"></i> Témoignages</h3><span class="admin-tab-badge" id="testimonialsCount">0</span></div>
                 <div style="margin-bottom:1.5rem">
-                    <button id="addTestimonialBtn" class="btn-primary"><i class="fas fa-plus"></i> Ajouter un témoignage</button>
+                    <button id="addTestimonialBtn" class="btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
                     <button id="saveTestimonialsBtn" class="btn-primary" style="margin-left:0.5rem"><i class="fas fa-save"></i> Sauvegarder</button>
                 </div>
                 <div id="addTestimonialForm" style="display:none" class="upload-card">
-                    <div class="form-group">
-                        <label>Nom</label>
-                        <input type="text" id="testiName" placeholder="Ex: Jean M.">
-                    </div>
-                    <div class="form-group">
-                        <label>Témoignage</label>
-                        <textarea id="testiMessage" rows="3" placeholder="Son témoignage…"></textarea>
-                    </div>
+                    <div class="form-group"><label>Nom</label><input type="text" id="testiName" placeholder="Ex: Jean M."></div>
+                    <div class="form-group"><label>Témoignage</label><textarea id="testiMessage" rows="3" placeholder="Son témoignage…"></textarea></div>
                     <button id="confirmAddTestimonial" class="btn-primary"><i class="fas fa-check"></i> Ajouter</button>
                 </div>
-                <div id="testimonialsAdminList" class="admin-meta-list">
-                    <div class="admin-empty"><i class="fas fa-quote-left"></i><p>Chargement des témoignages…</p></div>
-                </div>
+                <div id="testimonialsAdminList" class="admin-meta-list"><div class="admin-empty"><i class="fas fa-quote-left"></i><p>Chargement…</p></div></div>
+            </div>
+
             <!-- Tab: Mission -->
             <div id="tab-mission" class="admin-tab-content">
-                <div class="admin-tab-header">
-                    <h3><i class="fas fa-hand-holding-heart"></i> Page Mission</h3>
-                </div>
+                <div class="admin-tab-header"><h3><i class="fas fa-hand-holding-heart"></i> Page Mission</h3></div>
                 <div class="upload-card" style="margin-bottom:1.5rem">
                     <div class="admin-tab-header"><h4 style="font-size:1rem">Introduction</h4></div>
-                    <div class="form-group">
-                        <label>Titre du hero</label>
-                        <input type="text" id="missionHeroTitle" placeholder="Notre Mission Humanitaire">
-                    </div>
-                    <div class="form-group">
-                        <label>Sous-titre du hero</label>
-                        <textarea id="missionHeroSub" rows="2" placeholder="Sous-titre…"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Titre introduction</label>
-                        <input type="text" id="missionIntroTitle" placeholder="Qui nous sommes">
-                    </div>
-                    <div class="form-group">
-                        <label>Paragraphe 1</label>
-                        <textarea id="missionIntroP1" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Paragraphe 2</label>
-                        <textarea id="missionIntroP2" rows="3"></textarea>
-                    </div>
+                    <div class="form-group"><label>Titre hero</label><input type="text" id="missionHeroTitle" placeholder="Notre Mission Humanitaire"></div>
+                    <div class="form-group"><label>Sous-titre hero</label><textarea id="missionHeroSub" rows="2" placeholder="Sous-titre…"></textarea></div>
+                    <div class="form-group"><label>Titre introduction</label><input type="text" id="missionIntroTitle" placeholder="Qui nous sommes"></div>
+                    <div class="form-group"><label>Paragraphe 1</label><textarea id="missionIntroP1" rows="3"></textarea></div>
+                    <div class="form-group"><label>Paragraphe 2</label><textarea id="missionIntroP2" rows="3"></textarea></div>
                 </div>
-
                 <div class="upload-card" style="margin-bottom:1.5rem">
                     <div class="admin-tab-header"><h4 style="font-size:1rem">Statistiques</h4></div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-                        <div class="form-group">
-                            <label>Stat 1 - Chiffre</label>
-                            <input type="text" id="stat1Num" placeholder="+50">
-                            <label style="margin-top:0.5rem;font-size:0.75rem">Label</label>
-                            <input type="text" id="stat1Label" placeholder="Femmes accompagnées">
-                        </div>
-                        <div class="form-group">
-                            <label>Stat 2 - Chiffre</label>
-                            <input type="text" id="stat2Num" placeholder="+30">
-                            <label style="margin-top:0.5rem;font-size:0.75rem">Label</label>
-                            <input type="text" id="stat2Label" placeholder="Personnes handicapées">
-                        </div>
-                        <div class="form-group">
-                            <label>Stat 3 - Chiffre</label>
-                            <input type="text" id="stat3Num" placeholder="+100">
-                            <label style="margin-top:0.5rem;font-size:0.75rem">Label</label>
-                            <input type="text" id="stat3Label" placeholder="Familles aidées">
-                        </div>
-                        <div class="form-group">
-                            <label>Stat 4 - Chiffre</label>
-                            <input type="text" id="stat4Num" placeholder="Depuis">
-                            <label style="margin-top:0.5rem;font-size:0.75rem">Label</label>
-                            <input type="text" id="stat4Label" placeholder="2024">
-                        </div>
+                        <div class="form-group"><label>Stat 1</label><input type="text" id="stat1Num" placeholder="+50"><label style="margin-top:0.5rem;font-size:0.75rem">Label</label><input type="text" id="stat1Label" placeholder="Femmes accompagnées"></div>
+                        <div class="form-group"><label>Stat 2</label><input type="text" id="stat2Num" placeholder="+30"><label style="margin-top:0.5rem;font-size:0.75rem">Label</label><input type="text" id="stat2Label" placeholder="Personnes handicapées"></div>
+                        <div class="form-group"><label>Stat 3</label><input type="text" id="stat3Num" placeholder="+100"><label style="margin-top:0.5rem;font-size:0.75rem">Label</label><input type="text" id="stat3Label" placeholder="Familles aidées"></div>
+                        <div class="form-group"><label>Stat 4</label><input type="text" id="stat4Num" placeholder="Depuis"><label style="margin-top:0.5rem;font-size:0.75rem">Label</label><input type="text" id="stat4Label" placeholder="2024"></div>
                     </div>
                 </div>
-
                 <div class="upload-card" style="margin-bottom:1.5rem">
                     <div class="admin-tab-header"><h4 style="font-size:1rem">Autonomisation des femmes</h4></div>
-                    <div class="form-group">
-                        <label>Titre</label>
-                        <input type="text" id="womenTitle" placeholder="Autonomisation des femmes">
-                    </div>
-                    <div class="form-group">
-                        <label>Sous-titre</label>
-                        <textarea id="womenSub" rows="2"></textarea>
-                    </div>
+                    <div class="form-group"><label>Titre</label><input type="text" id="womenTitle" placeholder="Autonomisation des femmes"></div>
+                    <div class="form-group"><label>Sous-titre</label><textarea id="womenSub" rows="2"></textarea></div>
                     <div id="womenItemsContainer"></div>
                     <button id="addWomenItem" class="btn-secondary" style="margin-top:0.5rem"><i class="fas fa-plus"></i> Ajouter un axe</button>
                 </div>
-
                 <div class="upload-card" style="margin-bottom:1.5rem">
                     <div class="admin-tab-header"><h4 style="font-size:1rem">Handicapés & Démunis</h4></div>
-                    <div class="form-group">
-                        <label>Titre section handicapés</label>
-                        <input type="text" id="disabledTitle" placeholder="Aide aux personnes handicapées">
-                    </div>
+                    <div class="form-group"><label>Titre handicapés</label><input type="text" id="disabledTitle" placeholder="Aide aux personnes handicapées"></div>
                     <div id="disabledItemsContainer"></div>
                     <button id="addDisabledItem" class="btn-secondary" style="margin-top:0.5rem"><i class="fas fa-plus"></i> Ajouter un point</button>
-                    <div class="form-group" style="margin-top:1.5rem">
-                        <label>Titre section démunis</label>
-                        <input type="text" id="poorTitle" placeholder="Soutien aux familles démunies">
-                    </div>
+                    <div class="form-group" style="margin-top:1.5rem"><label>Titre démunis</label><input type="text" id="poorTitle" placeholder="Soutien aux familles démunies"></div>
                     <div id="poorItemsContainer"></div>
                     <button id="addPoorItem" class="btn-secondary" style="margin-top:0.5rem"><i class="fas fa-plus"></i> Ajouter un point</button>
                 </div>
-
                 <div class="upload-card" style="margin-bottom:1.5rem">
                     <div class="admin-tab-header"><h4 style="font-size:1rem">Témoignages</h4></div>
                     <div id="misTestimonialsContainer"></div>
                     <button id="addMisTestimonial" class="btn-secondary" style="margin-top:0.5rem"><i class="fas fa-plus"></i> Ajouter un témoignage</button>
                 </div>
-
                 <div style="text-align:center;margin-top:1rem">
                     <button id="saveMissionBtn" class="btn-primary"><i class="fas fa-save"></i> Sauvegarder la page Mission</button>
+                </div>
+            </div>
+
+            <!-- Tab: Galerie -->
+            <div id="tab-gallery" class="admin-tab-content">
+                <div class="admin-tab-header"><h3><i class="fas fa-images"></i> Photos de la mission</h3></div>
+                <div class="upload-card" style="margin-bottom:1.5rem">
+                    <h4 style="font-size:1rem;margin-bottom:1rem;color:var(--text)">Upload d'images</h4>
+                    <p style="font-size:0.85rem;color:var(--text2);margin-bottom:1rem">Les images seront uploadées dans <code>assets/images/missions/</code> sur GitHub.</p>
+                    <div id="galleryPreviewContainer" class="gallery-preview-grid"></div>
+                    <div class="form-group">
+                        <label>Choisir des images</label>
+                        <input type="file" id="galleryGitFile" accept="image/*" multiple>
+                    </div>
+                    <div id="galleryUploadBtnRow" style="display:none">
+                        <button id="galleryGitUploadBtn" class="btn-primary"><i class="fas fa-cloud-upload-alt"></i> Uploader sur GitHub</button>
+                    </div>
+                </div>
+                <div class="upload-card">
+                    <h4 style="font-size:1rem;margin-bottom:1rem;color:var(--text)">Ou utilise les images déjà présentes</h4>
+                    <p style="font-size:0.85rem;color:var(--text2);margin-bottom:0.5rem">Entre les chemins des images (un par ligne) :</p>
+                    <textarea id="galleryPathsInput" rows="4" placeholder="assets/images/missions/photo1.jpg&#10;assets/images/missions/photo2.jpg" style="width:100%"></textarea>
+                    <button id="saveGalleryBtn" class="btn-primary" style="margin-top:1rem"><i class="fas fa-save"></i> Sauvegarder la liste</button>
+                </div>
+            </div>
+
+            <!-- Tab: Config -->
+            <div id="tab-config" class="admin-tab-content">
+                <div class="admin-tab-header"><h3><i class="fas fa-cog"></i> Configuration</h3></div>
+                <div class="upload-card">
+                    <h4 style="font-size:1rem;margin-bottom:1rem;color:var(--text)">Google Analytics</h4>
+                    <div class="form-group"><label>ID Google Analytics (GA4)</label><input type="text" id="gaIdInput" placeholder="G-XXXXXXXXXX"></div>
+                    <div class="form-group" style="margin-bottom:0"><button id="saveConfigBtn" class="btn-primary"><i class="fas fa-save"></i> Sauvegarder</button></div>
                 </div>
             </div>
         </div>

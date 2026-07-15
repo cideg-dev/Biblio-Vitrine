@@ -24,8 +24,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="assets/css/style.css">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
 </head>
 <body>
+    <a href="#missionApp" id="skipLink" class="skip-link">Aller au contenu principal</a>
     <header>
         <nav class="navbar">
             <div class="nav-container">
@@ -40,11 +43,7 @@
                     <li class="nav-item"><a href="index.html#soutenir" class="nav-link donate-link"><i class="fas fa-heart"></i> Soutenir</a></li>
                     <li class="nav-item"><a href="admin.html" class="admin-btn">Admin</a></li>
                 </ul>
-                <div class="hamburger">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                </div>
+                <div class="hamburger"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
             </div>
         </nav>
     </header>
@@ -52,6 +51,62 @@
     <main id="missionApp">
         <div style="text-align:center;padding:10rem 2rem;color:var(--text3)"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top:1rem">Chargement…</p></div>
     </main>
+
+    <!-- Galerie photos (statique) -->
+    <section id="missionGallery" class="mission-gallery" style="display:none">
+        <div class="container">
+            <h2>Nos actions en images</h2>
+            <p class="section-subtitle">Quelques moments de notre travail sur le terrain.</p>
+            <div class="gallery-grid" id="galleryGrid">
+                <div class="gallery-placeholder" onclick="document.getElementById('galleryInput').click()">
+                    <i class="fas fa-plus"></i>
+                    <p>Ajoutez vos photos</p>
+                    <span>Placez-les dans assets/images/missions/</span>
+                </div>
+            </div>
+            <input type="file" id="galleryInput" accept="image/*" multiple style="display:none" onchange="handleGalleryUpload(event)">
+        </div>
+    </section>
+
+    <!-- Formulaire de contact -->
+    <section class="mission-contact" style="display:none">
+        <div class="container">
+            <div class="contact-card">
+                <h2>Contactez-nous</h2>
+                <p>Vous avez des questions, vous voulez nous soutenir ou collaborer ? Écrivez-nous.</p>
+                <form id="contactForm" class="contact-form" onsubmit="return handleContactForm(event)">
+                    <div class="contact-row">
+                        <div class="form-group">
+                            <label>Votre nom</label>
+                            <input type="text" id="contactName" placeholder="Jean Dupont" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Votre email</label>
+                            <input type="email" id="contactEmail" placeholder="jean@exemple.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Sujet</label>
+                        <select id="contactSubject">
+                            <option value="Soutien">Je veux soutenir le projet</option>
+                            <option value="Partenariat">Je représente une organisation</option>
+                            <option value="Don">Je veux faire un don</option>
+                            <option value="Bénévolat">Je veux être bénévole</option>
+                            <option value="Autre">Autre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="contactMessage" rows="4" placeholder="Votre message…" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%;justify-content:center">
+                        <i class="fab fa-whatsapp"></i> Envoyer via WhatsApp
+                    </button>
+                    <p class="contact-note">Le message sera envoyé directement sur notre WhatsApp. Vous pouvez aussi nous écrire à <a href="mailto:cideg.p.line@gmail.com">cideg.p.line@gmail.com</a></p>
+                </form>
+            </div>
+        </div>
+    </section>
 
     <footer>
         <div class="container">
@@ -90,17 +145,28 @@
         </div>
     </footer>
 
-    <a href="index.html#soutenir" class="donate-float" aria-label="Faire un don">
-        <i class="fas fa-heart"></i><span>Don</span>
-    </a>
-    <button id="backToTop" class="back-to-top" aria-label="Retour en haut">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-    <a href="https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W" target="_blank" rel="noopener" class="whatsapp-float" aria-label="WhatsApp">
-        <i class="fab fa-whatsapp"></i>
-    </a>
+    <a href="index.html#soutenir" class="donate-float" aria-label="Faire un don"><i class="fas fa-heart"></i><span>Don</span></a>
+    <button id="backToTop" class="back-to-top" aria-label="Retour en haut"><i class="fas fa-arrow-up"></i></button>
+    <a href="https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W" target="_blank" rel="noopener" class="whatsapp-float" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
 
     <script>
+        // ─── Config ───
+        async function loadMissionConfig() {
+            try {
+                const res = await fetch('assets/data/config.json')
+                if (!res.ok) return
+                const cfg = await res.json()
+                if (cfg.googleAnalyticsId && cfg.googleAnalyticsId !== 'G-XXXXXXXXXX') {
+                    document.querySelectorAll('script[src*="googletagmanager"]').forEach(s => {
+                        s.src = s.src.replace('G-XXXXXXXXXX', cfg.googleAnalyticsId)
+                    })
+                    window.gtag && gtag('config', cfg.googleAnalyticsId)
+                }
+            } catch {}
+        }
+        loadMissionConfig()
+
+        // ─── Navigation ───
         const backToTop = document.getElementById('backToTop')
         window.addEventListener('scroll', () => backToTop.classList.toggle('visible', window.scrollY > 400))
         backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }))
@@ -115,6 +181,93 @@
 
         function esc(s) { if (typeof s !== 'string') return ''; return s.replace(/[&<>"]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m])) }
 
+        // ─── Compteur animé ───
+        function animateCounter(el, target, suffix) {
+            const isNum = /^[0-9]/.test(target)
+            if (!isNum) { el.textContent = target; return }
+            const num = parseInt(target.replace(/[^0-9]/g, ''))
+            if (!num) { el.textContent = target; return }
+            const prefix = target.replace(/[0-9]/g, '')
+            let current = 0
+            const step = Math.max(1, Math.floor(num / 40))
+            const interval = setInterval(() => {
+                current += step
+                if (current >= num) { current = num; clearInterval(interval) }
+                el.textContent = prefix + current
+            }, 30)
+        }
+
+        function animateStats() {
+            document.querySelectorAll('.mis-stat-num').forEach(el => {
+                const target = el.textContent
+                const suffix = el.dataset.suffix || ''
+                animateCounter(el, target, suffix)
+            })
+        }
+
+        // ─── Galerie photos ───
+        function loadGallery() {
+            const gallery = document.getElementById('missionGallery')
+            const grid = document.getElementById('galleryGrid')
+            const saved = JSON.parse(localStorage.getItem('missionGallery') || '[]')
+            saved.forEach(src => {
+                const img = document.createElement('div')
+                img.className = 'gallery-img'
+                img.innerHTML = `<img src="${esc(src)}" alt="Action mission"><button class="gallery-del" onclick="removeGalleryImg('${esc(src)}')"><i class="fas fa-times"></i></button>`
+                grid.insertBefore(img, grid.querySelector('.gallery-placeholder'))
+            })
+            gallery.style.display = ''
+            document.querySelector('.mission-contact').style.display = ''
+        }
+
+        function handleGalleryUpload(e) {
+            const files = e.target.files
+            const saved = JSON.parse(localStorage.getItem('missionGallery') || '[]')
+            Array.from(files).forEach(file => {
+                const reader = new FileReader()
+                reader.onload = (ev) => {
+                    const src = ev.target.result
+                    saved.push(src)
+                    const img = document.createElement('div')
+                    img.className = 'gallery-img'
+                    img.innerHTML = `<img src="${src}" alt="Action mission"><button class="gallery-del" onclick="removeGalleryImgFromArr('${src}')"><i class="fas fa-times"></i></button>`
+                    const grid = document.getElementById('galleryGrid')
+                    grid.insertBefore(img, grid.querySelector('.gallery-placeholder'))
+                }
+                reader.readAsDataURL(file)
+            })
+            localStorage.setItem('missionGallery', JSON.stringify(saved))
+            e.target.value = ''
+        }
+
+        function removeGalleryImg(src) {
+            let saved = JSON.parse(localStorage.getItem('missionGallery') || '[]')
+            saved = saved.filter(s => s !== src)
+            localStorage.setItem('missionGallery', JSON.stringify(saved))
+            loadGallery()
+        }
+
+        function removeGalleryImgFromArr(src) {
+            let saved = JSON.parse(localStorage.getItem('missionGallery') || '[]')
+            saved = saved.filter(s => s !== src)
+            localStorage.setItem('missionGallery', JSON.stringify(saved))
+            const imgs = document.querySelectorAll('.gallery-img')
+            imgs.forEach(img => { if (img.querySelector('img')?.src === src) img.remove() })
+        }
+
+        // ─── Formulaire contact ───
+        function handleContactForm(e) {
+            e.preventDefault()
+            const name = document.getElementById('contactName').value.trim()
+            const email = document.getElementById('contactEmail').value.trim()
+            const subject = document.getElementById('contactSubject').value
+            const message = document.getElementById('contactMessage').value.trim()
+            const text = `*Nouveau message - Mission*%0A%0ANom : ${encodeURIComponent(name)}%0AEmail : ${encodeURIComponent(email)}%0ASujet : ${encodeURIComponent(subject)}%0A%0AMessage :%0A${encodeURIComponent(message)}`
+            window.open(`https://wa.me/2290162044524?text=${text}`, '_blank')
+            return false
+        }
+
+        // ─── Chargement principal ───
         async function loadMissionPage() {
             const app = document.getElementById('missionApp')
             try {
@@ -153,7 +306,7 @@
                                     <h2>${esc(d.intro?.title || '')}</h2>
                                     ${(d.intro?.paragraphs || []).map(p => `<p>${p}</p>`).join('')}
                                 </div>
-                                <div class="mission-intro-stats">${stats}</div>
+                                <div class="mission-intro-stats" id="statsContainer">${stats}</div>
                             </div>
                         </div>
                     </section>
@@ -199,6 +352,8 @@
                             </div>
                         </div>
                     </section>`
+                animateStats()
+                loadGallery()
             } catch (e) {
                 app.innerHTML = '<div style="text-align:center;padding:10rem 2rem;color:var(--text3)"><i class="fas fa-exclamation-triangle fa-2x"></i><p style="margin-top:1rem">Impossible de charger la page.</p></div>'
             }
