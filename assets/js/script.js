@@ -2,6 +2,8 @@ let allPdfs = []
 let filteredPdfs = []
 let currentPage = 1
 const itemsPerPage = 12
+const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+const PDF_BASE = 'assets/documents/'
 
 document.addEventListener('DOMContentLoaded', () => {
     // Mobile nav
@@ -36,6 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('zoomIn')?.addEventListener('click', zoomIn)
     document.getElementById('zoomOut')?.addEventListener('click', zoomOut)
     document.getElementById('back-to-library')?.addEventListener('click', closePdfViewer)
+    document.getElementById('downloadPdfBtn')?.addEventListener('click', () => window._currentPdfUrl && window.open(window._currentPdfUrl, '_blank'))
+
+    if (isMobile) {
+        const hint = document.getElementById('viewerHint')
+        if (hint) hint.textContent = 'Ouvre dans une nouvelle fenêtre pour une meilleure expérience'
+    }
 
     // Donate amount buttons
     document.querySelectorAll('.amount-btn').forEach(btn => {
@@ -47,6 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Newsletter
     document.getElementById('newsletterForm')?.addEventListener('submit', handleNewsletter)
+
+    // Open external download in viewer
+    window.downloadCurrentPdf = function() {
+        if (window._currentPdfUrl) window.open(window._currentPdfUrl, '_blank')
+    }
 
     // Smooth scroll for CTA
     document.querySelectorAll('a[href^="#"]').forEach(a => {
@@ -112,13 +125,22 @@ function renderPdfGrid() {
         card.style.animationDelay = `${i * 60}ms`
         const title = pdf.titre || pdf.nom_du_fichier.replace('.pdf', '').replace(/_/g, ' ')
         const desc = pdf.description || 'Aucune description disponible.'
+        const fileUrl = PDF_BASE + pdf.nom_du_fichier
         card.innerHTML = `
             <div class="pdf-thumbnail"><i class="fas fa-book"></i></div>
             <div class="pdf-info">
                 <div class="pdf-title">${esc(title)}</div>
                 <div class="pdf-description">${esc(desc)}</div>
+                <div class="pdf-actions-row">
+                    <button class="pdf-read-btn" data-url="${esc(fileUrl)}"><i class="fas fa-book-open"></i> Lire</button>
+                    <a href="${esc(fileUrl)}" download class="pdf-dl-btn" title="Télécharger"><i class="fas fa-download"></i></a>
+                </div>
             </div>`
-        card.addEventListener('click', () => openPDF('assets/documents/' + pdf.nom_du_fichier))
+        const readBtn = card.querySelector('.pdf-read-btn')
+        readBtn.addEventListener('click', (e) => {
+            e.stopPropagation()
+            isMobile ? window.open(fileUrl, '_blank') : openPDF(fileUrl)
+        })
         container.appendChild(card)
     })
 }
@@ -221,6 +243,7 @@ const canvas = document.getElementById('pdfCanvas')
 const ctx = canvas?.getContext('2d')
 
 async function openPDF(url) {
+    window._currentPdfUrl = url
     const overlay = document.getElementById('pdf-viewer-overlay')
     overlay.style.display = 'flex'
     try {
