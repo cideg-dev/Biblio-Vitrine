@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Bibliothèque Biblique</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h1>Administration - Bibliothèque Biblique</h1>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Retour au site</a></li>
+                    <li class="nav-item"><a href="#" id="logoutBtn" class="admin-btn">Déconnexion</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main id="adminContent">
+        <!-- Formulaire de connexion -->
+        <div id="loginSection" class="login-form">
+            <h2>Connexion Admin</h2>
+            <div class="form-group">
+                <label for="adminPassword">Mot de passe:</label>
+                <input type="password" id="adminPassword" required>
+            </div>
+            <button id="loginBtn" class="btn btn-primary">Se connecter</button>
+        </div>
+
+        <!-- Interface d'administration (cachée par défaut) -->
+        <div id="adminInterface" class="admin-container" style="display: none;">
+            <h2>Gestion des PDFs</h2>
+            
+            <div id="notificationMessage" class="upload-status" style="display: none;"></div>
+
+            <div class="upload-section">
+                <h3>Ajouter un nouveau PDF</h3>
+                <div class="form-group">
+                    <label for="newPdfFile">Fichier PDF :</label>
+                    <input type="file" id="newPdfFile" accept=".pdf">
+                </div>
+                <div class="form-group">
+                    <label for="newPdfTitle">Titre :</label>
+                    <input type="text" id="newPdfTitle" placeholder="Titre du document">
+                </div>
+                <div class="form-group">
+                    <label for="newPdfDescription">Description :</label>
+                    <textarea id="newPdfDescription" placeholder="Brève description du document"></textarea>
+                </div>
+                <button id="addPdfBtn" class="btn btn-primary">Ajouter le PDF</button>
+            </div>
+
+            <div class="pdf-list">
+                <h3>Liste des PDFs (Titres et descriptions modifiables)</h3>
+                <div id="existingPDFs">
+                    <!-- La liste des PDFs sera chargée ici par le JavaScript -->
+                </div>
+                <button id="saveChangesBtn" class="btn btn-primary" style="display: none; margin-top: 1rem;">Sauvegarder les modifications</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="assets/js/admin.js"></script>
+</body>
+</html>

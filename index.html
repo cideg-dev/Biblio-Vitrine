@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIDEG & P.line — Bibliothèque Biblique Chrétienne Gratuite</title>
+    <meta name="description" content="Accédez gratuitement à une collection de livres bibliques en PDF. Études théologiques, commentaires bibliques et ressources pour approfondir votre foi.">
+    <meta name="keywords" content="Bible, PDF biblique, livres chrétiens, études bibliques, théologie, ressources chrétiennes gratuites">
+    <meta name="author" content="CIDEG & P.line">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://cideg-dev.github.io/Biblio-Vitrine/">
+    <link rel="icon" href="assets/images/Lumiere_sur_parole.png">
+    <!-- Open Graph -->
+    <meta property="og:title" content="CIDEG & P.line — Bibliothèque Biblique Chrétienne Gratuite">
+    <meta property="og:description" content="Accédez gratuitement à une collection de livres bibliques en PDF.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cideg-dev.github.io/Biblio-Vitrine/">
+    <meta property="og:image" content="https://cideg-dev.github.io/Biblio-Vitrine/assets/images/Lumiere_sur_parole.png">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CIDEG & P.line — Bibliothèque Biblique Chrétienne Gratuite">
+    <meta name="twitter:description" content="Accédez gratuitement à une collection de livres bibliques en PDF.">
+    <meta name="twitter:image" content="https://cideg-dev.github.io/Biblio-Vitrine/assets/images/Lumiere_sur_parole.png">
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
+    
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3392272461637612"
+     crossorigin="anonymous"></script>
+    <meta name="google-adsense-account" content="ca-pub-3392272461637612">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "CIDEG & P.line",
+        "description": "Bibliothèque biblique chrétienne gratuite en ligne.",
+        "url": "https://cideg-dev.github.io/Biblio-Vitrine/",
+        "email": "cideg.p.line@gmail.com",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Natitingou",
+            "addressCountry": "BJ"
+        }
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line Logo" class="logo-img">
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="#accueil" class="nav-link">Accueil</a></li>
+                    <li class="nav-item"><a href="#bibliotheque" class="nav-link">Bibliothèque</a></li>
+                    <li class="nav-item"><a href="#apropos" class="nav-link">À propos</a></li>
+                    <li class="nav-item"><a href="#soutenir" class="nav-link">Soutenir</a></li>
+                    <li class="nav-item"><a href="admin.html" class="admin-btn">Admin</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="accueil" class="hero">
+            <div class="hero-content">
+                <h2>Bienvenue à CIDEG & P.line</h2>
+                <p>Accédez gratuitement à une collection complète de livres bibliques en format PDF</p>
+                <a href="#bibliotheque" class="cta-button">Explorer la bibliothèque</a>
+            </div>
+        </section>
+
+        <section id="valeurs" class="values">
+            <div class="container">
+                <h2>Nos Valeurs</h2>
+                <div class="values-grid">
+                    <div class="value-card">
+                        <h3>Accès Libre</h3>
+                        <p>Tous nos documents bibliques sont disponibles gratuitement pour tous.</p>
+                    </div>
+                    <div class="value-card">
+                        <h3>Fidélité</h3>
+                        <p>Nous nous engageons à préserver l'intégrité des textes sacrés.</p>
+                    </div>
+                    <div class="value-card">
+                        <h3>Communauté</h3>
+                        <p>Un espace pour les croyants cherchant à approfondir leur foi.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="bibliotheque" class="library">
+            <div class="container">
+                <h2>Bibliothèque de Livres Bibliques</h2>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Rechercher un livre...">
+                </div>
+                <div class="adsense-ad">
+                    <!-- Espace publicitaire AdSense -->
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-app-pub-3392272461637612"
+                         data-ad-slot="2372770671"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+                <div id="pdfList" class="pdf-grid">
+                    <!-- Les PDFs seront chargés dynamiquement ici -->
+                </div>
+                <div id="pagination-container" class="pagination-container"></div>
+            </div>
+        </section>
+
+        <section id="apropos" class="about">
+            <div class="container">
+                <h2>À Propos de CIDEG & P.line</h2>
+                <p>CIDEG & P.line a pour mission de rendre accessible à tous les textes sacrés de la tradition chrétienne. Nous croyons que la Parole de Dieu doit être disponible gratuitement pour tous ceux qui cherchent à approfondir leur foi et leur connaissance des Écritures.</p>
+                <p>Notre collection comprend des versions variées de la Bible, des commentaires bibliques, des études théologiques et d'autres ressources utiles pour la croissance spirituelle.</p>
+            </div>
+        </section>
+
+        <section id="soutenir" class="donate-section">
+            <div class="container">
+                <h2>Soutenez Notre Mission</h2>
+                <p class="donate-intro">Ce site est et restera <strong>100% gratuit</strong>. Si ces ressources vous ont été utiles, vous pouvez soutenir notre travail par un don volontaire. Chaque contribution, même modeste, nous aide à maintenir et enrichir cette bibliothèque pour tous.</p>
+                <div class="donate-methods">
+                    <div class="donate-card">
+                        <div class="donate-icon"><i class="fab fa-paypal"></i></div>
+                        <h3>PayPal</h3>
+                        <p>Don sécurisé par carte ou compte PayPal.</p>
+                        <form action="https://www.paypal.com/donate" method="post" target="_top">
+                            <input type="hidden" name="business" value="davi.ekue@gmail.com"/>
+                            <input type="hidden" name="no_recurring" value="0"/>
+                            <input type="hidden" name="item_name" value="Soutien à CIDEG & P.line"/>
+                            <input type="hidden" name="currency_code" value="USD"/>
+                            <button type="submit" class="donate-btn paypal-btn">Donner avec PayPal</button>
+                        </form>
+                    </div>
+                    <div class="donate-card">
+                        <div class="donate-icon"><i class="fas fa-credit-card"></i></div>
+                        <h3>Carte Bancaire</h3>
+                        <p>Accepté via PayPal (Visa, Mastercard, Amex). Choisissez l'option "Carte" dans PayPal.</p>
+                        <a href="https://www.paypal.com/donate/?business=davi.ekue@gmail.com&no_recurring=0&currency_code=USD" target="_blank" class="donate-btn paypal-btn">Donner par Carte</a>
+                    </div>
+                    <div class="donate-card">
+                        <div class="donate-icon"><i class="fas fa-mobile-alt"></i></div>
+                        <h3>Mobile Money</h3>
+                        <p>Envoyez votre don directement par transfert mobile.</p>
+                        <div class="mobile-money-details">
+                            <p><strong>MTN MoMo :</strong> +229 01 62 04 45 24</p>
+                            <p><em>Titulaire : DAVI Ekué</em></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 CIDEG & P.line. Tous droits réservés.</p>
+            <div class="footer-links">
+                <a href="privacy-policy.html">Politique de Confidentialité</a> |
+                <a href="cookies-policy.html">Cookies</a> |
+                <a href="terms-of-use.html">Conditions d'Utilisation</a> |
+                <a href="legal-notice.html">Mentions Légales</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bouton retour en haut -->
+    <button id="backToTop" class="back-to-top" aria-label="Retour en haut">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- visionneuse PDF en plein écran -->
+    <div id="pdf-viewer-overlay">
+        <div id="pdf-viewer-controls">
+            <button id="back-to-library" class="btn btn-secondary"><i class="fas fa-arrow-left"></i></button>
+            <div class="spacer"></div>
+            <button id="prevPage" class="btn btn-secondary"><i class="fas fa-chevron-left"></i></button>
+            <span id="pageInfo">Page <span id="pageNumber"></span> / <span id="pageCount"></span></span>
+            <button id="nextPage" class="btn btn-secondary"><i class="fas fa-chevron-right"></i></button>
+            <div class="spacer"></div>
+            <button id="zoomOut" class="btn btn-secondary"><i class="fas fa-search-minus"></i></button>
+            <button id="zoomIn" class="btn btn-secondary"><i class="fas fa-search-plus"></i></button>
+        </div>
+        <div id="pdf-canvas-container">
+            <canvas id="pdfCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script src="assets/js/script.js"></script>
+</body>
+</html>

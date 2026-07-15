@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Générateur de Hash SHA-256</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 50px auto; padding: 20px; background-color: #f5f5f5; }
+        h1 { text-align: center; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        #result { margin-top: 20px; padding: 10px; background-color: #e9ecef; word-break: break-all; font-family: monospace; }
+        .instructions { background-color: #fff; padding: 15px; border-left: 4px solid #007bff; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Générateur d'Empreinte (Hash) SHA-256</h1>
+    <div class="instructions">
+        <p><strong>Comment utiliser cet outil :</strong></p>
+        <ol>
+            <li>Entrez le mot de passe que vous souhaitez utiliser pour la section admin.</li>
+            <li>Cliquez sur "Générer l'empreinte".</li>
+            <li>Copiez l'empreinte générée.</li>
+            <li>Collez-la dans le fichier <code>assets/config/auth.json</code> comme valeur de la clé "hash".</li>
+        </ol>
+        <p><strong>Important :</strong> Mémorisez bien votre mot de passe. Si vous perdez votre machine, vous en aurez besoin pour regénérer ce hash.</p>
+    </div>
+    <label for="password">Mot de passe à hacher :</label>
+    <input type="text" id="password" placeholder="Entrez votre mot de passe ici...">
+    <button onclick="generateHash()">Générer l'empreinte</button>
+    <h3>Empreinte générée :</h3>
+    <pre id="result"></pre>
+
+    <script>
+        async function generateHash() {
+            const password = document.getElementById('password').value;
+            if (!password) {
+                alert('Veuillez entrer un mot de passe.');
+                return;
+            }
+            const msgUint8 = new TextEncoder().encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            document.getElementById('result').textContent = hashHex;
+        }
+    </script>
+</body>
+</html>

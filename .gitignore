@@ -1,0 +1,17 @@
+# Fichier de configuration d'authentification
+# Ce fichier ne doit JAMAIS être commit.
+assets/config/auth.json
+assets/config/server-secret.json
+
+# Dépendances du serveur Node.js
+/node_modules
+
+# Dossier contenant les PDFs et autres documents
+# Empêche le dépôt Git de devenir trop volumineux.
+# assets/documents/
+
+# Dossier duplicata du projet
+/Biblio-Vitrine/
+
+# Dossier PDF personnel (à ne pas commettre)
+/PDF/
