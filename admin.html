@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administration - Bibliothèque Biblique</title>
+    <title>Administration — Bibliothèque Biblique</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -11,10 +15,10 @@
         <nav class="navbar">
             <div class="nav-container">
                 <div class="logo">
-                    <h1>Administration - Bibliothèque Biblique</h1>
+                    <img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="logo-img">
                 </div>
                 <ul class="nav-menu">
-                    <li class="nav-item"><a href="index.html" class="nav-link">Retour au site</a></li>
+                    <li class="nav-item"><a href="index.html" class="nav-link">← Retour au site</a></li>
                     <li class="nav-item"><a href="#" id="logoutBtn" class="admin-btn">Déconnexion</a></li>
                 </ul>
                 <div class="hamburger">
@@ -27,52 +31,119 @@
     </header>
 
     <main id="adminContent">
-        <!-- Formulaire de connexion GitHub -->
+        <!-- Login -->
         <div id="loginSection" class="login-form">
-            <h2>Connexion Admin via GitHub</h2>
-            <p style="font-size:0.85rem;margin-bottom:1rem;">
-                Crée un token sur 
-                <a href="https://github.com/settings/tokens?scopes=repo&description=Biblio-Vitrine-Admin" target="_blank" rel="noopener">
-                    GitHub Settings → Tokens
-                </a>
-                (coche <code>repo</code>)
-            </p>
-            <div class="form-group">
-                <label for="githubToken">GitHub Personal Access Token :</label>
-                <input type="password" id="githubToken" placeholder="ghp_..." required>
+            <div class="login-card">
+                <div class="login-icon"><i class="fas fa-lock"></i></div>
+                <h2>Connexion Admin</h2>
+                <p class="login-desc">Connecte-toi avec ton token GitHub pour gérer la bibliothèque.</p>
+                <p class="login-help">
+                    <i class="fas fa-info-circle"></i>
+                    <a href="https://github.com/settings/tokens?scopes=repo&description=Biblio-Vitrine-Admin" target="_blank" rel="noopener">Créer un token</a>
+                    (coche <code>repo</code>)
+                </p>
+                <div class="form-group">
+                    <label for="githubToken">Token GitHub</label>
+                    <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required>
+                </div>
+                <button id="loginBtn" class="btn-primary" style="width:100%;justify-content:center">Se connecter</button>
             </div>
-            <button id="loginBtn" class="btn btn-primary">Se connecter</button>
         </div>
 
-        <!-- Interface d'administration (cachée par défaut) -->
-        <div id="adminInterface" class="admin-container" style="display: none;">
-            <h2>Gestion des PDFs</h2>
-            
-            <div id="notificationMessage" class="upload-status" style="display: none;"></div>
+        <!-- Admin Dashboard -->
+        <div id="adminInterface" class="admin-dashboard" style="display:none">
+            <div id="notificationMessage" class="upload-status" style="display:none"></div>
 
-            <div class="upload-section">
-                <h3>Ajouter un nouveau PDF</h3>
-                <div class="form-group">
-                    <label for="newPdfFile">Fichier PDF :</label>
-                    <input type="file" id="newPdfFile" accept=".pdf">
-                </div>
-                <div class="form-group">
-                    <label for="newPdfTitle">Titre :</label>
-                    <input type="text" id="newPdfTitle" placeholder="Titre du document">
-                </div>
-                <div class="form-group">
-                    <label for="newPdfDescription">Description :</label>
-                    <textarea id="newPdfDescription" placeholder="Brève description du document"></textarea>
-                </div>
-                <button id="addPdfBtn" class="btn btn-primary">Ajouter le PDF</button>
+            <!-- Stats row -->
+            <div class="admin-stats">
+                <div class="admin-stat"><span class="admin-stat-num" id="statTotal">0</span><span class="admin-stat-label">PDFs</span></div>
+                <div class="admin-stat"><span class="admin-stat-num" id="statRepo">---</span><span class="admin-stat-label">Dernier commit</span></div>
             </div>
 
-            <div class="pdf-list">
-                <h3>Liste des PDFs (Titres et descriptions modifiables)</h3>
-                <div id="existingPDFs">
-                    <!-- La liste des PDFs sera chargée ici par le JavaScript -->
+            <!-- Tabs -->
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="metadata"><i class="fas fa-list"></i> Métadonnées</button>
+                <button class="admin-tab" data-tab="upload"><i class="fas fa-upload"></i> Upload PDF</button>
+            </div>
+
+            <!-- Tab: Metadata -->
+            <div id="tab-metadata" class="admin-tab-content active">
+                <div class="admin-tab-header">
+                    <h3><i class="fas fa-edit"></i> Modifier les titres et descriptions</h3>
+                    <span class="admin-tab-badge" id="metaCount">0</span>
                 </div>
-                <button id="saveChangesBtn" class="btn btn-primary" style="display: none; margin-top: 1rem;">Sauvegarder les modifications</button>
+                <div class="meta-split">
+                    <div class="meta-panel-list">
+                        <div class="admin-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="metaSearch" placeholder="Rechercher un livre…">
+                        </div>
+                        <div id="bookList" class="book-list"></div>
+                    </div>
+                    <div class="meta-panel-edit" id="editPanel">
+                        <div class="edit-placeholder">
+                            <i class="fas fa-hand-pointer"></i>
+                            <p>Clique sur un livre dans la liste pour le modifier</p>
+                        </div>
+                        <div class="edit-form" id="editForm" style="display:none">
+                            <div class="edit-header">
+                                <span id="editFileLabel" class="edit-file-label"><i class="fas fa-file-pdf"></i> </span>
+                            </div>
+                            <div class="form-group">
+                                <label>Titre du document</label>
+                                <input type="text" id="editTitle" placeholder="Titre du document">
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea id="editDescription" rows="4" placeholder="Description du contenu…"></textarea>
+                            </div>
+                            <div class="edit-actions">
+                                <button id="saveChangesBtn" class="btn-primary">
+                                    <i class="fas fa-save"></i> Sauvegarder
+                                </button>
+                                <button id="deleteFromListBtn" class="btn-danger">
+                                    <i class="fas fa-trash-alt"></i> Retirer de la liste
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Upload -->
+            <div id="tab-upload" class="admin-tab-content">
+                <div class="admin-tab-header">
+                    <h3><i class="fas fa-cloud-upload-alt"></i> Ajouter un PDF</h3>
+                </div>
+                <div class="upload-card">
+                    <div class="upload-dropzone" id="dropzone">
+                        <i class="fas fa-file-pdf"></i>
+                        <p>Glisse un PDF ici ou <strong>clique pour choisir</strong></p>
+                        <span>Fichier .pdf uniquement</span>
+                        <input type="file" id="newPdfFile" accept=".pdf" hidden>
+                    </div>
+                    <div class="upload-fields" style="display:none">
+                        <div class="form-group">
+                            <label>Titre du document</label>
+                            <input type="text" id="newPdfTitle" placeholder="Ex: Comment étudier la Bible">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="newPdfDescription" placeholder="Brève description du contenu…"></textarea>
+                        </div>
+                        <div class="upload-info" id="uploadInfo"></div>
+                        <div class="upload-progress" id="uploadProgress" style="display:none">
+                            <div class="progress-track">
+                                <div class="progress-bar" id="progressBar"></div>
+                            </div>
+                            <span class="progress-text" id="progressText">0%</span>
+                        </div>
+                        <div class="upload-actions">
+                            <button id="addPdfBtn" class="btn-primary"><i class="fas fa-cloud-upload-alt"></i> Uploader sur GitHub</button>
+                            <button id="cancelUploadBtn" class="btn-secondary" style="display:none">Annuler</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>

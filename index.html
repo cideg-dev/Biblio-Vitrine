@@ -231,19 +231,20 @@
                         <div class="donate-icon"><i class="fab fa-paypal"></i></div>
                         <h3>PayPal & Carte</h3>
                         <p>Sécurisé · International · Visa, Mastercard, PayPal</p>
-                        <form action="https://www.paypal.com/donate" method="post" target="_top">
-                            <input type="hidden" name="business" value="davi.ekue@gmail.com"/>
-                            <input type="hidden" name="no_recurring" value="0"/>
-                            <input type="hidden" name="item_name" value="Soutien Bibliothèque Biblique"/>
-                            <input type="hidden" name="currency_code" value="USD"/>
-                            <div class="donate-amounts">
-                                <button type="button" class="amount-btn" data-amount="5">5 $</button>
-                                <button type="button" class="amount-btn" data-amount="10">10 $</button>
-                                <button type="button" class="amount-btn" data-amount="25">25 $</button>
-                                <button type="button" class="amount-btn" data-amount="50">50 $</button>
-                            </div>
-                            <button type="submit" class="donate-btn paypal-btn"><i class="fab fa-paypal"></i> Donner avec PayPal</button>
-                        </form>
+                        <div class="paypal-email-info">
+                            <i class="fas fa-envelope"></i>
+                            <span>Envoyez à : <strong>davi.ekue@gmail.com</strong></span>
+                        </div>
+                        <div class="donate-amounts">
+                            <button type="button" class="amount-btn" data-amount="5">5 $</button>
+                            <button type="button" class="amount-btn" data-amount="10">10 $</button>
+                            <button type="button" class="amount-btn" data-amount="25">25 $</button>
+                            <button type="button" class="amount-btn" data-amount="50">50 $</button>
+                        </div>
+                        <a id="paypalBtn" class="donate-btn paypal-btn" href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=davi.ekue@gmail.com&currency_code=USD&item_name=Soutien%20Biblioth%C3%A8que%20Biblique" target="_blank" rel="noopener">
+                            <i class="fab fa-paypal"></i> Payer avec PayPal
+                        </a>
+                        <p class="donate-note">✓ Fonctionne depuis tous les pays · Carte bancaire acceptée sans compte PayPal</p>
                     </div>
                     <div class="donate-card">
                         <div class="donate-icon"><i class="fas fa-mobile-alt"></i></div>

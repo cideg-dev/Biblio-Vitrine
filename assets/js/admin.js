@@ -1,4 +1,7 @@
 let pdfs = []
+let uploadAbort = null
+let selectedIndex = -1
+let searchQuery = ''
 const REPO_OWNER = 'cideg-dev'
 const REPO_NAME = 'Biblio-Vitrine'
 const REPO_BRANCH = 'master'
@@ -11,31 +14,53 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('loginBtn').addEventListener('click', handleLogin)
     document.getElementById('logoutBtn').addEventListener('click', handleLogout)
     document.getElementById('saveChangesBtn').addEventListener('click', saveChanges)
+    document.getElementById('deleteFromListBtn').addEventListener('click', deleteSelected)
     document.getElementById('addPdfBtn').addEventListener('click', handleAddPdf)
+    document.getElementById('cancelUploadBtn').addEventListener('click', cancelUpload)
+    document.getElementById('metaSearch').addEventListener('input', e => { searchQuery = e.target.value.toLowerCase(); renderBookList() })
+
+    // Tabs
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'))
+            document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'))
+            tab.classList.add('active')
+            document.getElementById('tab-' + tab.dataset.tab).classList.add('active')
+        })
+    })
+
+    // Dropzone
+    const dz = document.getElementById('dropzone')
+    const fileInput = document.getElementById('newPdfFile')
+    dz.addEventListener('click', () => fileInput.click())
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over') })
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'))
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); handleFileDrop(e.dataTransfer.files[0]) })
+    fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFileDrop(fileInput.files[0]) })
+
+    // Enter key on password field
+    document.getElementById('githubToken').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin() })
 })
 
-function getToken() {
-    return localStorage.getItem(TOKEN_KEY)
-}
+function getToken() { return localStorage.getItem(TOKEN_KEY) }
 
-function checkAuth() {
-    getToken() ? showAdmin() : showLogin()
-}
+function checkAuth() { getToken() ? showAdmin() : showLogin() }
 
 function showLogin() {
-    document.getElementById('loginSection').style.display = 'block'
+    document.getElementById('loginSection').style.display = 'flex'
     document.getElementById('adminInterface').style.display = 'none'
 }
 
 async function showAdmin() {
     document.getElementById('loginSection').style.display = 'none'
     document.getElementById('adminInterface').style.display = 'block'
+    document.getElementById('notificationMessage').style.display = 'none'
     await loadPDFs()
 }
 
 function handleLogin() {
     const token = document.getElementById('githubToken').value.trim()
-    if (!token) return alert('Token requis')
+    if (!token) return showNotif('Token requis', 'error')
     localStorage.setItem(TOKEN_KEY, token)
     showAdmin()
 }
@@ -45,9 +70,11 @@ function handleLogout() {
     showLogin()
 }
 
+// ─── GitHub API ───
 async function githubFetch(path, options = {}) {
     const token = getToken()
-    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`
+    const res = await fetch(url, {
         ...options,
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -63,73 +90,89 @@ async function githubFetch(path, options = {}) {
     return res
 }
 
+// ─── Load & Display ───
 async function loadPDFs() {
     try {
         const res = await githubFetch(LISTE_PATH)
         const data = await res.json()
         const content = atob(data.content.replace(/\n/g, ''))
         pdfs = JSON.parse(content)
-        displayPDFs()
+        document.getElementById('statTotal').textContent = pdfs.length
+        document.getElementById('metaCount').textContent = pdfs.length
+        renderBookList()
     } catch (e) {
         console.error(e)
-        showNotification('Erreur chargement liste PDFs', 'error')
+        showNotif('Erreur chargement liste PDFs', 'error')
     }
 }
 
-function displayPDFs() {
-    const container = document.getElementById('existingPDFs')
-    container.innerHTML = ''
+function getSearchText(pdf) {
+    const title = pdf.titre || pdf.nom_du_fichier.replace('.pdf', '').replace(/_/g, ' ')
+    return (title + ' ' + pdf.nom_du_fichier).toLowerCase()
+}
+
+function renderBookList() {
+    const list = document.getElementById('bookList')
+    list.innerHTML = ''
     if (!pdfs || !pdfs.length) {
-        container.innerHTML = '<p>Aucun PDF.</p>'
-        document.getElementById('saveChangesBtn').style.display = 'none'
+        list.innerHTML = '<div class="book-list-empty">Aucun PDF dans la liste.</div>'
         return
     }
     pdfs.forEach((pdf, i) => {
+        if (searchQuery && !getSearchText(pdf).includes(searchQuery)) return
+        const title = pdf.titre || pdf.nom_du_fichier.replace('.pdf', '').replace(/_/g, ' ')
         const item = document.createElement('div')
-        item.className = 'pdf-item'
+        item.className = 'book-list-item' + (i === selectedIndex ? ' selected' : '')
+        item.dataset.index = i
+        item.onclick = () => selectBook(i)
         item.innerHTML = `
-            <div class="form-group">
-                <label>Titre :</label>
-                <input type="text" class="pdf-title-input" value="${esc(pdf.titre)}">
-            </div>
-            <div class="form-group">
-                <label>Description :</label>
-                <textarea class="pdf-description-input">${esc(pdf.description)}</textarea>
-            </div>
-            <div class="form-group">
-                <label>Fichier :</label>
-                <input type="text" class="pdf-filename-input" value="${esc(pdf.nom_du_fichier)}" readonly>
-            </div>
-            <div class="pdf-actions">
-                <button class="btn btn-secondary" onclick="deletePDF(${i})">Supprimer</button>
-            </div>`
-        container.appendChild(item)
+            <span class="bli-num">${i + 1}</span>
+            <span class="bli-title">${esc(title)}</span>
+        `
+        list.appendChild(item)
     })
-    document.getElementById('saveChangesBtn').style.display = 'block'
 }
 
-function deletePDF(index) {
-    if (confirm(`Supprimer "${pdfs[index].nom_du_fichier}" ?`)) {
-        pdfs.splice(index, 1)
-        displayPDFs()
-    }
+function selectBook(index) {
+    selectedIndex = index
+    renderBookList()
+    const pdf = pdfs[index]
+    const title = pdf.titre || pdf.nom_du_fichier.replace('.pdf', '').replace(/_/g, ' ')
+    document.getElementById('editFileLabel').innerHTML = `<i class="fas fa-file-pdf"></i> ${esc(pdf.nom_du_fichier)}`
+    document.getElementById('editTitle').value = title
+    document.getElementById('editDescription').value = pdf.description || ''
+    document.querySelector('.edit-placeholder').style.display = 'none'
+    document.getElementById('editForm').style.display = 'block'
+    // Scroll the selected item into view in the list
+    const el = document.querySelector(`.book-list-item[data-index="${index}"]`)
+    if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
 }
 
+function deleteSelected() {
+    if (selectedIndex < 0) return
+    if (!confirm(`Retirer "${pdfs[selectedIndex].nom_du_fichier}" de la liste ?`)) return
+    pdfs.splice(selectedIndex, 1)
+    document.getElementById('metaCount').textContent = pdfs.length
+    document.getElementById('statTotal').textContent = pdfs.length
+    selectedIndex = -1
+    document.querySelector('.edit-placeholder').style.display = ''
+    document.getElementById('editForm').style.display = 'none'
+    renderBookList()
+    showNotif('PDF retiré de la liste (non supprimé du dépôt)', 'info')
+}
+
+// ─── Save Metadata ───
 async function saveChanges() {
-    showNotification('Sauvegarde...', 'info')
-    const items = document.querySelectorAll('.pdf-item')
-    const newList = []
-    items.forEach(item => {
-        newList.push({
-            titre: item.querySelector('.pdf-title-input').value,
-            description: item.querySelector('.pdf-description-input').value,
-            nom_du_fichier: item.querySelector('.pdf-filename-input').value
-        })
-    })
+    if (selectedIndex < 0) return
+    pdfs[selectedIndex].titre = document.getElementById('editTitle').value
+    pdfs[selectedIndex].description = document.getElementById('editDescription').value
+
+    showNotif('Sauvegarde en cours…', 'info')
     try {
         const res = await githubFetch(LISTE_PATH)
         const data = await res.json()
-        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(newList, null, 2))))
+        const json = JSON.stringify(pdfs, null, 2)
+        const encoded = btoa(unescape(encodeURIComponent(json)))
         await githubFetch(LISTE_PATH, {
             method: 'PUT',
             body: JSON.stringify({
@@ -139,11 +182,52 @@ async function saveChanges() {
                 branch: REPO_BRANCH
             })
         })
-        pdfs = newList
-        showNotification('Métadonnées sauvegardées', 'success')
+        renderBookList()
+        showNotif('✅ Modifications sauvegardées sur GitHub', 'success')
     } catch (e) {
-        showNotification('Erreur sauvegarde: ' + e.message, 'error')
+        showNotif('Erreur: ' + e.message, 'error')
     }
+}
+
+// ─── Upload PDF ───
+function handleFileDrop(file) {
+    const fileInput = document.getElementById('newPdfFile')
+    if (!file || file.type !== 'application/pdf') {
+        return showNotif('Seuls les fichiers PDF sont acceptés', 'error')
+    }
+    if (file.size > 50 * 1024 * 1024) {
+        return showNotif('Le fichier dépasse 50 Mo. Utilise git push manuellement.', 'error')
+    }
+
+    // Create a FileList-like entry
+    const dt = new DataTransfer()
+    dt.items.add(file)
+    fileInput.files = dt.files
+
+    document.getElementById('dropzone').style.display = 'none'
+    document.getElementById('uploadInfo').textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(1)} Mo)`
+    document.querySelector('.upload-fields').style.display = 'block'
+    document.getElementById('newPdfTitle').value = file.name.replace('.pdf', '').replace(/_/g, ' ')
+}
+
+function cancelUpload() {
+    if (uploadAbort) { uploadAbort.abort(); uploadAbort = null }
+    resetUpload()
+    showNotif('Upload annulé', 'info')
+}
+
+function resetUpload() {
+    document.getElementById('dropzone').style.display = ''
+    document.querySelector('.upload-fields').style.display = 'none'
+    document.getElementById('newPdfFile').value = ''
+    document.getElementById('newPdfTitle').value = ''
+    document.getElementById('newPdfDescription').value = ''
+    document.getElementById('uploadProgress').style.display = 'none'
+    document.getElementById('progressBar').style.width = '0%'
+    document.getElementById('progressText').textContent = '0%'
+    document.getElementById('cancelUploadBtn').style.display = 'none'
+    document.getElementById('addPdfBtn').disabled = false
+    document.getElementById('addPdfBtn').innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Uploader sur GitHub'
 }
 
 async function handleAddPdf() {
@@ -154,55 +238,98 @@ async function handleAddPdf() {
     const title = titleInput.value.trim()
     const desc = descInput.value.trim()
 
-    if (!file) return showNotification('Sélectionne un fichier PDF', 'error')
-    if (!title) return showNotification('Entre un titre', 'error')
+    if (!file) return showNotif('Sélectionne un fichier PDF', 'error')
+    if (!title) return showNotif('Entre un titre', 'error')
 
-    showNotification('Upload en cours...', 'info')
+    uploadAbort = new AbortController()
+    document.getElementById('uploadProgress').style.display = 'flex'
+    document.getElementById('cancelUploadBtn').style.display = ''
+    document.getElementById('addPdfBtn').disabled = true
+    document.getElementById('addPdfBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Upload en cours…'
 
     try {
         const filename = file.name
         const path = DOCS_PATH + filename
 
-        const reader = new FileReader()
-        reader.onload = async (e) => {
-            const base64 = e.target.result.split(',')[1]
+        // Step 1: Read file as base64 (with progress)
+        showNotif('Lecture du fichier…', 'info')
+        const base64 = await readFileAsBase64(file, (pct) => {
+            document.getElementById('progressBar').style.width = (pct * 0.3) + '%'
+            document.getElementById('progressText').textContent = Math.round(pct * 30) + '%'
+        })
 
-            let sha
-            try {
-                const existRes = await githubFetch(path)
+        if (uploadAbort.signal.aborted) throw new Error('Annulé')
+
+        // Step 2: Check if file exists on GitHub
+        document.getElementById('progressText').textContent = 'Vérification…'
+        let sha
+        try {
+            const existRes = await githubFetch(path)
+            if (existRes.ok) {
                 const existData = await existRes.json()
-                if (existRes.ok) sha = existData.sha
-            } catch { }
+                sha = existData.sha
+            }
+        } catch {}
 
-            await githubFetch(path, {
-                method: 'PUT',
-                body: JSON.stringify({
-                    message: `Ajout PDF: ${filename}`,
-                    content: base64,
-                    sha,
-                    branch: REPO_BRANCH
-                })
+        if (uploadAbort.signal.aborted) throw new Error('Annulé')
+
+        // Step 3: Upload to GitHub
+        document.getElementById('progressBar').style.width = '35%'
+        document.getElementById('progressText').textContent = 'Upload vers GitHub…'
+
+        await githubFetch(path, {
+            method: 'PUT',
+            body: JSON.stringify({
+                message: `Ajout PDF: ${filename}`,
+                content: base64,
+                sha,
+                branch: REPO_BRANCH
             })
+        })
 
-            pdfs.push({ titre: title, description: desc || 'Aucune description disponible.', nom_du_fichier: filename })
-            await savePdfList()
+        document.getElementById('progressBar').style.width = '70%'
+        document.getElementById('progressText').textContent = 'Mise à jour de la liste…'
 
-            fileInput.value = ''
-            titleInput.value = ''
-            descInput.value = ''
-            displayPDFs()
-            showNotification('PDF ajouté avec succès', 'success')
+        // Step 4: Update liste-pdfs.json
+        pdfs.push({ titre: title, description: desc || 'Aucune description disponible.', nom_du_fichier: filename })
+        await savePdfList()
+
+        document.getElementById('progressBar').style.width = '100%'
+        document.getElementById('progressText').textContent = '✅ Terminé'
+
+        resetUpload()
+        displayPDFs()
+        document.getElementById('statTotal').textContent = pdfs.length
+        showNotif('✅ PDF ajouté avec succès sur GitHub', 'success')
+    } catch (e) {
+        if (e.message === 'Annulé') return
+        showNotif('Erreur: ' + e.message, 'error')
+        document.getElementById('addPdfBtn').disabled = false
+        document.getElementById('addPdfBtn').innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Uploader sur GitHub'
+        document.getElementById('cancelUploadBtn').style.display = 'none'
+    }
+}
+
+function readFileAsBase64(file, onProgress) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => {
+            const base64 = reader.result.split(',')[1]
+            resolve(base64)
+        }
+        reader.onerror = () => reject(new Error('Erreur lecture fichier'))
+        reader.onprogress = (e) => {
+            if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total)
         }
         reader.readAsDataURL(file)
-    } catch (e) {
-        showNotification('Erreur upload: ' + e.message, 'error')
-    }
+    })
 }
 
 async function savePdfList() {
     const res = await githubFetch(LISTE_PATH)
     const data = await res.json()
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(pdfs, null, 2))))
+    const json = JSON.stringify(pdfs, null, 2)
+    const encoded = btoa(unescape(encodeURIComponent(json)))
     await githubFetch(LISTE_PATH, {
         method: 'PUT',
         body: JSON.stringify({
@@ -214,16 +341,17 @@ async function savePdfList() {
     })
 }
 
-function showNotification(msg, type) {
+// ─── UI ───
+function showNotif(msg, type) {
     const el = document.getElementById('notificationMessage')
     if (!el) return
     el.textContent = msg
-    el.className = `upload-status ${type}`
+    el.className = 'upload-status ' + type
     el.style.display = 'block'
-    setTimeout(() => el.style.display = 'none', 5000)
+    setTimeout(() => el.style.display = 'none', 6000)
 }
 
-function esc(str) {
-    if (typeof str !== 'string') return ''
-    return str.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]))
+function esc(s) {
+    if (typeof s !== 'string') return ''
+    return s.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]))
 }

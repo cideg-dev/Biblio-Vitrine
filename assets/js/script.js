@@ -51,8 +51,17 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'))
             btn.classList.add('active')
+            const paypalLink = document.getElementById('paypalBtn')
+            if (paypalLink) {
+                const base = paypalLink.href.replace(/&amount=[\d.]+/, '')
+                const amount = btn.dataset.amount
+                paypalLink.href = base + '&amount=' + amount
+            }
         })
     })
+    // Trigger first amount button to set default
+    const firstAmount = document.querySelector('.amount-btn')
+    if (firstAmount) firstAmount.click()
 
     // Newsletter
     document.getElementById('newsletterForm')?.addEventListener('submit', handleNewsletter)
