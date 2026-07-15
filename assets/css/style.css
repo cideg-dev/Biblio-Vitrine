@@ -627,6 +627,26 @@ h2 {
 .momocode-name { font-size: 0.8rem; color: var(--text2); }
 .donate-note.effectif { color: var(--primary); font-weight: 500; margin-bottom: 0; }
 .donate-thankyou { text-align: center; margin-top: 2.5rem; font-size: 1.1rem; color: var(--text); }
+.donate-trust {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+    margin: 1.5rem auto 0;
+    max-width: 600px;
+}
+.trust-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text3);
+    background: var(--surface);
+    padding: 0.4rem 0.8rem;
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+.trust-badge i { color: var(--primary); font-size: 0.7rem; }
 
 /* ─── Missions ─── */
 .mission-hero {
