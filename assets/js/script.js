@@ -4,7 +4,6 @@ let currentPage = 1
 let currentCategory = 'Toutes'
 let currentSort = 'defaut'
 const itemsPerPage = 12
-const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 const PDF_BASE = 'assets/documents/'
 const thumbCache = new Map()
 
@@ -29,10 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initAuthorFilter()
   // initHomeContent sera appelé après chargement des PDFs
 
-  if (isMobile) {
-    const hint = document.getElementById('viewerHint')
-    if (hint) hint.textContent = 'Ouvre dans une nouvelle fenêtre'
-  }
 })
 
 // ─── Config ───
@@ -135,7 +130,7 @@ function initSurprise() {
     const idx = Math.floor(Math.random() * allPdfs.length)
     const pdf = allPdfs[idx]
     const fileUrl = PDF_BASE + pdf.nom_du_fichier
-    isMobile ? window.open(fileUrl, '_blank') : openPDF(fileUrl)
+    openPDF(fileUrl)
   })
 }
 
@@ -332,8 +327,7 @@ function renderPdfGrid() {
     const readBtn = card.querySelector('.pdf-read-btn')
     readBtn.addEventListener('click', (e) => {
       e.stopPropagation()
-      trackDownload(pdf.nom_du_fichier)
-      isMobile ? window.open(fileUrl, '_blank') : openPDF(fileUrl)
+      openPDF(fileUrl)
     })
     const dlBtn = card.querySelector('.pdf-dl-btn')
     if (dlBtn) dlBtn.addEventListener('click', () => trackDownload(pdf.nom_du_fichier))
