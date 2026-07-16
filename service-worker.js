@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cideg-biblio-v1'
+const CACHE_NAME = 'cideg-biblio-v2'
 const urlsToCache = [
   '/Biblio-Vitrine/',
   '/Biblio-Vitrine/index.html',
