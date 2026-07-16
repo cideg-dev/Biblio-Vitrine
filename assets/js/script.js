@@ -4,6 +4,7 @@ let currentPage = 1
 let currentCategory = 'Toutes'
 let currentSort = 'defaut'
 const itemsPerPage = 12
+const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 const PDF_BASE = 'assets/documents/'
 const thumbCache = new Map()
 
@@ -515,20 +516,39 @@ let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumPending = null, 
 const canvas = document.getElementById('pdfCanvas')
 const ctx = canvas?.getContext('2d')
 
+function setDesktopControlsVisible(visible) {
+  document.getElementById('prevPage').style.display = visible ? '' : 'none'
+  document.getElementById('nextPage').style.display = visible ? '' : 'none'
+  document.getElementById('pageInfo').style.display = visible ? '' : 'none'
+  document.getElementById('zoomIn').style.display = visible ? '' : 'none'
+  document.getElementById('zoomOut').style.display = visible ? '' : 'none'
+  document.getElementById('fullscreenBtn').style.display = visible ? '' : 'none'
+  document.getElementById('pdf-canvas-container').style.display = visible ? '' : 'none'
+  document.getElementById('pdfIframe').style.display = visible ? 'none' : ''
+}
+
 async function openPDF(url) {
   window._currentPdfUrl = url
   const overlay = document.getElementById('pdf-viewer-overlay')
   overlay.style.display = 'flex'
   overlay.focus()
-  try {
-    pdfDoc = await pdfjsLib.getDocument(url).promise
-    document.getElementById('pageCount').textContent = pdfDoc.numPages
-    pageNum = 1
-    renderPdfPage(pageNum)
-  } catch (e) {
-    console.error(e)
-    alert('Impossible de charger le PDF.')
-    closePdfViewer()
+  if (isMobile) {
+    setDesktopControlsVisible(false)
+    const iframe = document.getElementById('pdfIframe')
+    iframe.src = url
+    iframe.onerror = () => { alert('Impossible de charger le PDF.'); closePdfViewer() }
+  } else {
+    setDesktopControlsVisible(true)
+    try {
+      pdfDoc = await pdfjsLib.getDocument(url).promise
+      document.getElementById('pageCount').textContent = pdfDoc.numPages
+      pageNum = 1
+      renderPdfPage(pageNum)
+    } catch (e) {
+      console.error(e)
+      alert('Impossible de charger le PDF.')
+      closePdfViewer()
+    }
   }
 }
 
@@ -567,6 +587,8 @@ document.addEventListener('fullscreenchange', () => {
 
 function closePdfViewer() {
   document.getElementById('pdf-viewer-overlay').style.display = 'none'
+  document.getElementById('pdfIframe').src = ''
+  setDesktopControlsVisible(true)
   pdfDoc = null; currentScale = 1.5
 }
 
