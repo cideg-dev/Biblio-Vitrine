@@ -1373,10 +1373,7 @@ footer {
     border-radius: var(--radius);
     max-width: 100%;
 }
-#pdfMobileContainer {
-    flex: 1;
-    background: #fff;
-}
+
 .pdf-viewer-hint {
     text-align: center;
     padding: 0.5rem;

@@ -4,7 +4,6 @@ let currentPage = 1
 let currentCategory = 'Toutes'
 let currentSort = 'defaut'
 const itemsPerPage = 12
-const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 const PDF_BASE = 'assets/documents/'
 const thumbCache = new Map()
 
@@ -521,15 +520,14 @@ let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumPending = null, 
 const canvas = document.getElementById('pdfCanvas')
 const ctx = canvas?.getContext('2d')
 
-function setDesktopControlsVisible(visible) {
-  document.getElementById('prevPage').style.display = visible ? '' : 'none'
-  document.getElementById('nextPage').style.display = visible ? '' : 'none'
-  document.getElementById('pageInfo').style.display = visible ? '' : 'none'
-  document.getElementById('zoomIn').style.display = visible ? '' : 'none'
-  document.getElementById('zoomOut').style.display = visible ? '' : 'none'
-  document.getElementById('fullscreenBtn').style.display = visible ? '' : 'none'
-  document.getElementById('pdf-canvas-container').style.display = visible ? '' : 'none'
-  document.getElementById('pdfMobileContainer').style.display = visible ? 'none' : ''
+function setDesktopControlsVisible() {
+  document.getElementById('prevPage').style.display = ''
+  document.getElementById('nextPage').style.display = ''
+  document.getElementById('pageInfo').style.display = ''
+  document.getElementById('zoomIn').style.display = ''
+  document.getElementById('zoomOut').style.display = ''
+  document.getElementById('fullscreenBtn').style.display = ''
+  document.getElementById('pdf-canvas-container').style.display = ''
 }
 
 async function openPDF(url) {
@@ -537,33 +535,16 @@ async function openPDF(url) {
   const overlay = document.getElementById('pdf-viewer-overlay')
   overlay.style.display = 'flex'
   overlay.focus()
-  if (isMobile) {
-    setDesktopControlsVisible(false)
-    const embed = document.getElementById('pdfEmbed')
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error('Network error')
-      const blob = await res.blob()
-      const blobUrl = URL.createObjectURL(blob)
-      window._currentBlobUrl = blobUrl
-      embed.src = blobUrl
-    } catch (e) {
-      console.error(e)
-      alert('Impossible de charger le PDF.')
-      closePdfViewer()
-    }
-  } else {
-    setDesktopControlsVisible(true)
-    try {
-      pdfDoc = await pdfjsLib.getDocument(url).promise
-      document.getElementById('pageCount').textContent = pdfDoc.numPages
-      pageNum = 1
-      renderPdfPage(pageNum)
-    } catch (e) {
-      console.error(e)
-      alert('Impossible de charger le PDF.')
-      closePdfViewer()
-    }
+  setDesktopControlsVisible()
+  try {
+    pdfDoc = await pdfjsLib.getDocument(url).promise
+    document.getElementById('pageCount').textContent = pdfDoc.numPages
+    pageNum = 1
+    renderPdfPage(pageNum)
+  } catch (e) {
+    console.error(e)
+    alert('Impossible de charger le PDF.')
+    closePdfViewer()
   }
 }
 
@@ -602,9 +583,6 @@ document.addEventListener('fullscreenchange', () => {
 
 function closePdfViewer() {
   document.getElementById('pdf-viewer-overlay').style.display = 'none'
-  document.getElementById('pdfEmbed').src = ''
-  if (window._currentBlobUrl) { URL.revokeObjectURL(window._currentBlobUrl); window._currentBlobUrl = null }
-  setDesktopControlsVisible(true)
   pdfDoc = null; currentScale = 1.5
 }
 
