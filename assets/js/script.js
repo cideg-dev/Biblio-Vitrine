@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initViewToggle()
   initAuthorFilter()
   // initHomeContent sera appelé après chargement des PDFs
+  // Préchargement de pdf.js en arrière-plan pour les vignettes
+  loadPdfJs().catch(() => {})
 
 })
 
@@ -361,6 +363,7 @@ function loadThumbnail(filename, idx) {
 }
 
 function renderThumbnail(filename, placeholder) {
+  if (!pdfjsLib) return
   const url = PDF_BASE + filename
   pdfjsLib.getDocument(url).promise.then(doc => {
     doc.getPage(1).then(page => {
@@ -615,7 +618,9 @@ async function renderPdfPage(num) {
     const firstKey = pageCache.keys().next().value
     pageCache.delete(firstKey)
   }
-  const offscreen = new OffscreenCanvas(canvas.width, canvas.height)
+  const offscreen = document.createElement('canvas')
+  offscreen.width = canvas.width
+  offscreen.height = canvas.height
   const offCtx = offscreen.getContext('2d')
   offCtx.drawImage(canvas, 0, 0)
   pageCache.set(num, { img: offscreen, height: canvas.height, width: canvas.width })
