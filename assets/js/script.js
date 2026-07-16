@@ -483,6 +483,23 @@ function handleNewsletter(e) {
   document.getElementById('newsletterEmail').value = ''
 }
 
+let pdfjsLib = null
+
+async function loadPdfJs() {
+  if (pdfjsLib) return
+  await new Promise((resolve, reject) => {
+    const script = document.createElement('script')
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'
+    script.onload = () => {
+      pdfjsLib = window.pdfjsLib
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+      resolve()
+    }
+    script.onerror = reject
+    document.head.appendChild(script)
+  })
+}
+
 // ─── PDF Viewer ───
 function initPdfViewer() {
   document.getElementById('prevPage')?.addEventListener('click', showPrevPdfPage)
@@ -514,11 +531,26 @@ function initPdfViewer() {
     hammer.on('swipeleft', showNextPdfPage)
     hammer.on('swiperight', showPrevPdfPage)
   }
+  // Auto-hide controls on mobile
+  let hideTimer = null
+  const controls = document.getElementById('pdf-viewer-controls')
+  const overlay = document.getElementById('pdf-viewer-overlay')
+  overlay?.addEventListener('mousemove', () => {
+    controls?.classList.remove('hidden')
+    clearTimeout(hideTimer)
+    hideTimer = setTimeout(() => controls?.classList.add('hidden'), 3000)
+  })
+  overlay?.addEventListener('touchstart', () => {
+    controls?.classList.toggle('hidden')
+    clearTimeout(hideTimer)
+  })
 }
 
 let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumPending = null, currentScale = 1.5
 const canvas = document.getElementById('pdfCanvas')
 const ctx = canvas?.getContext('2d')
+const pageCache = new Map()
+const CACHE_MAX = 10
 
 function setDesktopControlsVisible() {
   document.getElementById('prevPage').style.display = ''
@@ -532,24 +564,45 @@ function setDesktopControlsVisible() {
 
 async function openPDF(url) {
   window._currentPdfUrl = url
+  const loadingEl = document.getElementById('pdfLoadingIndicator')
+  if (loadingEl) loadingEl.style.display = 'flex'
   const overlay = document.getElementById('pdf-viewer-overlay')
   overlay.style.display = 'flex'
   overlay.focus()
   setDesktopControlsVisible()
   try {
+    await loadPdfJs()
+    document.getElementById('pdf-viewer-controls')?.classList.remove('hidden')
     pdfDoc = await pdfjsLib.getDocument(url).promise
     document.getElementById('pageCount').textContent = pdfDoc.numPages
-    pageNum = 1
+    const saved = getReadingProgress(url)
+    pageNum = saved > 0 && saved <= pdfDoc.numPages ? saved : 1
     renderPdfPage(pageNum)
+    if (saved > 0 && saved <= pdfDoc.numPages) {
+      showResumeToast(pageNum)
+    }
   } catch (e) {
     console.error(e)
     alert('Impossible de charger le PDF.')
     closePdfViewer()
+  } finally {
+    if (loadingEl) loadingEl.style.display = 'none'
   }
 }
 
 async function renderPdfPage(num) {
   if (!pdfDoc) return
+  const cached = pageCache.get(num)
+  if (cached) {
+    canvas.height = cached.height
+    canvas.width = cached.width
+    ctx.clearRect(0, 0, cached.width, cached.height)
+    ctx.drawImage(cached.img, 0, 0)
+    pageIsRendering = false
+    document.getElementById('pageNumber').textContent = num
+    if (pageNumPending !== null) { renderPdfPage(pageNumPending); pageNumPending = null }
+    return
+  }
   pageIsRendering = true
   const page = await pdfDoc.getPage(num)
   const viewport = page.getViewport({ scale: currentScale })
@@ -558,13 +611,21 @@ async function renderPdfPage(num) {
   await page.render({ canvasContext: ctx, viewport }).promise
   pageIsRendering = false
   document.getElementById('pageNumber').textContent = num
+  if (pageCache.size >= CACHE_MAX) {
+    const firstKey = pageCache.keys().next().value
+    pageCache.delete(firstKey)
+  }
+  const offscreen = new OffscreenCanvas(canvas.width, canvas.height)
+  const offCtx = offscreen.getContext('2d')
+  offCtx.drawImage(canvas, 0, 0)
+  pageCache.set(num, { img: offscreen, height: canvas.height, width: canvas.width })
   if (pageNumPending !== null) { renderPdfPage(pageNumPending); pageNumPending = null }
 }
 function queueRenderPage(num) { pageIsRendering ? (pageNumPending = num) : renderPdfPage(num) }
 function showPrevPdfPage() { if (pageNum > 1) { pageNum--; queueRenderPage(pageNum) } }
 function showNextPdfPage() { if (pdfDoc && pageNum < pdfDoc.numPages) { pageNum++; queueRenderPage(pageNum) } }
-function zoomIn() { if (currentScale < 3) { currentScale += 0.25; renderPdfPage(pageNum) } }
-function zoomOut() { if (currentScale > 0.25) { currentScale -= 0.25; renderPdfPage(pageNum) } }
+function zoomIn() { if (currentScale < 3) { currentScale += 0.25; pageCache.clear(); renderPdfPage(pageNum) } }
+function zoomOut() { if (currentScale > 0.25) { currentScale -= 0.25; pageCache.clear(); renderPdfPage(pageNum) } }
 function toggleFullscreen() {
   const container = document.getElementById('pdf-canvas-container')
   const btn = document.getElementById('fullscreenBtn')
@@ -581,9 +642,32 @@ document.addEventListener('fullscreenchange', () => {
   if (btn) btn.innerHTML = document.fullscreenElement ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>'
 })
 
+// ─── Reading Progress ───
+function getReadingProgress(url) {
+  try {
+    const key = 'reading_' + btoa(url)
+    return parseInt(localStorage.getItem(key)) || 0
+  } catch { return 0 }
+}
+function saveReadingProgress(url, page) {
+  try {
+    const key = 'reading_' + btoa(url)
+    localStorage.setItem(key, page.toString())
+  } catch {}
+}
+function showResumeToast(page) {
+  const toast = document.getElementById('resumeToast')
+  if (!toast) return
+  toast.textContent = `Reprise à la page ${page}`
+  toast.classList.add('show')
+  setTimeout(() => toast.classList.remove('show'), 3000)
+}
+
 function closePdfViewer() {
+  const url = window._currentPdfUrl
+  if (url && pdfDoc) saveReadingProgress(url, pageNum)
   document.getElementById('pdf-viewer-overlay').style.display = 'none'
-  pdfDoc = null; currentScale = 1.5
+  pdfDoc = null; currentScale = 1.5; pageCache.clear()
 }
 
 function esc(s) {

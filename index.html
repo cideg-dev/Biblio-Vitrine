@@ -27,8 +27,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXL9EB8SQY"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config','G-KXL9EB8SQY');</script>
@@ -356,6 +354,7 @@
     <a href="#soutenir" class="donate-float" aria-label="Faire un don"><i class="fas fa-heart"></i><span>Don</span></a>
     <button id="backToTop" class="back-to-top" aria-label="Retour en haut"><i class="fas fa-arrow-up"></i></button>
     <a href="https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W" target="_blank" rel="noopener" class="whatsapp-float" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+    <button id="installPwaBtn" class="install-pwa-btn" style="display:none" aria-label="Installer l'application"><i class="fas fa-download"></i><span>Installer</span></button>
 
     <div id="pdf-viewer-overlay">
         <div id="pdf-viewer-controls">
@@ -370,16 +369,41 @@
             <button id="fullscreenBtn" class="btn btn-secondary" aria-label="Plein écran"><i class="fas fa-expand"></i></button>
             <button id="downloadPdfBtn" class="btn btn-secondary" aria-label="Télécharger"><i class="fas fa-download"></i></button>
         </div>
+        <div id="pdfLoadingIndicator" class="pdf-loading"><i class="fas fa-spinner fa-spin"></i> Chargement du PDF…</div>
+        <div id="resumeToast" class="resume-toast"></div>
         <div class="pdf-viewer-hint"><i class="fas fa-info-circle"></i> <span id="viewerHint">Pincer pour zoomer, glisser pour naviguer</span></div>
         <div id="pdf-canvas-container"><canvas id="pdfCanvas"></canvas></div>
     </div>
 
-    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#00f5c8">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="assets/js/script.js"></script>
-    <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js')</script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js')
+      }
+      let deferredPrompt = null
+      window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault()
+        deferredPrompt = e
+        const btn = document.getElementById('installPwaBtn')
+        if (btn) btn.style.display = 'flex'
+      })
+      document.getElementById('installPwaBtn')?.addEventListener('click', async () => {
+        if (!deferredPrompt) return
+        deferredPrompt.prompt()
+        const choice = await deferredPrompt.userChoice
+        if (choice.outcome === 'accepted') {
+          document.getElementById('installPwaBtn').style.display = 'none'
+        }
+        deferredPrompt = null
+      })
+      window.addEventListener('appinstalled', () => {
+        document.getElementById('installPwaBtn').style.display = 'none'
+      })
+    </script>
+    <link rel="manifest" href="manifest.json">
 </body>
 </html>

@@ -1340,6 +1340,12 @@ footer {
     background: rgba(10,10,15,0.9);
     backdrop-filter: blur(12px);
     z-index: 3001;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+#pdf-viewer-controls.hidden {
+    opacity: 0;
+    transform: translateY(-100%);
+    pointer-events: none;
 }
 #pdf-viewer-controls .btn-secondary {
     background: rgba(255,255,255,0.06);
@@ -1358,6 +1364,66 @@ footer {
 }
 #pdf-viewer-controls .btn-secondary:hover { background: rgba(255,255,255,0.12); color: var(--text); }
 #pageInfo { color: var(--text2); font-size: 0.8rem; white-space: nowrap; }
+
+/* PDF Loading Indicator */
+.pdf-loading {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 2rem;
+    color: var(--text2);
+    font-size: 1rem;
+    flex: 1;
+}
+.pdf-loading i { font-size: 1.5rem; color: var(--primary); }
+
+/* Resume Toast */
+.resume-toast {
+    position: fixed;
+    top: 5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--primary);
+    color: var(--bg);
+    padding: 0.6rem 1.5rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    z-index: 3002;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+.resume-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* PWA Install Button */
+.install-pwa-btn {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 8rem;
+    z-index: 999;
+    background: var(--primary);
+    color: var(--bg);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font);
+    box-shadow: 0 4px 15px rgba(0,245,200,0.3);
+    transition: all 0.3s;
+    animation: pulse-install 2s infinite;
+}
+.install-pwa-btn:hover { transform: scale(1.05); }
+@keyframes pulse-install { 0%,100% { box-shadow: 0 4px 15px rgba(0,245,200,0.3); } 50% { box-shadow: 0 4px 25px rgba(0,245,200,0.5); } }
 .spacer { flex: 1; }
 #pdf-canvas-container {
     flex: 1;
