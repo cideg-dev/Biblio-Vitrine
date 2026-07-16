@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tab.dataset.tab === 'gallery') loadGalleryAdmin()
       if (tab.dataset.tab === 'home') loadHome()
       if (tab.dataset.tab === 'blog') loadBlog()
+      if (tab.dataset.tab === 'stats') loadStats()
     })
   })
 
@@ -76,6 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('addHomeValue').addEventListener('click', addHomeValueItem)
   document.getElementById('addArticleBtn').addEventListener('click', addArticle)
   document.getElementById('saveArticlesBtn').addEventListener('click', saveArticles)
+  document.getElementById('refreshStatsBtn').addEventListener('click', loadStats)
+  document.getElementById('resetStatsBtn').addEventListener('click', resetStats)
+  document.getElementById('publishStatsBtn').addEventListener('click', publishStats)
 
   document.querySelector('.hamburger')?.addEventListener('click', () => {
     document.querySelector('.hamburger').classList.toggle('active')
@@ -820,6 +824,50 @@ async function saveArticles() {
   try {
     await saveJSON(ARTICLES_PATH, articles, 'Mise à jour des articles')
     showNotif('Articles sauvegardés', 'success')
+  } catch (e) { showNotif('Erreur: ' + e.message, 'error') }
+}
+
+// ─── Stats ───
+function loadStats() {
+  const container = document.getElementById('statsList')
+  try {
+    const raw = localStorage.getItem('downloadStats')
+    if (!raw) { container.innerHTML = '<div class="admin-empty"><i class="fas fa-inbox"></i><p>Aucune donnée pour le moment. Consultez des PDFs depuis le site pour générer des stats.</p></div>'; return }
+    const stats = JSON.parse(raw)
+    const entries = Object.entries(stats).sort((a, b) => b[1] - a[1])
+    const total = entries.reduce((s, e) => s + e[1], 0)
+    const maxCount = entries[0]?.[1] || 1
+    container.innerHTML = `
+      <p style="font-size:0.85rem;color:var(--text2);margin-bottom:1rem">Total des consultations : <strong style="color:var(--text)">${total}</strong></p>
+      <div style="display:flex;flex-direction:column;gap:0.4rem">
+        ${entries.slice(0, 50).map(([name, count]) => {
+          const pct = (count / maxCount) * 100
+          const shortName = name.length > 50 ? name.slice(0, 47) + '…' : name
+          return `<div style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem">
+            <span style="min-width:2rem;text-align:right;color:var(--text3);font-weight:600">${count}</span>
+            <div style="flex:1;height:18px;background:var(--bg);border-radius:100px;overflow:hidden">
+              <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:100px;transition:width 0.5s"></div>
+            </div>
+            <span style="flex:1;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(shortName)}</span>
+          </div>`
+        }).join('')}
+      </div>`
+  } catch (e) { container.innerHTML = '<p style="color:var(--accent)">Erreur: ' + e.message + '</p>' }
+}
+
+function resetStats() {
+  if (!confirm('Réinitialiser toutes les statistiques ?')) return
+  localStorage.removeItem('downloadStats')
+  loadStats()
+  showNotif('Stats réinitialisées', 'info')
+}
+
+async function publishStats() {
+  try {
+    const raw = localStorage.getItem('downloadStats')
+    const stats = raw ? JSON.parse(raw) : {}
+    await saveJSON('assets/data/stats.json', { stats, updatedAt: new Date().toISOString() }, 'Publication des statistiques')
+    showNotif('Stats publiées sur GitHub', 'success')
   } catch (e) { showNotif('Erreur: ' + e.message, 'error') }
 }
 

@@ -332,8 +332,11 @@ function renderPdfGrid() {
     const readBtn = card.querySelector('.pdf-read-btn')
     readBtn.addEventListener('click', (e) => {
       e.stopPropagation()
+      trackDownload(pdf.nom_du_fichier)
       isMobile ? window.open(fileUrl, '_blank') : openPDF(fileUrl)
     })
+    const dlBtn = card.querySelector('.pdf-dl-btn')
+    if (dlBtn) dlBtn.addEventListener('click', () => trackDownload(pdf.nom_du_fichier))
     container.appendChild(card)
     loadThumbnail(pdf.nom_du_fichier, i)
   })
@@ -492,6 +495,7 @@ function initPdfViewer() {
   document.getElementById('nextPage')?.addEventListener('click', showNextPdfPage)
   document.getElementById('zoomIn')?.addEventListener('click', zoomIn)
   document.getElementById('zoomOut')?.addEventListener('click', zoomOut)
+  document.getElementById('fullscreenBtn')?.addEventListener('click', toggleFullscreen)
   document.getElementById('back-to-library')?.addEventListener('click', closePdfViewer)
   document.getElementById('downloadPdfBtn')?.addEventListener('click', () => window._currentPdfUrl && window.open(window._currentPdfUrl, '_blank'))
   // Keyboard navigation
@@ -551,6 +555,22 @@ function showPrevPdfPage() { if (pageNum > 1) { pageNum--; queueRenderPage(pageN
 function showNextPdfPage() { if (pdfDoc && pageNum < pdfDoc.numPages) { pageNum++; queueRenderPage(pageNum) } }
 function zoomIn() { if (currentScale < 3) { currentScale += 0.25; renderPdfPage(pageNum) } }
 function zoomOut() { if (currentScale > 0.25) { currentScale -= 0.25; renderPdfPage(pageNum) } }
+function toggleFullscreen() {
+  const container = document.getElementById('pdf-canvas-container')
+  const btn = document.getElementById('fullscreenBtn')
+  if (!document.fullscreenElement) {
+    container.requestFullscreen?.()
+    btn.innerHTML = '<i class="fas fa-compress"></i>'
+  } else {
+    document.exitFullscreen?.()
+    btn.innerHTML = '<i class="fas fa-expand"></i>'
+  }
+}
+document.addEventListener('fullscreenchange', () => {
+  const btn = document.getElementById('fullscreenBtn')
+  if (btn) btn.innerHTML = document.fullscreenElement ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>'
+})
+
 function closePdfViewer() {
   document.getElementById('pdf-viewer-overlay').style.display = 'none'
   pdfDoc = null; currentScale = 1.5
@@ -625,6 +645,15 @@ async function loadDonationGoal() {
 }
 
 // ─── Verse transition styles ───
+// ─── Download Stats ───
+function trackDownload(filename) {
+  try {
+    const stats = JSON.parse(localStorage.getItem('downloadStats') || '{}')
+    stats[filename] = (stats[filename] || 0) + 1
+    localStorage.setItem('downloadStats', JSON.stringify(stats))
+  } catch {}
+}
+
 const style = document.createElement('style')
 style.textContent = `#dailyVerse, #dailyVerseRef { transition: opacity 0.4s ease; }`
 document.head.appendChild(style)

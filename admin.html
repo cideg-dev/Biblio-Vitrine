@@ -56,6 +56,7 @@
                 <button class="admin-tab" data-tab="home"><i class="fas fa-home"></i> Accueil</button>
                 <button class="admin-tab" data-tab="blog"><i class="fas fa-newspaper"></i> Blog</button>
                 <button class="admin-tab" data-tab="gallery"><i class="fas fa-images"></i> Galerie</button>
+                <button class="admin-tab" data-tab="stats"><i class="fas fa-chart-bar"></i> Stats</button>
                 <button class="admin-tab" data-tab="config"><i class="fas fa-cog"></i> Config</button>
             </div>
 
@@ -251,6 +252,24 @@
                     <p style="font-size:0.85rem;color:var(--text2);margin-bottom:0.5rem">Entre les chemins des images (un par ligne) :</p>
                     <textarea id="galleryPathsInput" rows="4" placeholder="assets/images/missions/photo1.jpg&#10;assets/images/missions/photo2.jpg" style="width:100%"></textarea>
                     <button id="saveGalleryBtn" class="btn-primary" style="margin-top:1rem"><i class="fas fa-save"></i> Sauvegarder la liste</button>
+                </div>
+            </div>
+
+            <!-- Tab: Stats -->
+            <div id="tab-stats" class="admin-tab-content">
+                <div class="admin-tab-header"><h3><i class="fas fa-chart-bar"></i> Statistiques</h3></div>
+                <div class="upload-card">
+                    <div class="admin-tab-header"><h4 style="font-size:1rem">Top PDFs consultés</h4></div>
+                    <div id="statsList"><p style="color:var(--text3)">Chargement…</p></div>
+                    <div style="margin-top:1rem;display:flex;gap:0.5rem">
+                        <button id="refreshStatsBtn" class="btn-secondary"><i class="fas fa-sync"></i> Actualiser</button>
+                        <button id="resetStatsBtn" class="btn-danger"><i class="fas fa-trash-alt"></i> Réinitialiser</button>
+                    </div>
+                </div>
+                <div class="upload-card" style="margin-top:1rem">
+                    <div class="admin-tab-header"><h4 style="font-size:1rem">Synchronisation GitHub</h4></div>
+                    <p style="font-size:0.85rem;color:var(--text2);margin-bottom:1rem">Les stats sont stockées localement dans votre navigateur. Vous pouvez les publier sur GitHub pour les partager.</p>
+                    <button id="publishStatsBtn" class="btn-primary"><i class="fas fa-cloud-upload-alt"></i> Publier les stats sur GitHub</button>
                 </div>
             </div>
 
