@@ -1373,10 +1373,8 @@ footer {
     border-radius: var(--radius);
     max-width: 100%;
 }
-#pdfIframe {
+#pdfMobileContainer {
     flex: 1;
-    width: 100%;
-    border: none;
     background: #fff;
 }
 .pdf-viewer-hint {

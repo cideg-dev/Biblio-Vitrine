@@ -492,7 +492,12 @@ function initPdfViewer() {
   document.getElementById('zoomOut')?.addEventListener('click', zoomOut)
   document.getElementById('fullscreenBtn')?.addEventListener('click', toggleFullscreen)
   document.getElementById('back-to-library')?.addEventListener('click', closePdfViewer)
-  document.getElementById('downloadPdfBtn')?.addEventListener('click', () => window._currentPdfUrl && window.open(window._currentPdfUrl, '_blank'))
+  document.getElementById('downloadPdfBtn')?.addEventListener('click', () => {
+    const url = window._currentPdfUrl
+    if (!url) return
+    const a = document.createElement('a')
+    a.href = url; a.download = ''; document.body.appendChild(a); a.click(); document.body.removeChild(a)
+  })
   // Keyboard navigation
   document.addEventListener('keydown', e => {
     const overlay = document.getElementById('pdf-viewer-overlay')
@@ -524,7 +529,7 @@ function setDesktopControlsVisible(visible) {
   document.getElementById('zoomOut').style.display = visible ? '' : 'none'
   document.getElementById('fullscreenBtn').style.display = visible ? '' : 'none'
   document.getElementById('pdf-canvas-container').style.display = visible ? '' : 'none'
-  document.getElementById('pdfIframe').style.display = visible ? 'none' : ''
+  document.getElementById('pdfMobileContainer').style.display = visible ? 'none' : ''
 }
 
 async function openPDF(url) {
@@ -534,9 +539,19 @@ async function openPDF(url) {
   overlay.focus()
   if (isMobile) {
     setDesktopControlsVisible(false)
-    const iframe = document.getElementById('pdfIframe')
-    iframe.src = url
-    iframe.onerror = () => { alert('Impossible de charger le PDF.'); closePdfViewer() }
+    const embed = document.getElementById('pdfEmbed')
+    try {
+      const res = await fetch(url)
+      if (!res.ok) throw new Error('Network error')
+      const blob = await res.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      window._currentBlobUrl = blobUrl
+      embed.src = blobUrl
+    } catch (e) {
+      console.error(e)
+      alert('Impossible de charger le PDF.')
+      closePdfViewer()
+    }
   } else {
     setDesktopControlsVisible(true)
     try {
@@ -587,7 +602,8 @@ document.addEventListener('fullscreenchange', () => {
 
 function closePdfViewer() {
   document.getElementById('pdf-viewer-overlay').style.display = 'none'
-  document.getElementById('pdfIframe').src = ''
+  document.getElementById('pdfEmbed').src = ''
+  if (window._currentBlobUrl) { URL.revokeObjectURL(window._currentBlobUrl); window._currentBlobUrl = null }
   setDesktopControlsVisible(true)
   pdfDoc = null; currentScale = 1.5
 }
