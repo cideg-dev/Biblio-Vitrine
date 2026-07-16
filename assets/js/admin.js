@@ -23,6 +23,8 @@ const CATEGORIES = [
 document.addEventListener('DOMContentLoaded', () => {
   checkAuth()
   document.getElementById('loginBtn').addEventListener('click', handleLogin)
+  document.getElementById('startOAuthBtn')?.addEventListener('click', startOAuth)
+  document.getElementById('cancelOAuthBtn')?.addEventListener('click', cancelOAuth)
   document.getElementById('logoutBtn').addEventListener('click', handleLogout)
   document.getElementById('saveChangesBtn').addEventListener('click', saveChanges)
   document.getElementById('deleteFromListBtn').addEventListener('click', deleteSelected)
@@ -91,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }))
 })
 
-function getToken() { return localStorage.getItem(TOKEN_KEY) }
+function getToken() { return sessionStorage.getItem(TOKEN_KEY) }
 function checkAuth() { getToken() ? showAdmin() : showLogin() }
 function showLogin() {
   document.getElementById('loginSection').style.display = 'flex'
@@ -106,12 +108,69 @@ async function showAdmin() {
 function handleLogin() {
   const token = document.getElementById('githubToken').value.trim()
   if (!token) return showNotif('Token requis', 'error')
-  localStorage.setItem(TOKEN_KEY, token)
+  sessionStorage.setItem(TOKEN_KEY, token)
   showAdmin()
 }
 function handleLogout() {
-  localStorage.removeItem(TOKEN_KEY)
+  sessionStorage.removeItem(TOKEN_KEY)
   showLogin()
+}
+
+// ─── OAuth Device Flow (connexion sans token) ───
+let oauthPollTimer = null
+
+async function startOAuth() {
+  const clientId = document.getElementById('oauthClientId').value.trim()
+  if (!clientId) return showNotif('Entre ton Client ID GitHub OAuth', 'error')
+  try {
+    const res = await fetch('https://github.com/login/device/code', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_id: clientId, scope: 'repo' })
+    })
+    if (!res.ok) throw new Error('Erreur GitHub')
+    const data = await res.json()
+    document.getElementById('oauthStep1').style.display = 'none'
+    document.getElementById('oauthStep2').style.display = 'block'
+    document.getElementById('userCodeDisplay').textContent = data.user_code
+    document.getElementById('deviceVerificationLink').href = data.verification_uri
+    const interval = (data.interval || 5) * 1000
+    oauthPollTimer = setInterval(async () => {
+      try {
+        const pollRes = await fetch('https://github.com/login/oauth/access_token', {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ client_id: clientId, device_code: data.device_code, grant_type: 'urn:ietf:params:oauth:grant-type:device_code' })
+        })
+        const pollData = await pollRes.json()
+        if (pollData.access_token) {
+          clearInterval(oauthPollTimer)
+          oauthPollTimer = null
+          sessionStorage.setItem(TOKEN_KEY, pollData.access_token)
+          document.getElementById('oauthSection').style.display = 'none'
+          showNotif('Connecté avec GitHub OAuth !', 'success')
+          showAdmin()
+        } else if (pollData.error === 'authorization_pending') {
+          // Attente utilisateur...
+        } else if (pollData.error === 'slow_down') {
+          // Ralentir le polling
+        } else if (pollData.error === 'expired_token') {
+          clearInterval(oauthPollTimer)
+          oauthPollTimer = null
+          showNotif('Code expiré. Réessaie.', 'error')
+          cancelOAuth()
+        }
+      } catch {}
+    }, interval)
+  } catch (e) {
+    showNotif('Erreur OAuth: ' + e.message, 'error')
+  }
+}
+
+function cancelOAuth() {
+  if (oauthPollTimer) { clearInterval(oauthPollTimer); oauthPollTimer = null }
+  document.getElementById('oauthStep1').style.display = 'block'
+  document.getElementById('oauthStep2').style.display = 'none'
 }
 
 async function githubFetch(path, options = {}) {
@@ -126,7 +185,7 @@ async function githubFetch(path, options = {}) {
     }
   })
   if (res.status === 401 || res.status === 403) {
-    localStorage.removeItem(TOKEN_KEY)
+    sessionStorage.removeItem(TOKEN_KEY)
     showLogin()
     throw new Error('Token invalide ou expiré')
   }

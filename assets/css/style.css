@@ -1344,6 +1344,7 @@ footer {
     flex-shrink: 0;
 }
 #pdf-viewer-controls .btn-secondary:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+#pdf-viewer-controls .btn-secondary.active { background: var(--primary); color: var(--bg); }
 #pageInfo { color: var(--text2); font-size: 0.8rem; white-space: nowrap; }
 
 /* PDF Loading Indicator */

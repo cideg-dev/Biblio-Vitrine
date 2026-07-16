@@ -510,6 +510,7 @@ function initPdfViewer() {
   document.getElementById('zoomIn')?.addEventListener('click', zoomIn)
   document.getElementById('zoomOut')?.addEventListener('click', zoomOut)
   document.getElementById('fullscreenBtn')?.addEventListener('click', toggleFullscreen)
+  document.getElementById('scrollModeToggle')?.addEventListener('click', toggleScrollMode)
   document.getElementById('back-to-library')?.addEventListener('click', closePdfViewer)
   document.getElementById('downloadPdfBtn')?.addEventListener('click', () => {
     const url = window._currentPdfUrl
@@ -549,15 +550,16 @@ function initPdfViewer() {
   })
 }
 
-let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumPending = null, currentScale = 1.5
+let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumPending = null, currentScale = 1.5, isScrollMode = false
 const canvas = document.getElementById('pdfCanvas')
 const ctx = canvas?.getContext('2d')
 const pageCache = new Map()
 const CACHE_MAX = 10
+let scrollCanvases = []
 
 function setDesktopControlsVisible() {
-  document.getElementById('prevPage').style.display = ''
-  document.getElementById('nextPage').style.display = ''
+  document.getElementById('prevPage').style.display = isScrollMode ? 'none' : ''
+  document.getElementById('nextPage').style.display = isScrollMode ? 'none' : ''
   document.getElementById('pageInfo').style.display = ''
   document.getElementById('zoomIn').style.display = ''
   document.getElementById('zoomOut').style.display = ''
@@ -572,6 +574,8 @@ async function openPDF(url) {
   const overlay = document.getElementById('pdf-viewer-overlay')
   overlay.style.display = 'flex'
   overlay.focus()
+  isScrollMode = false
+  scrollCanvases = []
   setDesktopControlsVisible()
   try {
     await loadPdfJs()
@@ -627,10 +631,27 @@ async function renderPdfPage(num) {
   if (pageNumPending !== null) { renderPdfPage(pageNumPending); pageNumPending = null }
 }
 function queueRenderPage(num) { pageIsRendering ? (pageNumPending = num) : renderPdfPage(num) }
-function showPrevPdfPage() { if (pageNum > 1) { pageNum--; queueRenderPage(pageNum) } }
-function showNextPdfPage() { if (pdfDoc && pageNum < pdfDoc.numPages) { pageNum++; queueRenderPage(pageNum) } }
-function zoomIn() { if (currentScale < 3) { currentScale += 0.25; pageCache.clear(); renderPdfPage(pageNum) } }
-function zoomOut() { if (currentScale > 0.25) { currentScale -= 0.25; pageCache.clear(); renderPdfPage(pageNum) } }
+function showPrevPdfPage() {
+  if (isScrollMode) {
+    const container = document.getElementById('pdf-canvas-container')
+    const c = container?.querySelector('[data-page="' + (pageNum - 1) + '"]')
+    if (c) { c.scrollIntoView({ behavior: 'smooth', block: 'start' }); pageNum-- }
+    return
+  }
+  if (pageNum > 1) { pageNum--; queueRenderPage(pageNum) }
+}
+function showNextPdfPage() {
+  if (isScrollMode) {
+    if (!pdfDoc || pageNum >= pdfDoc.numPages) return
+    const container = document.getElementById('pdf-canvas-container')
+    const c = container?.querySelector('[data-page="' + (pageNum + 1) + '"]')
+    if (c) { c.scrollIntoView({ behavior: 'smooth', block: 'start' }); pageNum++ }
+    return
+  }
+  if (pdfDoc && pageNum < pdfDoc.numPages) { pageNum++; queueRenderPage(pageNum) }
+}
+function zoomIn() { if (currentScale < 3) { currentScale += 0.25; pageCache.clear(); isScrollMode ? renderScrollMode() : renderPdfPage(pageNum) } }
+function zoomOut() { if (currentScale > 0.25) { currentScale -= 0.25; pageCache.clear(); isScrollMode ? renderScrollMode() : renderPdfPage(pageNum) } }
 function toggleFullscreen() {
   const container = document.getElementById('pdf-canvas-container')
   const btn = document.getElementById('fullscreenBtn')
@@ -646,6 +667,72 @@ document.addEventListener('fullscreenchange', () => {
   const btn = document.getElementById('fullscreenBtn')
   if (btn) btn.innerHTML = document.fullscreenElement ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>'
 })
+
+// ─── Scroll Mode ───
+function toggleScrollMode() {
+  if (!pdfDoc) return
+  isScrollMode = !isScrollMode
+  const btn = document.getElementById('scrollModeToggle')
+  btn.classList.toggle('active', isScrollMode)
+  setDesktopControlsVisible()
+  if (isScrollMode) {
+    renderScrollMode()
+  } else {
+    cleanupScrollMode()
+    renderPdfPage(pageNum)
+  }
+}
+
+function cleanupScrollMode() {
+  scrollCanvases = []
+  const container = document.getElementById('pdf-canvas-container')
+  container.innerHTML = '<canvas id="pdfCanvas"></canvas>'
+  container.style.overflow = ''
+  container.style.padding = ''
+}
+
+async function renderScrollMode() {
+  if (!pdfDoc) return
+  const container = document.getElementById('pdf-canvas-container')
+  container.innerHTML = ''
+  container.style.overflow = 'auto'
+  container.style.padding = '0.5rem'
+  scrollCanvases = []
+
+  const wrapper = document.createElement('div')
+  wrapper.style.cssText = 'margin:0 auto;max-width:100%'
+  container.appendChild(wrapper)
+
+  for (let i = 1; i <= pdfDoc.numPages; i++) {
+    const pc = document.createElement('canvas')
+    pc.dataset.page = i
+    const page = await pdfDoc.getPage(i)
+    const vp = page.getViewport({ scale: currentScale })
+    pc.width = vp.width
+    pc.height = vp.height
+    pc.style.cssText = 'display:block;margin:0 auto 8px;max-width:100%;border-radius:8px;border:1px solid rgba(255,255,255,0.04)'
+    const pCtx = pc.getContext('2d')
+    await page.render({ canvasContext: pCtx, viewport: vp }).promise
+    wrapper.appendChild(pc)
+    scrollCanvases.push(pc)
+  }
+
+  container.addEventListener('scroll', updateScrollPageIndicator)
+  updateScrollPageIndicator()
+}
+
+function updateScrollPageIndicator() {
+  if (!isScrollMode || !scrollCanvases.length) return
+  const container = document.getElementById('pdf-canvas-container')
+  const scrollTop = container.scrollTop + 100
+  let found = 1
+  for (let i = 0; i < scrollCanvases.length; i++) {
+    if (scrollCanvases[i].offsetTop > scrollTop) break
+    found = i + 1
+  }
+  pageNum = Math.min(found, scrollCanvases.length)
+  document.getElementById('pageNumber').textContent = pageNum
+}
 
 // ─── Reading Progress ───
 function getReadingProgress(url) {
@@ -671,7 +758,12 @@ function showResumeToast(page) {
 function closePdfViewer() {
   const url = window._currentPdfUrl
   if (url && pdfDoc) saveReadingProgress(url, pageNum)
+  isScrollMode = false; scrollCanvases = []
   document.getElementById('pdf-viewer-overlay').style.display = 'none'
+  const container = document.getElementById('pdf-canvas-container')
+  container.innerHTML = '<canvas id="pdfCanvas"></canvas>'
+  container.style.overflow = ''
+  container.style.padding = ''
   pdfDoc = null; currentScale = 1.5; pageCache.clear()
 }
 
