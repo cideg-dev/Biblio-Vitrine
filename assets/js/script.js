@@ -99,15 +99,23 @@ function initThemeToggle() {
   const btn = document.getElementById('themeToggle')
   if (!btn) return
   const saved = localStorage.getItem('theme')
-  if (saved === 'light') document.body.classList.add('light-mode')
-  btn.setAttribute('aria-label', document.body.classList.contains('light-mode') ? 'Mode sombre' : 'Mode clair')
-  btn.innerHTML = document.body.classList.contains('light-mode') ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>'
+  const modes = ['dark', 'light', 'auto']
+  const icons = ['fa-moon', 'fa-sun', 'fa-circle-half-stroke']
+  const labels = ['Mode sombre', 'Mode clair', 'Mode auto']
+  let idx = saved === 'light' ? 1 : saved === 'auto' ? 2 : 0
+  if (idx === 0) document.body.classList.remove('light-mode', 'auto-theme')
+  if (idx === 1) document.body.classList.add('light-mode')
+  if (idx === 2) { document.body.classList.add('auto-theme'); initAutoTheme() }
+  btn.setAttribute('aria-label', labels[idx])
+  btn.innerHTML = `<i class="fas ${icons[idx]}"></i>`
   btn.addEventListener('click', () => {
-    document.body.classList.toggle('light-mode')
-    const isLight = document.body.classList.contains('light-mode')
-    localStorage.setItem('theme', isLight ? 'light' : 'dark')
-    btn.setAttribute('aria-label', isLight ? 'Mode sombre' : 'Mode clair')
-    btn.innerHTML = isLight ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>'
+    idx = (idx + 1) % 3
+    localStorage.setItem('theme', modes[idx])
+    document.body.classList.remove('light-mode', 'auto-theme')
+    if (idx === 1) document.body.classList.add('light-mode')
+    if (idx === 2) { document.body.classList.add('auto-theme'); initAutoTheme() }
+    btn.setAttribute('aria-label', labels[idx])
+    btn.innerHTML = `<i class="fas ${icons[idx]}"></i>`
   })
 }
 
@@ -311,6 +319,7 @@ function filterAndSort() {
     case 'alpha-asc': list.sort((a, b) => (a.titre || a.nom_du_fichier).localeCompare(b.titre || b.nom_du_fichier)); break
     case 'alpha-desc': list.sort((a, b) => (b.titre || b.nom_du_fichier).localeCompare(a.titre || a.nom_du_fichier)); break
     case 'newest': list.sort((a, b) => (b.numero || 0) - (a.numero || 0)); break
+    case 'popular': list.sort((a, b) => (getDownloadCount(b.nom_du_fichier) || 0) - (getDownloadCount(a.nom_du_fichier) || 0)); break
   }
   filteredPdfs = list
   render()
@@ -343,10 +352,12 @@ function renderPdfGrid() {
     const fileUrl = PDF_BASE + pdf.nom_du_fichier
     const fav = isFavorite(pdf.nom_du_fichier)
     const dlCount = getDownloadCount(pdf.nom_du_fichier)
+    const isNew = isNewPdf(pdf)
     card.innerHTML = `
       <div class="pdf-thumbnail" id="thumb-${i}">
         <div class="thumb-placeholder"><i class="fas fa-book"></i></div>
         <canvas class="thumb-canvas" hidden></canvas>
+        ${isNew ? '<span class="new-badge">Nouveau</span>' : ''}
         <button class="pdf-fav-btn ${fav ? 'active' : ''}" data-filename="${esc(pdf.nom_du_fichier)}" aria-label="${fav ? 'Retirer des favoris' : 'Ajouter aux favoris'}"><i class="fa${fav ? 's' : 'r'} fa-heart"></i></button>
       </div>
       <div class="pdf-info">
@@ -609,6 +620,7 @@ function initPdfViewer() {
     if (e.key === '?') toggleShortcutHelp()
     if (e.key === 'm' || e.key === 'M') toggleReadingMode()
     if (e.key === 'b' || e.key === 'B') toggleBookmark()
+    if (e.key === 'g' || e.key === 'G') gotoPageDialog()
     if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) {
       e.preventDefault()
       document.getElementById('pdfSearchInput')?.focus()
@@ -631,7 +643,14 @@ function initPdfViewer() {
         isScrollMode ? renderScrollMode() : renderPdfPage(pageNum)
       }
     })
+    hammer.on('swipedown', () => { if (isScrollMode) return; showNextPdfPage() })
+    hammer.on('swipeup', () => { if (isScrollMode) return; showPrevPdfPage() })
   }
+  // Double-click/double-tap zoom
+  container?.addEventListener('dblclick', (e) => {
+    if (currentScale < 1.8) { currentScale = 2.5 } else { currentScale = 1.2 }
+    pageCache.clear(); isScrollMode ? renderScrollMode() : renderPdfPage(pageNum)
+  })
   // Page slider (throttled)
   const pageSlider = document.getElementById('pageSlider')
   let sliderPending = null
@@ -657,6 +676,14 @@ function initPdfViewer() {
   document.getElementById('shareBtn')?.addEventListener('click', sharePdf)
   document.getElementById('closeSidebar')?.addEventListener('click', () => document.getElementById('pdfSidebar').style.display = 'none')
   document.getElementById('fitModeBtn')?.addEventListener('click', toggleFitMode)
+  document.getElementById('reflowModeBtn')?.addEventListener('click', toggleReflowMode)
+  document.getElementById('ttsBtn')?.addEventListener('click', toggleTts)
+  document.getElementById('exportTxtBtn')?.addEventListener('click', exportPdfAsTxt)
+  document.getElementById('tocBtn')?.addEventListener('click', () => {
+    const sidebar = document.getElementById('tocSidebar')
+    if (sidebar) { sidebar.style.display = sidebar.style.display === 'flex' ? 'none' : 'flex'; loadPdfOutline() }
+  })
+  document.getElementById('closeTocSidebar')?.addEventListener('click', () => document.getElementById('tocSidebar').style.display = 'none')
   initPdfSearch()
 }
 
@@ -694,7 +721,12 @@ async function openPDF(url, targetPage) {
     document.getElementById('pageCount').textContent = pdfDoc.numPages
     const saved = getReadingProgress(url)
     pageNum = targetPage || (saved > 0 && saved <= pdfDoc.numPages ? saved : 1)
+    loadZoomForDoc(url)
     renderPdfPage(pageNum)
+    // Auto-fullscreen on mobile
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && !document.fullscreenElement) {
+      setTimeout(() => { document.getElementById('pdf-canvas-container')?.requestFullscreen?.().catch(() => {}) }, 500)
+    }
     const slider = document.getElementById('pageSlider')
     if (slider) { slider.max = pdfDoc.numPages; slider.value = pageNum }
     document.getElementById('pageCountLabel').textContent = pdfDoc.numPages
@@ -929,7 +961,8 @@ function showResumeToast(page) {
 
 function closePdfViewer() {
   const url = window._currentPdfUrl
-  if (url && pdfDoc) saveReadingProgress(url, pageNum)
+  if (url && pdfDoc) { saveReadingProgress(url, pageNum); saveZoomForDoc(url) }
+  if (ttsPlaying) stopTts()
   isScrollMode = false; scrollCanvases = []
   document.getElementById('pdf-viewer-overlay').style.display = 'none'
   document.getElementById('pdfShortcutHelp').style.display = 'none'
@@ -1462,12 +1495,277 @@ function showToast(msg) {
   setTimeout(() => t.style.opacity = '0', 3000)
 }
 
-// ─── Init URL param & reading mode ───
+// ─── Theme auto (system preference) ───
+function initAutoTheme() {
+  const mq = window.matchMedia('(prefers-color-scheme: light)')
+  if (localStorage.getItem('theme') === 'auto') {
+    document.body.classList.toggle('light-theme', mq.matches)
+  }
+  mq.addEventListener('change', e => {
+    if (localStorage.getItem('theme') === 'auto') document.body.classList.toggle('light-theme', e.matches)
+  })
+}
+
+// ─── Goto page dialog ───
+function gotoPageDialog() {
+  if (!pdfDoc) return
+  const p = prompt(`Aller à la page (1-${pdfDoc.numPages}):`, pageNum.toString())
+  if (!p) return
+  const n = parseInt(p)
+  if (n >= 1 && n <= pdfDoc.numPages && n !== pageNum) {
+    if (isScrollMode) {
+      const c = document.querySelector(`[data-page="${n}"]`)
+      if (c) { c.scrollIntoView({ block: 'start' }); pageNum = n; document.getElementById('pageNumber').textContent = n; updateProgressBar() }
+    } else { pageNum = n; queueRenderPage(n) }
+  }
+}
+
+// ─── Save/Load zoom per document ───
+function saveZoomForDoc(url) {
+  try { localStorage.setItem('zoom_' + btoa(url), currentScale.toString()) } catch {}
+}
+function loadZoomForDoc(url) {
+  try { const z = parseFloat(localStorage.getItem('zoom_' + btoa(url))); if (z >= 0.25 && z <= 3) currentScale = z } catch {}
+}
+
+// ─── Mode Texte Reflow ───
+let isReflowMode = false, reflowText = '', reflowPageLines = []
+function toggleReflowMode() {
+  if (!pdfDoc) return
+  const btn = document.getElementById('reflowModeBtn')
+  const container = document.getElementById('pdf-canvas-container')
+  isReflowMode = !isReflowMode
+  if (isReflowMode) {
+    btn?.classList.add('active')
+    btn.title = 'Mode page'
+    btn.innerHTML = '<i class="fas fa-file-pdf"></i>'
+    showReflowPage(pageNum)
+  } else {
+    btn?.classList.remove('active')
+    btn.title = 'Mode texte fluide'
+    btn.innerHTML = '<i class="fas fa-align-left"></i>'
+    renderPdfPage(pageNum)
+  }
+}
+async function showReflowPage(num) {
+  if (!pdfDoc) return
+  const container = document.getElementById('pdf-canvas-container')
+  const page = await pdfDoc.getPage(num)
+  const tc = await page.getTextContent()
+  container.innerHTML = ''
+  container.style.overflow = 'auto'
+  container.style.padding = '1.5rem'
+  const div = document.createElement('div')
+  div.className = 'reflow-container'
+  let lastY = null, block = []
+  tc.items.forEach(item => {
+    const y = Math.round(item.transform[5])
+    if (lastY !== null && Math.abs(y - lastY) > 5 && block.length) {
+      div.appendChild(createReflowBlock(block))
+      block = []
+    }
+    block.push(item.str)
+    lastY = y
+  })
+  if (block.length) div.appendChild(createReflowBlock(block))
+  container.appendChild(div)
+}
+function createReflowBlock(lines) {
+  const p = document.createElement('p')
+  p.className = 'reflow-paragraph'
+  p.textContent = lines.join(' ')
+  return p
+}
+
+// ─── Table des matieres (PDF outline) ───
+async function loadPdfOutline() {
+  if (!pdfDoc) return
+  const list = document.getElementById('tocList')
+  if (!list) return
+  try {
+    const outline = await pdfDoc.getOutline()
+    list.innerHTML = ''
+    if (!outline || !outline.length) {
+      list.innerHTML = '<p style="font-size:0.75rem;color:var(--text3);padding:0.5rem">Pas de table des matières</p>'
+      return
+    }
+    const renderItems = (items, depth = 0) => {
+      items.forEach(item => {
+        const a = document.createElement('a')
+        a.className = 'toc-item'
+        a.style.paddingLeft = (0.5 + depth * 0.8) + 'rem'
+        a.textContent = item.title
+        a.addEventListener('click', async () => {
+          if (item.dest) {
+            try {
+              const dest = typeof item.dest === 'string' ? await pdfDoc.getDestination(item.dest) : item.dest
+              if (dest) {
+                const pageIdx = await pdfDoc.getPageIndex(dest[0])
+                const targetPage = pageIdx + 1
+                if (isScrollMode) {
+                  const c = document.querySelector(`[data-page="${targetPage}"]`)
+                  if (c) c.scrollIntoView({ block: 'start' })
+                } else { pageNum = targetPage; queueRenderPage(targetPage) }
+              }
+            } catch {}
+          }
+        })
+        list.appendChild(a)
+        if (item.items && item.items.length) renderItems(item.items, depth + 1)
+      })
+    }
+    renderItems(outline)
+  } catch { list.innerHTML = '<p style="font-size:0.75rem;color:var(--text3)">Erreur chargement</p>' }
+}
+
+// ─── Lecture audio (TTS) ───
+let ttsSynth = null, ttsUtterance = null, ttsPlaying = false, ttsPageText = ''
+function toggleTts() {
+  if (!pdfDoc) return
+  const btn = document.getElementById('ttsBtn')
+  if (ttsPlaying) { stopTts(); btn?.classList.remove('active'); return }
+  btn?.classList.add('active')
+  ttsSynth = window.speechSynthesis
+  if (!ttsSynth) { alert('Synthèse vocale non disponible'); btn?.classList.remove('active'); return }
+  speakPage(pageNum)
+}
+function speakPage(num) {
+  if (!pdfDoc || !ttsSynth) return
+  pdfDoc.getPage(num).then(p => p.getTextContent()).then(tc => {
+    ttsPageText = tc.items.map(i => i.str).join(' ')
+    if (!ttsPageText.trim()) { stopTts(); return }
+    ttsUtterance = new SpeechSynthesisUtterance(ttsPageText)
+    ttsUtterance.lang = 'fr-FR'
+    ttsUtterance.rate = 0.9
+    ttsUtterance.onend = () => {
+      if (pageNum < pdfDoc.numPages && ttsPlaying) {
+        if (isScrollMode) {
+          pageNum++; const c = document.querySelector(`[data-page="${pageNum}"]`)
+          if (c) c.scrollIntoView({ block: 'start' })
+        } else { pageNum++; queueRenderPage(pageNum) }
+        speakPage(pageNum)
+      } else { stopTts() }
+    }
+    ttsUtterance.onerror = stopTts
+    ttsPlaying = true; ttsSynth.speak(ttsUtterance)
+  }).catch(stopTts)
+}
+function stopTts() {
+  ttsPlaying = false
+  if (ttsSynth) { ttsSynth.cancel(); ttsSynth = null }
+  document.getElementById('ttsBtn')?.classList.remove('active')
+}
+
+// ─── Export PDF → TXT ───
+async function exportPdfAsTxt() {
+  if (!pdfDoc) return
+  const name = document.querySelector('.pdf-info-title')?.textContent || 'document'
+  let fullText = ''
+  for (let i = 1; i <= pdfDoc.numPages; i++) {
+    const page = await pdfDoc.getPage(i)
+    const tc = await page.getTextContent()
+    fullText += tc.items.map(i => i.str).join(' ') + '\n\n'
+  }
+  const blob = new Blob([fullText], { type: 'text/plain' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = name + '.txt'
+  document.body.appendChild(a); a.click(); a.remove()
+  URL.revokeObjectURL(a.href)
+}
+
+// ─── Gestionnaire de signets global ───
+function getAllBookmarks() {
+  const all = {}
+  Object.keys(localStorage).filter(k => k.startsWith('bm_')).forEach(k => {
+    try { all[k.slice(3)] = JSON.parse(localStorage.getItem(k)) } catch {}
+  })
+  return all
+}
+function showGlobalBookmarks() {
+  const overlay = document.getElementById('globalBookmarksOverlay')
+  const list = document.getElementById('globalBookmarksList')
+  if (!overlay || !list) return
+  overlay.style.display = 'flex'
+  const all = getAllBookmarks()
+  const entries = Object.entries(all).flatMap(([encodedUrl, bms]) => {
+    const url = atob(encodedUrl)
+    const pdf = allPdfs.find(p => url.includes(p.nom_du_fichier))
+    const title = pdf ? (pdf.titre || pdf.nom_du_fichier) : url.split('/').pop()
+    return bms.map(b => ({ ...b, url, title, encodedUrl }))
+  })
+  if (!entries.length) { list.innerHTML = '<p style="color:var(--text3);padding:1rem;text-align:center">Aucun signet</p>'; return }
+  list.innerHTML = entries.map((b, i) => `<div class="gb-item">
+    <div class="gb-info"><strong>${esc(b.title)}</strong> — Page ${b.page} <span style="font-size:0.65rem;color:var(--text3)">(${b.date})</span></div>
+    <div class="gb-actions">
+      <button class="btn-secondary" onclick="openPDF('${esc(b.url)}');setTimeout(()=>{document.querySelector('[data-page=\\"${b.page}\\"]')?.scrollIntoView({block:'start'});document.getElementById('pageNum') && (pageNum=${b.page}, queueRenderPage(${b.page}))},800);closeGlobalBookmarks()" style="padding:0.2rem 0.5rem;font-size:0.7rem"><i class="fas fa-book-open"></i></button>
+      <button class="btn-secondary" onclick="localStorage.setItem('bm_${esc(b.encodedUrl)}',JSON.stringify(JSON.parse(localStorage.getItem('bm_${esc(b.encodedUrl)}')||'[]').filter(x=>x.page!==${b.page})));showGlobalBookmarks()" style="padding:0.2rem 0.5rem;font-size:0.7rem;color:var(--accent)"><i class="fas fa-times"></i></button>
+    </div>
+  </div>`).join('')
+}
+function closeGlobalBookmarks() {
+  document.getElementById('globalBookmarksOverlay').style.display = 'none'
+}
+
+// ─── Stats de lecture (page) ───
+function showReadingStats() {
+  const overlay = document.getElementById('readingStatsOverlay')
+  const content = document.getElementById('readingStatsContent')
+  if (!overlay || !content) return
+  try {
+    const readStats = JSON.parse(localStorage.getItem('readStats') || '{"reads":{},"total":0}')
+    const readTitles = JSON.parse(localStorage.getItem('readTitles') || '[]')
+    const favs = getFavorites()
+    const allBms = getAllBookmarks()
+    const bmCount = Object.values(allBms).reduce((s, a) => s + a.length, 0)
+    // Streak
+    let streak = 0
+    const d = new Date()
+    for (let i = 0; i < 365; i++) {
+      const key = 'day_' + d.toISOString().slice(0, 10)
+      if (localStorage.getItem(key)) { streak++ } else if (i > 0) break
+      d.setDate(d.getDate() - 1)
+    }
+    const downloads = JSON.parse(localStorage.getItem('downloadStats') || '{}')
+    const dlTotal = Object.values(downloads).reduce((s, c) => s + c, 0)
+    overlay.style.display = 'flex'
+    content.innerHTML = `
+      <div class="stats-grid-inline">
+        <div class="stat-card"><span class="stat-num">${readStats.total || 0}</span><span class="stat-lbl">Consultations</span></div>
+        <div class="stat-card"><span class="stat-num">${readTitles.length}</span><span class="stat-lbl">Livres lus</span></div>
+        <div class="stat-card"><span class="stat-num">${favs.length}</span><span class="stat-lbl">Favoris</span></div>
+        <div class="stat-card"><span class="stat-num">${bmCount}</span><span class="stat-lbl">Signets</span></div>
+        <div class="stat-card"><span class="stat-num">${dlTotal}</span><span class="stat-lbl">Téléchargements</span></div>
+        <div class="stat-card"><span class="stat-num">${streak}</span><span class="stat-lbl">Jours de suite</span></div>
+      </div>
+      <p style="font-size:0.75rem;color:var(--text3);margin-top:0.5rem">Les stats sont stockées localement sur cet appareil.</p>
+    `
+  } catch { content.innerHTML = '<p style="color:var(--accent)">Erreur chargement stats</p>' }
+}
+function closeReadingStats() {
+  document.getElementById('readingStatsOverlay').style.display = 'none'
+}
+// Track daily visit
+function trackDailyVisit() {
+  try {
+    const today = new Date().toISOString().slice(0, 10)
+    localStorage.setItem('day_' + today, '1')
+  } catch {}
+}
+
+// ─── Badge nouveau sur les PDFs recents ───
+function isNewPdf(pdf) {
+  return pdf.numero && pdf.numero > (Math.max(...allPdfs.filter(p => p.numero).map(p => p.numero)) - 5)
+}
+
+// ─── Init all remaining ───
 document.addEventListener('DOMContentLoaded', () => {
   initReadingMode()
   handleDirectLink()
   handleCategoryFilter()
   initGlobalSearch()
+  initAutoTheme()
+  trackDailyVisit()
   // Cookie banner
   const cookieBanner = document.getElementById('cookieBanner')
   if (cookieBanner && !localStorage.getItem('cookiesAccepted')) {

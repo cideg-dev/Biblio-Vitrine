@@ -188,6 +188,7 @@
                                     <option value="alpha-asc">A → Z</option>
                                     <option value="alpha-desc">Z → A</option>
                                     <option value="newest">Plus récents</option>
+                                    <option value="popular">Populaires</option>
                                 </select>
                             </div>
                             <div class="view-toggle" role="group" aria-label="Affichage">
@@ -385,8 +386,10 @@
                         <a href="https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                         <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
                     </div>
-                    <button onclick="exportUserData()" class="footer-export-btn" title="Exporter mes données" aria-label="Exporter mes données"><i class="fas fa-download"></i> Exporter mes données</button>
-                    <button onclick="syncToCloud({favorites:getFavorites(),readingProgress:Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith('reading_')&&!k.endsWith('_time')).map(k=>[k,localStorage.getItem(k)]))})" class="footer-export-btn" title="Synchroniser dans le cloud" aria-label="Synchroniser dans le cloud"><i class="fas fa-cloud-upload-alt"></i> Sync cloud</button>
+                    <button onclick="exportUserData()" class="footer-export-btn" title="Exporter mes données"><i class="fas fa-download"></i> Exporter mes données</button>
+                    <button onclick="showReadingStats()" class="footer-export-btn" title="Mes statistiques"><i class="fas fa-chart-bar"></i> Mes stats</button>
+                    <button onclick="showGlobalBookmarks()" class="footer-export-btn" title="Tous mes signets"><i class="fas fa-bookmark"></i> Mes signets</button>
+                    <button onclick="syncToCloud({favorites:getFavorites(),readingProgress:Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith('reading_')&&!k.endsWith('_time')).map(k=>[k,localStorage.getItem(k)]))})" class="footer-export-btn" title="Synchroniser dans le cloud"><i class="fas fa-cloud-upload-alt"></i> Sync cloud</button>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -426,12 +429,16 @@
                 <button id="nextPage" class="btn btn-secondary" aria-label="Page suivante"><i class="fas fa-chevron-right"></i></button>
                 <div class="spacer"></div>
                 <button id="scrollModeToggle" class="btn btn-secondary" aria-label="Mode défilement continu" title="Mode défilement"><i class="fas fa-align-justify"></i></button>
+                <button id="reflowModeBtn" class="btn btn-secondary" aria-label="Mode texte fluide" title="Mode texte fluide"><i class="fas fa-align-left"></i></button>
                 <button id="readingModeBtn" class="btn btn-secondary" aria-label="Mode lecture" title="Mode lecture"><i class="fas fa-moon"></i></button>
+                <button id="ttsBtn" class="btn btn-secondary" aria-label="Lecture audio" title="Lecture audio"><i class="fas fa-volume-up"></i></button>
+                <button id="tocBtn" class="btn btn-secondary" aria-label="Table des matières" title="Table des matières"><i class="fas fa-list-ul"></i></button>
                 <button id="bookmarkBtn" class="btn btn-secondary" aria-label="Signet" title="Signet"><i class="fas fa-bookmark"></i></button>
                 <button id="fitModeBtn" class="btn btn-secondary" aria-label="Ajuster à la largeur" title="Ajuster à la largeur"><i class="fas fa-arrows-alt-h"></i></button>
                 <button id="zoomOut" class="btn btn-secondary" aria-label="Zoom arrière"><i class="fas fa-search-minus"></i></button>
                 <button id="zoomIn" class="btn btn-secondary" aria-label="Zoom avant"><i class="fas fa-search-plus"></i></button>
                 <button id="fullscreenBtn" class="btn btn-secondary" aria-label="Plein écran"><i class="fas fa-expand"></i></button>
+                <button id="exportTxtBtn" class="btn btn-secondary" aria-label="Export TXT" title="Export TXT"><i class="fas fa-file-export"></i></button>
                 <button id="shareBtn" class="btn btn-secondary share-btn" aria-label="Partager" title="Partager"><i class="fas fa-share-alt"></i></button>
                 <button id="downloadPdfBtn" class="btn btn-secondary" aria-label="Télécharger"><i class="fas fa-download"></i></button>
             </div>
@@ -455,6 +462,8 @@
                 <div class="shortcut-row"><span class="shortcut-key">M</span><span>Mode lecture</span></div>
                 <div class="shortcut-row"><span class="shortcut-key">B</span><span>Signet</span></div>
                 <div class="shortcut-row"><span class="shortcut-key">Ctrl+F</span><span>Rechercher dans le PDF</span></div>
+                <div class="shortcut-row"><span class="shortcut-key">G</span><span>Aller à une page</span></div>
+                <div class="shortcut-row"><span class="shortcut-key">Double-clic</span><span>Zoom avant/arrière</span></div>
                 <button class="btn-secondary" onclick="closeShortcutHelp()">Fermer</button>
             </div>
         </div>
@@ -464,6 +473,13 @@
                 <button id="closeSidebar" class="btn btn-secondary" style="padding:0.2rem 0.5rem;font-size:0.7rem"><i class="fas fa-times"></i></button>
             </div>
             <div id="bookmarkList"></div>
+        </div>
+        <div class="pdf-sidebar toc-sidebar" id="tocSidebar" style="display:none">
+            <div class="pdf-sidebar-header">
+                <h4>Table des matières</h4>
+                <button id="closeTocSidebar" class="btn btn-secondary" style="padding:0.2rem 0.5rem;font-size:0.7rem"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="tocList"></div>
         </div>
         <div id="updateBanner" class="update-banner" style="display:none">
             <span><i class="fas fa-sync-alt"></i> Nouvelle version disponible</span>
@@ -476,6 +492,21 @@
             </div>
         </div>
         <div id="pdf-canvas-container"><canvas id="pdfCanvas"></canvas></div>
+    </div>
+
+    <!-- Global Bookmarks Overlay -->
+    <div id="globalBookmarksOverlay" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeGlobalBookmarks()">
+        <div class="modal-content">
+            <div class="modal-header"><h3><i class="fas fa-bookmark"></i> Tous mes signets</h3><button class="btn btn-secondary" onclick="closeGlobalBookmarks()" style="padding:0.2rem 0.5rem;font-size:0.7rem"><i class="fas fa-times"></i></button></div>
+            <div id="globalBookmarksList"></div>
+        </div>
+    </div>
+    <!-- Reading Stats Overlay -->
+    <div id="readingStatsOverlay" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeReadingStats()">
+        <div class="modal-content">
+            <div class="modal-header"><h3><i class="fas fa-chart-bar"></i> Mes statistiques</h3><button class="btn btn-secondary" onclick="closeReadingStats()" style="padding:0.2rem 0.5rem;font-size:0.7rem"><i class="fas fa-times"></i></button></div>
+            <div id="readingStatsContent"></div>
+        </div>
     </div>
 
     <meta name="theme-color" content="#00f5c8">

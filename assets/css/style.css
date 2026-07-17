@@ -1605,6 +1605,91 @@ footer {
     .text-layer span { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; }
 }
 
+/* ─── Reflow mode ─── */
+.reflow-container {
+    max-width: 720px; margin: 0 auto; text-align: left;
+    font-size: 1.05rem; line-height: 1.8; color: var(--text2);
+    padding: 0.5rem 0;
+}
+.reflow-paragraph { margin-bottom: 1rem; text-align: justify; }
+body.reading-mode .reflow-container { color: var(--text); }
+body.reading-mode .reflow-paragraph { color: var(--text); }
+
+/* ─── TOC Sidebar ─── */
+.toc-sidebar { width: 280px; }
+.toc-item {
+    display: block; padding: 0.4rem 0.5rem; font-size: 0.78rem;
+    color: var(--text2); text-decoration: none; cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s;
+}
+.toc-item:hover { background: var(--surface2); color: var(--primary); }
+
+/* ─── Modal overlay ─── */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    z-index: 9999; display: flex; align-items: center;
+    justify-content: center; padding: 1rem;
+}
+.modal-content {
+    background: var(--surface); border-radius: var(--radius-lg);
+    padding: 1.5rem; max-width: 500px; width: 100%;
+    max-height: 80vh; overflow-y: auto;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.modal-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 1rem;
+}
+.modal-header h3 { color: var(--text); font-size: 1.1rem; }
+
+/* ─── Stats modal ─── */
+.stats-grid-inline {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 0.8rem;
+}
+.stat-card {
+    background: var(--surface2); border-radius: var(--radius);
+    padding: 1rem; text-align: center;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+.stat-num { display: block; font-size: 1.8rem; font-weight: 700; color: var(--primary); }
+.stat-lbl { display: block; font-size: 0.7rem; color: var(--text3); margin-top: 0.3rem; }
+
+/* ─── Global bookmarks ─── */
+.gb-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    gap: 0.5rem;
+}
+.gb-info { flex: 1; font-size: 0.8rem; color: var(--text2); }
+.gb-actions { display: flex; gap: 0.3rem; flex-shrink: 0; }
+
+/* ─── New badge ─── */
+.new-badge {
+    position: absolute; top: 0.5rem; left: 0.5rem;
+    background: var(--primary); color: var(--bg);
+    font-size: 0.6rem; font-weight: 700; padding: 0.15rem 0.5rem;
+    border-radius: 100px; z-index: 2; text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ─── Auto theme ─── */
+body.auto-theme { transition: background 0.3s, color 0.3s; }
+body.auto-theme.light-theme {
+    --bg: #f5f0e8; --surface: #ede8de; --surface2: #e5e0d6;
+    --text: #2a2a2a; --text2: #555; --text3: #888;
+    --primary: #2a7a5a; --primary-dim: rgba(42,122,90,0.12); --accent: #b84a6a;
+}
+
+/* ─── Batch operations (admin) ─── */
+.batch-toolbar {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.5rem; background: var(--surface2);
+    border-radius: var(--radius); margin-bottom: 0.5rem; flex-wrap: wrap;
+}
+.batch-count { font-weight: 700; color: var(--primary); font-size: 1rem; }
+.batch-cb { margin-right: 0.3rem; accent-color: var(--primary); }
+.book-list-item.batch-selected { background: var(--primary-dim); }
+
 #pdf-canvas-container {
     flex: 1;
     overflow: auto;

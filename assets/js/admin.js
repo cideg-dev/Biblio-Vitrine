@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('addPdfBtn').addEventListener('click', handleAddPdf)
   document.getElementById('cancelUploadBtn').addEventListener('click', cancelUpload)
   document.getElementById('metaSearch').addEventListener('input', e => { searchQuery = e.target.value.toLowerCase(); renderBookList() })
+  document.getElementById('batchDeleteBtn')?.addEventListener('click', batchDelete)
+  document.getElementById('batchCategoryBtn')?.addEventListener('click', batchChangeCategory)
 
   document.getElementById('addTestimonialBtn').addEventListener('click', () => {
     document.getElementById('addTestimonialForm').style.display = 'block'
@@ -183,6 +185,39 @@ function getSearchText(pdf) {
   return (title + ' ' + pdf.nom_du_fichier + ' ' + (pdf.categorie || '') + ' ' + (pdf.auteur || '')).toLowerCase()
 }
 
+let batchSelected = new Set()
+function toggleBatchItem(idx) {
+  if (batchSelected.has(idx)) batchSelected.delete(idx); else batchSelected.add(idx)
+  document.getElementById('batchCount').textContent = batchSelected.size
+  document.getElementById('batchToolbar').style.display = batchSelected.size ? 'flex' : 'none'
+  renderBookList()
+}
+async function batchDelete() {
+  if (!batchSelected.size) return
+  if (!confirm(`Supprimer ${batchSelected.size} PDF(s) de la liste ? (Les fichiers ne sont pas supprimés du dépôt)`)) return
+  const sorted = [...batchSelected].sort((a, b) => b - a)
+  sorted.forEach(i => pdfs.splice(i, 1))
+  batchSelected.clear()
+  document.getElementById('batchToolbar').style.display = 'none'
+  document.getElementById('metaCount').textContent = pdfs.length
+  document.getElementById('statTotal').textContent = pdfs.length
+  await saveJSON(LISTE_PATH, pdfs, 'Suppression par lot de PDFs')
+  renderBookList()
+  showNotif('PDFs supprimés', 'success')
+}
+async function batchChangeCategory() {
+  if (!batchSelected.size) return
+  const cat = prompt('Nouvelle catégorie pour les ' + batchSelected.size + ' PDFs sélectionnés :\n' + CATEGORIES.join(', '))
+  if (!cat || !CATEGORIES.includes(cat)) return showNotif('Catégorie invalide', 'error')
+  if (!confirm(`Appliquer la catégorie "${cat}" à ${batchSelected.size} PDF(s) ?`)) return
+  batchSelected.forEach(i => { pdfs[i].categorie = cat })
+  await saveJSON(LISTE_PATH, pdfs, 'Changement de catégorie par lot')
+  batchSelected.clear()
+  document.getElementById('batchToolbar').style.display = 'none'
+  renderBookList()
+  showNotif(`Catégorie "${cat}" appliquée`, 'success')
+}
+
 function renderBookList() {
   const list = document.getElementById('bookList')
   list.innerHTML = ''
@@ -194,11 +229,12 @@ function renderBookList() {
     if (searchQuery && !getSearchText(pdf).includes(searchQuery)) return
     const title = pdf.titre || pdf.nom_du_fichier.replace('.pdf', '').replace(/_/g, ' ')
     const item = document.createElement('div')
-    item.className = 'book-list-item' + (i === selectedIndex ? ' selected' : '')
+    item.className = 'book-list-item' + (i === selectedIndex ? ' selected' : '') + (batchSelected.has(i) ? ' batch-selected' : '')
     item.dataset.index = i
-    item.onclick = () => selectBook(i)
+    item.onclick = (e) => { if (e.target.type !== 'checkbox') selectBook(i) }
     const cat = pdf.categorie || 'Non classé'
     item.innerHTML = `
+      <input type="checkbox" class="batch-cb" ${batchSelected.has(i) ? 'checked' : ''} onchange="event.stopPropagation();toggleBatchItem(${i})">
       <span class="bli-num">${i + 1}</span>
       <span class="bli-title">${esc(title)}</span>
       <span class="bli-cat">${esc(cat)}</span>
@@ -292,16 +328,54 @@ function resetUpload() {
   document.getElementById('addPdfBtn').innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Uploader sur GitHub'
 }
 
+// Extract PDF metadata using pdf.js
+async function extractPdfMetadata(file) {
+  try {
+    const arrayBuffer = await file.arrayBuffer()
+    await loadPdfJsForAdmin()
+    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise
+    const meta = await pdf.getMetadata()
+    const info = meta.info || {}
+    const title = info.Title || file.name.replace('.pdf', '').replace(/_/g, ' ').trim()
+    const author = info.Author || ''
+    return { title, author }
+  } catch { return null }
+}
+let pdfJsLoadedForAdmin = false
+async function loadPdfJsForAdmin() {
+  if (pdfJsLoadedForAdmin && window.pdfjsLib) return
+  pdfJsLoadedForAdmin = true
+  await new Promise((resolve, reject) => {
+    if (window.pdfjsLib) { resolve(); return }
+    const s = document.createElement('script')
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'
+    s.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+      resolve()
+    }
+    s.onerror = reject; document.head.appendChild(s)
+  })
+}
+
 async function handleAddPdf() {
   const fileInput = document.getElementById('newPdfFile')
   const titleInput = document.getElementById('newPdfTitle')
   const descInput = document.getElementById('newPdfDescription')
   const file = fileInput.files[0]
+  if (!file) return showNotif('Sélectionne un fichier PDF', 'error')
+  // Auto-extract metadata from PDF
+  if (!titleInput.value.trim()) {
+    showNotif('Extraction des métadonnées…', 'info')
+    const meta = await extractPdfMetadata(file)
+    if (meta) {
+      if (!titleInput.value.trim()) titleInput.value = meta.title
+      if (!document.getElementById('editAuthor').value && meta.author) document.getElementById('editAuthor').value = meta.author
+    }
+  }
   const title = titleInput.value.trim()
   if (!confirm(`Uploader "${file?.name}" sur GitHub ? Cela va modifier le dépôt.`)) return
-  const desc = descInput.value.trim()
-  if (!file) return showNotif('Sélectionne un fichier PDF', 'error')
   if (!title) return showNotif('Entre un titre', 'error')
+  const desc = descInput.value.trim()
   uploadAbort = new AbortController()
   document.getElementById('uploadProgress').style.display = 'flex'
   document.getElementById('cancelUploadBtn').style.display = ''

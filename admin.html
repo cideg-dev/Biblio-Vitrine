@@ -68,6 +68,12 @@
                 <div class="meta-split">
                     <div class="meta-panel-list">
                         <div class="admin-search"><i class="fas fa-search"></i><input type="text" id="metaSearch" placeholder="Rechercher…"></div>
+                        <div id="batchToolbar" class="batch-toolbar" style="display:none">
+                            <span id="batchCount" class="batch-count">0</span><span style="font-size:0.78rem;color:var(--text3)">sélectionné(s)</span>
+                            <button id="batchCategoryBtn" class="btn-secondary" style="font-size:0.75rem;padding:0.3rem 0.7rem"><i class="fas fa-tag"></i> Catégorie</button>
+                            <button id="batchDeleteBtn" class="btn-secondary" style="font-size:0.75rem;padding:0.3rem 0.7rem;color:var(--accent)"><i class="fas fa-trash-alt"></i> Supprimer</button>
+                            <button class="btn-secondary" style="font-size:0.75rem;padding:0.3rem 0.7rem" onclick="batchSelected.clear();document.getElementById('batchToolbar').style.display='none';renderBookList()"><i class="fas fa-times"></i> Annuler</button>
+                        </div>
                         <div id="bookList" class="book-list"></div>
                     </div>
                     <div class="meta-panel-edit" id="editPanel">
