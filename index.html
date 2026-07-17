@@ -25,8 +25,15 @@
     <meta name="twitter:image" content="https://cideg-dev.github.io/Biblio-Vitrine/assets/images/Lumiere_sur_parole.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap">
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preload" as="script" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" fetchpriority="low">
+    <link rel="preload" as="script" crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js" fetchpriority="low">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet"></noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"></noscript>
     <link rel="stylesheet" href="assets/css/style.css">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXL9EB8SQY"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config','G-KXL9EB8SQY');</script>
@@ -40,7 +47,7 @@
         <nav class="navbar" aria-label="Navigation principale">
             <div class="nav-container">
                 <div class="logo">
-                    <a href="index.html" aria-label="Accueil"><img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="logo-img"></a>
+                    <a href="index.html" aria-label="Accueil"><img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="logo-img" fetchpriority="high"></a>
                 </div>
                 <ul class="nav-menu">
                     <li class="nav-item"><a href="#accueil" class="nav-link">Accueil</a></li>
@@ -352,7 +359,7 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
-                    <img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="footer-logo">
+                    <img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="footer-logo" loading="lazy">
                     <p>Rendre la Parole de Dieu accessible à tous, gratuitement.</p>
                 </div>
                 <div class="footer-col">
@@ -384,7 +391,7 @@
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2024 CIDEG & P.line. « Ta parole est une lampe à mes pieds. » — Psaume 119:105</p>
-                <p class="app-version">v<span id="appVersion">1.2.0</span></p>
+                <p class="app-version">v<span id="appVersion">1.2.1</span></p>
             </div>
         </div>
     </footer>

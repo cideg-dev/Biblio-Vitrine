@@ -632,19 +632,26 @@ function initPdfViewer() {
       }
     })
   }
-  // Page slider
+  // Page slider (throttled)
   const pageSlider = document.getElementById('pageSlider')
+  let sliderPending = null
   pageSlider?.addEventListener('input', () => {
     const target = parseInt(pageSlider.value)
-    if (!pdfDoc || target < 1 || target > pdfDoc.numPages) return
+    document.getElementById('pageLabel').textContent = target
+    updateProgressBar()
+    sliderPending = target
+  })
+  pageSlider?.addEventListener('change', () => {
+    if (!sliderPending || !pdfDoc) return
+    const target = sliderPending
+    if (target < 1 || target > pdfDoc.numPages) return
     if (isScrollMode) {
       const c = container?.querySelector('[data-page="' + target + '"]')
       if (c) { c.scrollIntoView({ behavior: 'smooth', block: 'start' }); pageNum = target }
     } else {
       pageNum = target; queueRenderPage(pageNum)
     }
-    document.getElementById('pageLabel').textContent = target
-    updateProgressBar()
+    sliderPending = null
   })
   document.querySelector('.keyhint')?.addEventListener('click', toggleShortcutHelp)
   document.getElementById('shareBtn')?.addEventListener('click', sharePdf)
