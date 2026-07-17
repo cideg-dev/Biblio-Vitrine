@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Préchargement de pdf.js en arrière-plan pour les vignettes
   loadPdfJs().catch(() => {})
   initPwaInstall()
+  initHomeEnfants()
 })
 
 // ─── Config ───
@@ -227,6 +228,37 @@ function initHomeContent() {
       impacts.innerHTML = d.donateImpact.map(item => `<li><i class="fas fa-check-circle" aria-hidden="true"></i> ${item}</li>`).join('')
     }
   }).catch(() => {})
+}
+
+// ─── Home Enfants Section ───
+const HOME_STORIES = [
+  {n:1,fr:'Lorsque Dieu a tout créé',en:'When God Made Everything',testament:'at'},
+  {n:2,fr:"Le début de la folie de l'homme",en:"The Start of Man's Sadness",testament:'at'},
+  {n:3,fr:'Noé et la grande innondation',en:'Noah and the Great Flood',testament:'at'},
+  {n:4,fr:'La promesse de Dieu à Abraham',en:"God's Promise to Abraham",testament:'at'},
+  {n:5,fr:"Dieu met l'amour d'Abraham à l'épreuve",en:"God Tests Abraham's Love",testament:'at'},
+  {n:6,fr:'Jacob le trompeur',en:'Jacob the Deceiver',testament:'at'}
+]
+function initHomeEnfants() {
+  const grid = document.getElementById('homeEnfantsGrid')
+  if (!grid) return
+  grid.innerHTML = HOME_STORIES.map(s => {
+    const hue = s.testament === 'at' ? ((s.n * 47 + 10) % 360) : ((s.n * 37 + 200) % 360)
+    const c1 = `hsl(${hue}, 55%, 40%)`
+    const c2 = `hsl(${(hue + 40) % 360}, 55%, 30%)`
+    const icon = s.testament === 'at' ? 'fa-scroll' : 'fa-cross'
+    const badgeTxt = s.testament === 'at' ? 'AT' : 'NT'
+    return `<a href="enfants.html" class="home-enfant-card" title="${s.fr}">
+      <div class="home-enfant-thumb" style="background:linear-gradient(135deg,${c1},${c2})">
+        <i class="fas ${icon}"></i>
+        <span class="home-enfant-badge ${s.testament}">${badgeTxt}</span>
+      </div>
+      <div class="home-enfant-info">
+        <strong>${s.fr}</strong>
+        <span>#${s.n.toString().padStart(2,'0')}</span>
+      </div>
+    </a>`
+  }).join('')
 }
 
 // ─── Data Loading ───

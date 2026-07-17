@@ -252,31 +252,45 @@ function openChildPdf(url, title) {
   const fallback = document.getElementById('childPdfFallback')
   const fallbackLink = document.getElementById('childPdfFallbackLink')
   titleEl.textContent = title
+  const cleanTitle = title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g, '').trim()
   dlBtn.href = url
-  dlBtn.download = title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g, '').trim() + '.pdf'
+  dlBtn.download = cleanTitle + '.pdf'
   extBtn.href = url
   fallback.style.display = 'none'
+  fallbackLink.href = url
 
   viewer.style.display = 'flex'
   document.body.style.overflow = 'hidden'
+  frame.src = ''
 
-  frame.src = url
-  frame.onerror = () => {
-    fallback.style.display = 'flex'
-    fallbackLink.href = url
-  }
-  setTimeout(() => {
+  // Add #view=FitH for better iframe PDF display
+  const pdfUrl = url + (url.includes('?') ? '&' : '#') + 'view=FitH'
+  frame.onload = () => {
     try {
-      if (frame.contentDocument?.body?.innerHTML === '' || frame.contentDocument?.body?.querySelector('img') === null) {
-        // PDF might not have loaded, show fallback after timeout
+      if (frame.contentDocument?.body?.innerHTML === '' ||
+          (frame.contentDocument?.body?.children?.length || 0) === 0) {
+        fallback.style.display = 'flex'
       }
-    } catch {} // cross-origin errors are expected
-  }, 3000)
+    } catch {} // same-origin only
+  }
+  frame.src = pdfUrl
+
+  // Fallback if PDF doesn't load after 5s
+  clearTimeout(frame._loadTimer)
+  frame._loadTimer = setTimeout(() => {
+    try {
+      if (!frame.contentDocument?.body?.innerHTML ||
+          frame.contentDocument?.body?.children?.length > 0) return
+    } catch {}
+    fallback.style.display = 'flex'
+  }, 5000)
 }
 
 function closeChildPdf() {
+  const frame = document.getElementById('childPdfFrame')
+  clearTimeout(frame._loadTimer)
   document.getElementById('childPdfViewer').style.display = 'none'
-  document.getElementById('childPdfFrame').src = ''
+  frame.src = ''
   document.getElementById('childPdfFallback').style.display = 'none'
   document.body.style.overflow = ''
 }
