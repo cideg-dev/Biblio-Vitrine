@@ -2571,6 +2571,7 @@ input[type="file"] {
     white-space: nowrap;
 }
 .enfant-link:hover { transform: translateY(-1px); }
+.enfant-link:active { transform: scale(0.93); background: rgba(255,255,255,0.1); }
 .enfant-link.pdf-link { color: #ff6b6b; border-color: rgba(255,107,107,0.12); }
 .enfant-link.pdf-link:hover { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.2); }
 .enfant-link.cb-link { color: #51cf66; border-color: rgba(81,207,102,0.12); }
