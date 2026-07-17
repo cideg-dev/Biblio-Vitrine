@@ -493,31 +493,7 @@
       document.getElementById('updateAppBtn')?.addEventListener('click', () => {
         window.location.reload()
       })
-      let deferredPrompt = null
-      window.addEventListener('beforeinstallprompt', e => {
-        e.preventDefault()
-        deferredPrompt = e
-        document.getElementById('installPwaBtn').style.display = 'flex'
-      })
-      document.getElementById('installPwaBtn')?.addEventListener('click', async () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt()
-          const choice = await deferredPrompt.userChoice
-          if (choice.outcome === 'accepted') document.getElementById('installPwaBtn').style.display = 'none'
-          deferredPrompt = null
-          return
-        }
-        // iOS fallback: instructions
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
-        if (isIOS) {
-          alert('Pour installer l\'application :\n1. Touche le bouton Partager (⬆️)\n2. Fais défiler et choisis "Sur l\'écran d\'accueil"\n3. Touche "Ajouter"')
-        } else {
-          document.getElementById('installPwaBtn').textContent = 'Installer'
-        }
-      })
-      window.addEventListener('appinstalled', () => {
-        document.getElementById('installPwaBtn').style.display = 'none'
-      })
+      // PWA install logic moved to script.js
     </script>
     <link rel="manifest" href="manifest.json">
 </body>

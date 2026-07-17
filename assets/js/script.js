@@ -6,6 +6,21 @@ let currentSort = 'defaut'
 const itemsPerPage = 12
 const PDF_BASE = 'assets/documents/'
 const thumbCache = new Map()
+let deferredPwaPrompt = null
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault()
+  deferredPwaPrompt = e
+  const btn = document.getElementById('installPwaBtn')
+  if (btn) btn.style.display = 'flex'
+})
+// Fallback: show install button on mobile even if beforeinstallprompt never fired
+setTimeout(() => {
+  const btn = document.getElementById('installPwaBtn')
+  if (!btn || btn.style.display === 'flex') return
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
+  if (isMobile && !isStandalone) btn.style.display = 'flex'
+}, 3000)
 
 document.addEventListener('DOMContentLoaded', () => {
   initNav()
@@ -30,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // initHomeContent sera appelé après chargement des PDFs
   // Préchargement de pdf.js en arrière-plan pour les vignettes
   loadPdfJs().catch(() => {})
-
+  initPwaInstall()
 })
 
 // ─── Config ───
@@ -1400,6 +1415,31 @@ style.textContent += `
 body.reading-mode .text-layer span::selection { background: rgba(42,122,90,0.3); }
 `
 document.head.appendChild(style)
+
+// ─── PWA Install ───
+function initPwaInstall() {
+  const btn = document.getElementById('installPwaBtn')
+  if (!btn) return
+  btn.addEventListener('click', async () => {
+    if (deferredPwaPrompt) {
+      deferredPwaPrompt.prompt()
+      const choice = await deferredPwaPrompt.userChoice
+      if (choice.outcome === 'accepted') btn.style.display = 'none'
+      deferredPwaPrompt = null
+      return
+    }
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+    if (isIOS) {
+      alert('Pour installer l\'application :\n1. Touche le bouton Partager (⬆️)\n2. Fais défiler et choisis "Sur l\'écran d\'accueil"\n3. Touche "Ajouter"')
+    }
+  })
+  // If already installed, hide
+  if (window.matchMedia('(display-mode: standalone)').matches) btn.style.display = 'none'
+}
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('installPwaBtn')
+  if (btn) btn.style.display = 'none'
+})
 
 // ─── Toast helper ───
 function showToast(msg) {
