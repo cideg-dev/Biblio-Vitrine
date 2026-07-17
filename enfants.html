@@ -89,20 +89,42 @@
         </section>
     </main>
 
-    <!-- Lecteur PDF intégré (iframe) + Audio MP3 -->
+    <!-- Lecteur PDF intégré (iframe) + Audio MP3 complet -->
     <div id="childPdfViewer" class="child-pdf-viewer" style="display:none">
         <div class="child-pdf-header">
             <div class="child-pdf-header-left">
                 <button class="btn btn-secondary" onclick="closeChildPdf()" aria-label="Fermer" title="Fermer"><i class="fas fa-times"></i></button>
                 <span id="childPdfTitle" class="child-pdf-title">Histoire</span>
+                <button id="childFavBtn" class="btn btn-secondary" onclick="childToggleFav()" aria-label="Favori" title="Favori"><i class="fas fa-heart"></i></button>
+                <span id="childProgressBadge" class="child-progress-badge" style="display:none"></span>
             </div>
             <div class="child-pdf-header-center">
-                <button id="childTtsBtn" class="btn btn-secondary" onclick="childToggleTts()" aria-label="Écouter l'histoire" title="Écouter l'histoire"><i class="fas fa-headphones"></i> Audio</button>
+                <button class="btn btn-secondary" onclick="childPrevStory()" title="Histoire précédente"><i class="fas fa-step-backward"></i></button>
+                <span id="childStoryCounter" style="font-size:0.75rem;color:var(--text2);white-space:nowrap">1/60</span>
+                <button class="btn btn-secondary" onclick="childNextStory()" title="Histoire suivante"><i class="fas fa-step-forward"></i></button>
             </div>
             <div class="child-pdf-header-right">
+                <button id="childFullscreenBtn" class="btn btn-secondary" onclick="childToggleFullscreen()" aria-label="Plein écran" title="Plein écran"><i class="fas fa-expand"></i></button>
                 <a id="childPdfDownloadBtn" class="btn btn-secondary" download aria-label="Télécharger" title="Télécharger"><i class="fas fa-download"></i></a>
                 <a id="childPdfExternalBtn" class="btn btn-secondary" target="_blank" rel="noopener" aria-label="Ouvrir" title="Ouvrir dans un nouvel onglet"><i class="fas fa-external-link-alt"></i></a>
             </div>
+        </div>
+        <div class="child-pdf-audio" id="childAudioBar" style="display:none">
+            <button id="childPlayBtn" class="btn btn-secondary" onclick="childTogglePlay()" title="Lecture/Pause"><i class="fas fa-play"></i></button>
+            <div class="child-audio-progress" onclick="childSeekAudio(event)">
+                <div class="child-audio-progress-bar" id="childAudioProgressBar"></div>
+                <div class="child-audio-thumb" id="childAudioThumb"></div>
+            </div>
+            <span id="childAudioTime" class="child-audio-time">0:00 / 0:00</span>
+            <select id="childSpeedSelect" class="child-speed-select" onchange="childSetSpeed(this.value)" aria-label="Vitesse" title="Vitesse">
+                <option value="0.75">0.75x</option>
+                <option value="1" selected>1x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+                <option value="2">2x</option>
+            </select>
+            <button id="childVolumeBtn" class="btn btn-secondary" onclick="childToggleMute()" title="Volume"><i class="fas fa-volume-up"></i></button>
+            <input type="range" id="childVolumeSlider" class="child-volume-slider" min="0" max="100" value="100" oninput="childSetVolume(this.value)" aria-label="Volume">
         </div>
         <div class="child-pdf-body">
             <iframe id="childPdfFrame" class="child-pdf-iframe" title="Lecteur PDF"></iframe>
@@ -245,8 +267,21 @@ function cardColors(n, testament) {
   return { hue, sat: s, lig: l }
 }
 
-// ─── Lecteur PDF (iframe) + Audio MP3 ───
-let childAudio = null, childAudioUrl = ''
+// ─── Lecteur PDF (iframe) + Audio MP3 complet ───
+let childAudio = null, childAudioUrl = '', childStoryId = 0
+let childFavs = [], childRead = {}
+
+function loadChildStorage() {
+  try {
+    childFavs = JSON.parse(localStorage.getItem('enfantFavs') || '[]')
+    childRead = JSON.parse(localStorage.getItem('enfantRead') || '{}')
+  } catch {}
+}
+
+function formatTime(s) {
+  const m = Math.floor(s / 60), sec = Math.floor(s % 60)
+  return m + ':' + (sec < 10 ? '0' : '') + sec
+}
 
 function openChildPdf(url, title, audioUrl) {
   const viewer = document.getElementById('childPdfViewer')
@@ -263,57 +298,174 @@ function openChildPdf(url, title, audioUrl) {
   fallback.style.display = 'none'
   fallbackLink.href = url
 
-  childAudioUrl = audioUrl || ''
-  const ttsBtn = document.getElementById('childTtsBtn')
-  ttsBtn.style.display = childAudioUrl ? 'inline-flex' : 'none'
-  ttsBtn.classList.remove('active')
-  ttsBtn.innerHTML = '<i class="fas fa-headphones"></i> Audio'
-
-  // Stop any previous audio
+  // Stop previous audio
   if (childAudio) { childAudio.pause(); childAudio.currentTime = 0 }
+
+  childAudioUrl = audioUrl || ''
+  const audioBar = document.getElementById('childAudioBar')
+  audioBar.style.display = childAudioUrl ? 'flex' : 'none'
+  resetAudioUI()
+
+  // Story position
+  const story = STORIES.find(s => buildUrl(s, 'pdf') === url || buildUrl(s, 'cb') === url)
+  childStoryId = story ? story.n : 0
+  const idx = childStoryId ? STORIES.findIndex(s => s.n === childStoryId) + 1 : 0
+  document.getElementById('childStoryCounter').textContent = idx ? idx + '/' + STORIES.length : '—'
+  updateFavBtn()
+  updateReadStatus()
 
   viewer.style.display = 'flex'
   document.body.style.overflow = 'hidden'
 
   frame.onerror = () => { fallback.style.display = 'flex' }
+  frame.onload = () => {
+    try {
+      if (frame.contentDocument?.body?.innerHTML === '' ||
+          (frame.contentDocument?.body?.children?.length || 0) === 0) fallback.style.display = 'flex'
+    } catch {}
+  }
   frame.src = url
 
   clearTimeout(frame._loadTimer)
   frame._loadTimer = setTimeout(() => {
     try {
       if (!frame.contentDocument?.body?.innerHTML ||
-          frame.contentDocument?.body?.querySelector('img')) return
+          frame.contentDocument?.body?.children?.length > 0) return
     } catch {}
     fallback.style.display = 'flex'
   }, 5000)
 }
 
-function childToggleTts() {
-  const btn = document.getElementById('childTtsBtn')
-  if (childAudio && !childAudio.paused) {
-    childAudio.pause(); childAudio.currentTime = 0
-    btn.classList.remove('active')
-    btn.innerHTML = '<i class="fas fa-headphones"></i> Audio'
-    return
-  }
-  if (!childAudioUrl) return
-
-  btn.classList.add('active')
-  btn.innerHTML = '<i class="fas fa-stop"></i> Stop'
-
-  if (!childAudio) {
-    childAudio = new Audio()
-    childAudio.onended = () => {
-      btn.classList.remove('active')
-      btn.innerHTML = '<i class="fas fa-headphones"></i> Audio'
-    }
-  }
-  childAudio.src = childAudioUrl
-  childAudio.play().catch(() => {
-    btn.classList.remove('active')
-    btn.innerHTML = '<i class="fas fa-headphones"></i> Audio'
-  })
+// ─── Audio controls ───
+function resetAudioUI() {
+  const btn = document.getElementById('childPlayBtn')
+  btn.innerHTML = '<i class="fas fa-play"></i>'
+  document.getElementById('childAudioProgressBar').style.width = '0%'
+  document.getElementById('childAudioTime').textContent = '0:00 / 0:00'
 }
+
+function childTogglePlay() {
+  const btn = document.getElementById('childPlayBtn')
+  if (!childAudioUrl) return
+  if (!childAudio || childAudio.paused) {
+    if (!childAudio) {
+      childAudio = new Audio()
+      childAudio.onended = () => {
+        document.getElementById('childPlayBtn').innerHTML = '<i class="fas fa-play"></i>'
+        document.getElementById('childAudioProgressBar').style.width = '0%'
+        // Auto-play next story
+        if (childStoryId) childNextStory()
+      }
+      childAudio.ontimeupdate = () => {
+        if (childAudio.duration) {
+          const pct = (childAudio.currentTime / childAudio.duration) * 100
+          document.getElementById('childAudioProgressBar').style.width = pct + '%'
+          document.getElementById('childAudioTime').textContent =
+            formatTime(childAudio.currentTime) + ' / ' + formatTime(childAudio.duration)
+        }
+      }
+    }
+    childAudio.src = childAudioUrl
+    childAudio.play().catch(() => { resetAudioUI() })
+    btn.innerHTML = '<i class="fas fa-pause"></i>'
+  } else {
+    childAudio.pause()
+    btn.innerHTML = '<i class="fas fa-play"></i>'
+  }
+}
+
+function childSeekAudio(e) {
+  if (!childAudio || !childAudio.duration) return
+  const bar = e.currentTarget
+  const rect = bar.getBoundingClientRect()
+  const pct = (e.clientX - rect.left) / rect.width
+  childAudio.currentTime = pct * childAudio.duration
+}
+
+function childSetSpeed(val) {
+  if (childAudio) childAudio.playbackRate = parseFloat(val)
+}
+
+function childToggleMute() {
+  if (!childAudio) return
+  childAudio.muted = !childAudio.muted
+  const icon = document.getElementById('childVolumeBtn').querySelector('i')
+  icon.className = 'fas fa-volume-' + (childAudio.muted ? 'off' : 'up')
+}
+
+function childSetVolume(val) {
+  if (childAudio) {
+    childAudio.volume = val / 100
+    const icon = document.getElementById('childVolumeBtn').querySelector('i')
+    icon.className = 'fas fa-volume-' + (val == 0 ? 'off' : val < 50 ? 'down' : 'up')
+  }
+}
+
+// ─── Navigation histoires ───
+function childPrevStory() {
+  if (!childStoryId) return
+  const idx = STORIES.findIndex(s => s.n === childStoryId)
+  if (idx <= 0) return
+  const prev = STORIES[idx - 1]
+  openChildPdf(buildUrl(prev, 'pdf'), prev.fr, buildUrl(prev, 'audio'))
+  if (childAudio) { childAudio.pause(); childAudio.currentTime = 0; resetAudioUI() }
+}
+function childNextStory() {
+  if (!childStoryId) return
+  const idx = STORIES.findIndex(s => s.n === childStoryId)
+  if (idx < 0 || idx >= STORIES.length - 1) return
+  const next = STORIES[idx + 1]
+  openChildPdf(buildUrl(next, 'pdf'), next.fr, buildUrl(next, 'audio'))
+  if (childAudio) { childAudio.pause(); childAudio.currentTime = 0; resetAudioUI() }
+  // Auto-play audio for next story
+  setTimeout(() => childTogglePlay(), 500)
+}
+
+// ─── Favoris ───
+function updateFavBtn() {
+  const btn = document.getElementById('childFavBtn')
+  const isFav = childStoryId && childFavs.includes(childStoryId)
+  btn.classList.toggle('active', isFav)
+  btn.innerHTML = '<i class="' + (isFav ? 'fas' : 'far') + ' fa-heart"></i>'
+  btn.style.color = isFav ? '#ff6b6b' : ''
+}
+
+function childToggleFav() {
+  if (!childStoryId) return
+  const idx = childFavs.indexOf(childStoryId)
+  if (idx >= 0) childFavs.splice(idx, 1)
+  else childFavs.push(childStoryId)
+  localStorage.setItem('enfantFavs', JSON.stringify(childFavs))
+  updateFavBtn()
+}
+
+// ─── Lecture tracking ───
+function updateReadStatus() {
+  if (!childStoryId) return
+  childRead[childStoryId] = Date.now()
+  localStorage.setItem('enfantRead', JSON.stringify(childRead))
+  const badge = document.getElementById('childProgressBadge')
+  const count = Object.keys(childRead).length
+  badge.style.display = count ? 'inline' : 'none'
+  badge.textContent = count + '/60 lues'
+}
+
+// ─── Plein écran ───
+function childToggleFullscreen() {
+  const viewer = document.getElementById('childPdfViewer')
+  const btn = document.getElementById('childFullscreenBtn')
+  if (!document.fullscreenElement) {
+    viewer.requestFullscreen?.().catch(() => {})
+    btn.innerHTML = '<i class="fas fa-compress"></i>'
+  } else {
+    document.exitFullscreen?.()
+    btn.innerHTML = '<i class="fas fa-expand"></i>'
+  }
+}
+document.addEventListener('fullscreenchange', () => {
+  const btn = document.getElementById('childFullscreenBtn')
+  if (btn) btn.innerHTML = '<i class="fas fa-' + (document.fullscreenElement ? 'compress' : 'expand') + '"></i>'
+})
 
 function closeChildPdf() {
   if (childAudio) { childAudio.pause(); childAudio.currentTime = 0 }
@@ -323,10 +475,15 @@ function closeChildPdf() {
   frame.src = ''
   document.getElementById('childPdfFallback').style.display = 'none'
   document.body.style.overflow = ''
+  if (document.fullscreenElement) document.exitFullscreen()?.catch(() => {})
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.getElementById('childPdfViewer').style.display !== 'none') closeChildPdf()
+  if (document.getElementById('childPdfViewer').style.display === 'none') return
+  if (e.key === 'Escape') closeChildPdf()
+  if (e.key === 'ArrowLeft') childPrevStory()
+  if (e.key === 'ArrowRight') childNextStory()
+  if (e.key === ' ') { e.preventDefault(); childTogglePlay() }
 })
 
 function renderStories(list) {
@@ -393,9 +550,15 @@ function openStoryCb(n) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  loadChildStorage()
   renderStories(STORIES)
   document.getElementById('enfantsSearch').addEventListener('input', filterStories)
   document.getElementById('enfantsFilter').addEventListener('change', filterStories)
+
+  const badge = document.getElementById('childProgressBadge')
+  const count = Object.keys(childRead).length
+  badge.style.display = count ? 'inline' : 'none'
+  badge.textContent = count + '/60 lues'
 
   const hamburger = document.querySelector('.hamburger')
   const navMenu = document.querySelector('.nav-menu')
