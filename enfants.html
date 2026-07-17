@@ -311,9 +311,9 @@ function renderStories(list) {
         <div class="enfant-title">${s.fr}</div>
         <div class="enfant-title-en">${s.en}</div>
         <div class="enfant-actions">
-          <button onclick="openChildPdf('${pdfUrl}','${s.fr}')" class="enfant-link pdf-link" title="Lire l'histoire"><i class="fas fa-book-open"></i> Lire</button>
+          <button class="enfant-link pdf-link lire-btn" data-n="${s.n}" data-type="pdf" title="Lire l'histoire"><i class="fas fa-book-open"></i> Lire</button>
+          <button class="enfant-link cb-link lire-btn" data-n="${s.n}" data-type="cb" title="Livre de coloriage"><i class="fas fa-palette"></i> Colorier</button>
           <a href="${pdfUrl}" target="_blank" rel="noopener" class="enfant-link dl-link" title="Télécharger le PDF" download><i class="fas fa-download"></i></a>
-          <a href="${cbUrl}" target="_blank" rel="noopener" class="enfant-link cb-link" title="Coloriage"><i class="fas fa-palette"></i></a>
           <a href="${audioUrl}" target="_blank" rel="noopener" class="enfant-link audio-link" title="Audio MP3"><i class="fas fa-headphones"></i></a>
           <a href="${tractUrl}" target="_blank" rel="noopener" class="enfant-link dl-link" title="Tract"><i class="fas fa-scroll"></i></a>
           <a href="https://vimeo.com/bibleforchildren/french${pad(s.n)}" target="_blank" rel="noopener" class="enfant-link video-link" title="Vidéo"><i class="fas fa-video"></i></a>
@@ -338,10 +338,23 @@ function filterStories() {
   renderStories(filtered)
 }
 
+function handleCardClick(e) {
+  const btn = e.target.closest('.lire-btn')
+  if (!btn) return
+  const n = parseInt(btn.dataset.n)
+  const type = btn.dataset.type
+  const story = STORIES.find(s => s.n === n)
+  if (!story) return
+  const url = buildUrl(story, type)
+  const suffix = type === 'cb' ? ' (coloriage)' : ''
+  openChildPdf(url, story.fr + suffix)
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   renderStories(STORIES)
   document.getElementById('enfantsSearch').addEventListener('input', filterStories)
   document.getElementById('enfantsFilter').addEventListener('change', filterStories)
+  document.getElementById('enfantsGrid').addEventListener('click', handleCardClick)
 
   const hamburger = document.querySelector('.hamburger')
   const navMenu = document.querySelector('.nav-menu')
