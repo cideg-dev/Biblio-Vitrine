@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXL9EB8SQY"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config','G-KXL9EB8SQY');</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
     <a href="#enfants-content" id="skipLink" class="skip-link">Aller au contenu</a>
@@ -89,25 +90,26 @@
         </section>
     </main>
 
-    <!-- Lecteur PDF intégré pour les histoires enfants -->
+    <!-- Lecteur PDF intégré (pdf.js) pour les histoires enfants -->
     <div id="childPdfViewer" class="child-pdf-viewer" style="display:none">
         <div class="child-pdf-header">
             <div class="child-pdf-header-left">
                 <button class="btn btn-secondary" onclick="closeChildPdf()" aria-label="Fermer" title="Fermer"><i class="fas fa-times"></i></button>
                 <span id="childPdfTitle" class="child-pdf-title">Histoire</span>
             </div>
+            <div class="child-pdf-header-center">
+                <button class="btn btn-secondary" onclick="childPrevPage()" aria-label="Page précédente" title="Page précédente"><i class="fas fa-chevron-left"></i></button>
+                <span id="childPageNum">1</span><span style="color:var(--text3);font-size:0.75rem">/</span><span id="childPageTotal">1</span>
+                <button class="btn btn-secondary" onclick="childNextPage()" aria-label="Page suivante" title="Page suivante"><i class="fas fa-chevron-right"></i></button>
+                <button id="childTtsBtn" class="btn btn-secondary" onclick="childToggleTts()" aria-label="Lecture audio" title="Lecture audio"><i class="fas fa-volume-up"></i></button>
+            </div>
             <div class="child-pdf-header-right">
-                <a id="childPdfDownloadBtn" class="btn btn-secondary" download aria-label="Télécharger" title="Télécharger le PDF"><i class="fas fa-download"></i> Télécharger</a>
-                <a id="childPdfExternalBtn" class="btn btn-secondary" target="_blank" rel="noopener" aria-label="Ouvrir dans un nouvel onglet" title="Ouvrir dans un nouvel onglet"><i class="fas fa-external-link-alt"></i></a>
+                <a id="childPdfDownloadBtn" class="btn btn-secondary" download aria-label="Télécharger" title="Télécharger"><i class="fas fa-download"></i></a>
+                <a id="childPdfExternalBtn" class="btn btn-secondary" target="_blank" rel="noopener" aria-label="Ouvrir" title="Ouvrir dans un nouvel onglet"><i class="fas fa-external-link-alt"></i></a>
             </div>
         </div>
         <div class="child-pdf-body">
-            <iframe id="childPdfFrame" class="child-pdf-iframe" title="Lecteur PDF"></iframe>
-            <div id="childPdfFallback" class="child-pdf-fallback" style="display:none">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Impossible d'afficher ce PDF dans le navigateur.</p>
-                <a id="childPdfFallbackLink" class="btn-primary" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
-            </div>
+            <canvas id="childPdfCanvas"></canvas>
         </div>
     </div>
 
@@ -242,62 +244,114 @@ function cardColors(n, testament) {
   return { hue, sat: s, lig: l }
 }
 
-// Open PDF in our embedded viewer
+// ─── Lecteur PDF avec pdf.js ───
+let childPdfDoc = null, childPageNum = 1, childScale = 1.5
+let childRendering = false, childTtsSynth = null, childTtsPlaying = false
+
 function openChildPdf(url, title) {
   const viewer = document.getElementById('childPdfViewer')
-  const frame = document.getElementById('childPdfFrame')
   const titleEl = document.getElementById('childPdfTitle')
   const dlBtn = document.getElementById('childPdfDownloadBtn')
   const extBtn = document.getElementById('childPdfExternalBtn')
-  const fallback = document.getElementById('childPdfFallback')
-  const fallbackLink = document.getElementById('childPdfFallbackLink')
   titleEl.textContent = title
-  const cleanTitle = title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g, '').trim()
   dlBtn.href = url
-  dlBtn.download = cleanTitle + '.pdf'
+  dlBtn.download = title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g, '').trim() + '.pdf'
   extBtn.href = url
-  fallback.style.display = 'none'
-  fallbackLink.href = url
-
   viewer.style.display = 'flex'
   document.body.style.overflow = 'hidden'
-  frame.src = ''
 
-  // Add #view=FitH for better iframe PDF display
-  const pdfUrl = url + (url.includes('?') ? '&' : '#') + 'view=FitH'
-  frame.onload = () => {
-    try {
-      if (frame.contentDocument?.body?.innerHTML === '' ||
-          (frame.contentDocument?.body?.children?.length || 0) === 0) {
-        fallback.style.display = 'flex'
-      }
-    } catch {} // same-origin only
+  childPageNum = 1; childPdfDoc = null
+  document.getElementById('childPageNum').textContent = '1'
+  document.getElementById('childPageTotal').textContent = '—'
+  const canvas = document.getElementById('childPdfCanvas')
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+  pdfjsLib.getDocument(url).promise.then(pdf => {
+    childPdfDoc = pdf
+    document.getElementById('childPageTotal').textContent = pdf.numPages
+    renderChildPage(1)
+  }).catch(() => {
+    closeChildPdf()
+    window.open(url, '_blank')
+  })
+}
+
+function renderChildPage(num) {
+  if (!childPdfDoc || childRendering) return
+  childRendering = true
+  childPageNum = num
+  document.getElementById('childPageNum').textContent = num
+  const canvas = document.getElementById('childPdfCanvas')
+  const ctx = canvas.getContext('2d')
+  const body = document.querySelector('.child-pdf-body')
+  const maxW = body.clientWidth - 20
+
+  childPdfDoc.getPage(num).then(page => {
+    let scale = childScale
+    const vp = page.getViewport({ scale: 1 })
+    if (vp.width * scale > maxW) scale = maxW / vp.width
+    const viewport = page.getViewport({ scale })
+    canvas.width = viewport.width
+    canvas.height = viewport.height
+    page.render({ canvasContext: ctx, viewport }).promise.then(() => {
+      childRendering = false
+    })
+  })
+}
+
+function childPrevPage() {
+  if (childPdfDoc && childPageNum > 1) renderChildPage(childPageNum - 1)
+}
+function childNextPage() {
+  if (childPdfDoc && childPageNum < childPdfDoc.numPages) renderChildPage(childPageNum + 1)
+}
+
+function childToggleTts() {
+  const btn = document.getElementById('childTtsBtn')
+  if (childTtsPlaying) {
+    childTtsPlaying = false
+    if (childTtsSynth) { childTtsSynth.cancel(); childTtsSynth = null }
+    btn.classList.remove('active')
+    return
   }
-  frame.src = pdfUrl
+  if (!childPdfDoc) return
+  childTtsSynth = window.speechSynthesis
+  if (!childTtsSynth) return
+  btn.classList.add('active')
+  childTtsPlaying = true
 
-  // Fallback if PDF doesn't load after 5s
-  clearTimeout(frame._loadTimer)
-  frame._loadTimer = setTimeout(() => {
-    try {
-      if (!frame.contentDocument?.body?.innerHTML ||
-          frame.contentDocument?.body?.children?.length > 0) return
-    } catch {}
-    fallback.style.display = 'flex'
-  }, 5000)
+  childPdfDoc.getPage(childPageNum).then(p => p.getTextContent()).then(tc => {
+    const text = tc.items.map(i => i.str).join(' ')
+    if (!text.trim()) { btn.classList.remove('active'); childTtsPlaying = false; return }
+    const utter = new SpeechSynthesisUtterance(text)
+    utter.lang = 'fr-FR'; utter.rate = 0.9
+    const voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('fr'))
+    if (voices.length) utter.voice = voices[0]
+    utter.onend = () => { childTtsPlaying = false; btn.classList.remove('active') }
+    utter.onerror = () => { childTtsPlaying = false; btn.classList.remove('active') }
+    childTtsSynth.speak(utter)
+  }).catch(() => { btn.classList.remove('active'); childTtsPlaying = false })
 }
 
 function closeChildPdf() {
-  const frame = document.getElementById('childPdfFrame')
-  clearTimeout(frame._loadTimer)
+  if (childTtsPlaying) {
+    childTtsPlaying = false
+    if (childTtsSynth) { childTtsSynth.cancel(); childTtsSynth = null }
+  }
   document.getElementById('childPdfViewer').style.display = 'none'
-  frame.src = ''
-  document.getElementById('childPdfFallback').style.display = 'none'
+  document.getElementById('childPdfCanvas').width = 0
+  document.getElementById('childPdfCanvas').height = 0
+  childPdfDoc = null
   document.body.style.overflow = ''
 }
 
-// Close on Escape
+// Keyboard shortcuts for the viewer
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.getElementById('childPdfViewer').style.display !== 'none') closeChildPdf()
+  const v = document.getElementById('childPdfViewer')
+  if (v.style.display === 'none') return
+  if (e.key === 'Escape') closeChildPdf()
+  if (e.key === 'ArrowLeft') childPrevPage()
+  if (e.key === 'ArrowRight') childNextPage()
 })
 
 function renderStories(list) {
