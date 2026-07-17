@@ -1519,6 +1519,8 @@ function initPwaInstall() {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
     if (isIOS) {
       alert('Pour installer l\'application :\n1. Touche le bouton Partager (⬆️)\n2. Fais défiler et choisis "Sur l\'écran d\'accueil"\n3. Touche "Ajouter"')
+    } else {
+      alert('Pour installer l\'application :\n1. Ouvre le menu du navigateur (⋮)\n2. Cherche "Installer l\'application" ou "Ajouter à l\'écran d\'accueil"')
     }
   })
   // If already installed, hide

@@ -41,6 +41,7 @@
                     <li class="nav-item"><a href="enfants.html" class="nav-link active" style="color:var(--primary)!important"><i class="fas fa-child"></i> Enfants</a></li>
                     <li class="nav-item"><a href="index.html#soutenir" class="nav-link donate-link"><i class="fas fa-heart"></i> Soutenir</a></li>
                     <li class="nav-item"><a href="admin.html" class="admin-btn">Admin</a></li>
+                    <li class="nav-item"><button id="installPwaBtn" class="install-pwa-btn" style="display:none"><i class="fas fa-download"></i> App</button></li>
                 </ul>
                 <div class="hamburger"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
             </div>
@@ -130,7 +131,7 @@
             <iframe id="childPdfFrame" class="child-pdf-iframe" title="Lecteur PDF"></iframe>
             <div id="childPdfFallback" class="child-pdf-fallback" style="display:none">
                 <i class="fas fa-exclamation-triangle"></i>
-                <p>Impossible d'afficher ce PDF.</p>
+                <p id="childPdfFallbackMsg">Impossible d'afficher ce PDF dans le navigateur.</p>
                 <a id="childPdfFallbackLink" class="btn-primary" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
             </div>
         </div>
@@ -291,12 +292,13 @@ function openChildPdf(url, title, audioUrl) {
   const extBtn = document.getElementById('childPdfExternalBtn')
   const fallback = document.getElementById('childPdfFallback')
   const fallbackLink = document.getElementById('childPdfFallbackLink')
+  const fallbackMsg = document.getElementById('childPdfFallbackMsg')
   titleEl.textContent = title
   dlBtn.href = url
   dlBtn.download = title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g, '').trim() + '.pdf'
   extBtn.href = url
-  fallback.style.display = 'none'
-  fallbackLink.href = url
+
+  const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 
   // Stop previous audio
   if (childAudio) { childAudio.pause(); childAudio.currentTime = 0 }
@@ -317,8 +319,18 @@ function openChildPdf(url, title, audioUrl) {
   viewer.style.display = 'flex'
   document.body.style.overflow = 'hidden'
 
-  frame.onerror = () => { fallback.style.display = 'flex' }
-  frame.src = url
+  if (isMobile) {
+    frame.src = ''
+    fallbackMsg.textContent = 'Ouvert dans un nouvel onglet pour une meilleure lecture sur mobile.'
+    fallbackLink.textContent = 'Rouvrir le PDF'
+    fallbackLink.href = url
+    fallback.style.display = 'flex'
+    window.open(url, '_blank')
+  } else {
+    fallback.style.display = 'none'
+    frame.onerror = () => { fallback.style.display = 'flex' }
+    frame.src = url
+  }
 }
 
 // ─── Audio controls ───
@@ -543,6 +555,35 @@ document.addEventListener('DOMContentLoaded', () => {
   const count = Object.keys(childRead).length
   badge.style.display = count ? 'inline' : 'none'
   badge.textContent = count + '/60 lues'
+
+  // PWA install
+  let deferredPwaPrompt = null
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault()
+    deferredPwaPrompt = e
+    const btn = document.getElementById('installPwaBtn')
+    if (btn) btn.style.display = 'inline-flex'
+  })
+  document.getElementById('installPwaBtn')?.addEventListener('click', () => {
+    if (deferredPwaPrompt) {
+      deferredPwaPrompt.prompt()
+      deferredPwaPrompt.userChoice.then(() => { deferredPwaPrompt = null })
+      return
+    }
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+    if (isIOS) {
+      alert('Pour installer l\'application :\n1. Touche le bouton Partager (⬆️)\n2. Fais défiler et choisis "Sur l\'écran d\'accueil"\n3. Touche "Ajouter"')
+    } else {
+      alert('Pour installer l\'application :\n1. Ouvre le menu du navigateur (⋮)\n2. Cherche "Installer l\'application" ou "Ajouter à l\'écran d\'accueil"')
+    }
+  })
+  setTimeout(() => {
+    const btn = document.getElementById('installPwaBtn')
+    if (!btn || btn.style.display !== 'none') return
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
+    if (isMobile && !isStandalone) btn.style.display = 'inline-flex'
+  }, 3000)
 
   const hamburger = document.querySelector('.hamburger')
   const navMenu = document.querySelector('.nav-menu')
