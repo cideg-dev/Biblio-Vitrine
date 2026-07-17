@@ -584,6 +584,7 @@ async function loadPdfJs() {
     script.onload = () => {
       pdfjsLib = window.pdfjsLib
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+      if (pdfjsLib.GlobalWorkerOptions) pdfjsLib.GlobalWorkerOptions.standardFontDataUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/standard_fonts/'
       resolve()
     }
     script.onerror = reject
