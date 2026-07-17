@@ -669,7 +669,7 @@ function initPdfViewer() {
       const c = container?.querySelector('[data-page="' + target + '"]')
       if (c) { c.scrollIntoView({ behavior: 'smooth', block: 'start' }); pageNum = target }
     } else {
-      pageNum = target; queueRenderPage(pageNum)
+      pageNum = target; stopTts(); queueRenderPage(pageNum)
     }
     sliderPending = null
   })
@@ -679,6 +679,12 @@ function initPdfViewer() {
   document.getElementById('fitModeBtn')?.addEventListener('click', toggleFitMode)
   document.getElementById('reflowModeBtn')?.addEventListener('click', toggleReflowMode)
   document.getElementById('ttsBtn')?.addEventListener('click', toggleTts)
+  document.getElementById('ttsAutoReadBtn')?.addEventListener('click', () => {
+    ttsAutoRead = !ttsAutoRead
+    document.getElementById('ttsAutoReadBtn')?.classList.toggle('active')
+    localStorage.setItem('ttsAutoRead', ttsAutoRead ? '1' : '')
+    if (ttsAutoRead && pdfDoc && !ttsPlaying) checkAutoRead()
+  })
   document.getElementById('ttsVoiceSelect')?.addEventListener('change', e => {
     ttsVoiceIdx = parseInt(e.target.value) || 0
     localStorage.setItem('ttsVoiceIdx', e.target.value)
@@ -777,7 +783,7 @@ async function renderPdfPage(num) {
     ctx.drawImage(cached.img, 0, 0)
     pageIsRendering = false
     document.getElementById('pageNumber').textContent = num
-    if (pageNumPending !== null) { renderPdfPage(pageNumPending); pageNumPending = null }
+    if (pageNumPending !== null) { renderPdfPage(pageNumPending); pageNumPending = null } else { checkAutoRead() }
     return
   }
   pageIsRendering = true
@@ -807,7 +813,7 @@ async function renderPdfPage(num) {
   canvas.parentNode ? canvas.parentNode.replaceChild(wrapper, canvas) : null
   wrapper.appendChild(canvas)
   renderTextLayer(page, wrapper, currentScale)
-  if (pageNumPending !== null) { renderPdfPage(pageNumPending); pageNumPending = null }
+  if (pageNumPending !== null) { renderPdfPage(pageNumPending); pageNumPending = null } else { checkAutoRead() }
 }
 function queueRenderPage(num) { pageIsRendering ? (pageNumPending = num) : renderPdfPage(num) }
 function showPrevPdfPage() {
@@ -817,7 +823,7 @@ function showPrevPdfPage() {
     if (c) { c.scrollIntoView({ behavior: 'smooth', block: 'start' }); pageNum-- }
     return
   }
-  if (pageNum > 1) { pageNum--; queueRenderPage(pageNum) }
+  if (pageNum > 1) { pageNum--; stopTts(); queueRenderPage(pageNum) }
 }
 function showNextPdfPage() {
   if (isScrollMode) {
@@ -827,7 +833,7 @@ function showNextPdfPage() {
     if (c) { c.scrollIntoView({ behavior: 'smooth', block: 'start' }); pageNum++ }
     return
   }
-  if (pdfDoc && pageNum < pdfDoc.numPages) { pageNum++; queueRenderPage(pageNum) }
+  if (pdfDoc && pageNum < pdfDoc.numPages) { pageNum++; stopTts(); queueRenderPage(pageNum) }
 }
 function zoomIn() { if (currentScale < 3) { currentScale += 0.25; pageCache.clear(); isScrollMode ? renderScrollMode() : renderPdfPage(pageNum) } }
 function zoomOut() { if (currentScale > 0.25) { currentScale -= 0.25; pageCache.clear(); isScrollMode ? renderScrollMode() : renderPdfPage(pageNum) } }
@@ -1637,7 +1643,7 @@ async function loadPdfOutline() {
 // ─── Lecture audio (TTS) ───
 let ttsSynth = null, ttsUtterance = null, ttsPlaying = false, ttsPageText = ''
 let ttsFrenchVoices = [], ttsVoiceIdx = 0, ttsAutoRotate = false
-let ttsVoiceLoadAttempted = false
+let ttsVoiceLoadAttempted = false, ttsAutoRead = false, ttsContinuous = false
 
 function loadTtsVoices() {
   ttsVoiceLoadAttempted = true
@@ -1675,6 +1681,16 @@ function toggleTts() {
     const v = speechSynthesis.getVoices()
     if (v && v.length) ttsFrenchVoices = v.filter(x => x.lang.startsWith('fr'))
   }
+  ttsContinuous = true
+  speakPage(pageNum)
+}
+
+function checkAutoRead() {
+  if (!ttsAutoRead || !pdfDoc || ttsPlaying || isScrollMode) return
+  if (!ttsVoiceLoadAttempted) loadTtsVoices()
+  ttsSynth = window.speechSynthesis
+  if (!ttsSynth) return
+  ttsContinuous = false
   speakPage(pageNum)
 }
 function speakPage(num) {
@@ -1699,7 +1715,7 @@ function speakPage(num) {
         const ri = document.getElementById('ttsRotateIndicator')
         if (ri) ri.textContent = ttsFrenchVoices[ttsVoiceIdx].name.split(' ')[0]
       }
-      if (pageNum < pdfDoc.numPages && ttsPlaying) {
+      if (ttsContinuous && pageNum < pdfDoc.numPages && ttsPlaying) {
         if (isScrollMode) {
           pageNum++; const c = document.querySelector(`[data-page="${pageNum}"]`)
           if (c) c.scrollIntoView({ block: 'start' })
@@ -1832,6 +1848,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (speechSynthesis?.getVoices()?.length) loadTtsVoices()
   ttsAutoRotate = localStorage.getItem('ttsAutoRotate') === '1'
   document.getElementById('ttsRotateBtn')?.classList.toggle('active', ttsAutoRotate)
+  ttsAutoRead = localStorage.getItem('ttsAutoRead') === '1'
+  document.getElementById('ttsAutoReadBtn')?.classList.toggle('active', ttsAutoRead)
   initReadingMode()
   handleDirectLink()
   handleCategoryFilter()
