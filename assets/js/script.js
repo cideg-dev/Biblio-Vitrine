@@ -881,18 +881,21 @@ function cleanupScrollMode() {
   container.innerHTML = '<canvas id="pdfCanvas"></canvas>'
   container.style.overflow = ''
   container.style.padding = ''
+  container.style.display = ''
 }
 
 async function renderScrollMode() {
   if (!pdfDoc) return
   const container = document.getElementById('pdf-canvas-container')
   container.innerHTML = ''
+  container.style.display = 'block'
   container.style.overflow = 'auto'
   container.style.padding = '0.5rem'
+  container.style.textAlign = 'center'
   scrollCanvases = []
 
   const wrapper = document.createElement('div')
-  wrapper.style.cssText = 'margin:0 auto;max-width:100%'
+  wrapper.style.cssText = 'margin:0 auto;max-width:100%;width:100%'
   container.appendChild(wrapper)
 
   for (let i = 1; i <= pdfDoc.numPages; i++) {
