@@ -23,8 +23,7 @@ const CATEGORIES = [
 document.addEventListener('DOMContentLoaded', () => {
   checkAuth()
   document.getElementById('loginBtn').addEventListener('click', handleLogin)
-  document.getElementById('startOAuthBtn')?.addEventListener('click', startOAuth)
-  document.getElementById('cancelOAuthBtn')?.addEventListener('click', cancelOAuth)
+  document.getElementById('githubToken')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin() })
   document.getElementById('logoutBtn').addEventListener('click', handleLogout)
   document.getElementById('saveChangesBtn').addEventListener('click', saveChanges)
   document.getElementById('deleteFromListBtn').addEventListener('click', deleteSelected)
@@ -71,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
   dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'))
   dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); handleFileDrop(e.dataTransfer.files[0]) })
   fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFileDrop(fileInput.files[0]) })
-  document.getElementById('githubToken').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin() })
+
 
   document.getElementById('galleryGitUploadBtn').addEventListener('click', uploadGalleryToGitHub)
   document.getElementById('galleryGitFile').addEventListener('change', handleGalleryFileSelect)
@@ -114,63 +113,6 @@ function handleLogin() {
 function handleLogout() {
   sessionStorage.removeItem(TOKEN_KEY)
   showLogin()
-}
-
-// ─── OAuth Device Flow (connexion sans token) ───
-let oauthPollTimer = null
-
-async function startOAuth() {
-  const clientId = document.getElementById('oauthClientId').value.trim()
-  if (!clientId) return showNotif('Entre ton Client ID GitHub OAuth', 'error')
-  try {
-    const res = await fetch('https://github.com/login/device/code', {
-      method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ client_id: clientId, scope: 'repo' })
-    })
-    if (!res.ok) throw new Error('Erreur GitHub')
-    const data = await res.json()
-    document.getElementById('oauthStep1').style.display = 'none'
-    document.getElementById('oauthStep2').style.display = 'block'
-    document.getElementById('userCodeDisplay').textContent = data.user_code
-    document.getElementById('deviceVerificationLink').href = data.verification_uri
-    const interval = (data.interval || 5) * 1000
-    oauthPollTimer = setInterval(async () => {
-      try {
-        const pollRes = await fetch('https://github.com/login/oauth/access_token', {
-          method: 'POST',
-          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-          body: JSON.stringify({ client_id: clientId, device_code: data.device_code, grant_type: 'urn:ietf:params:oauth:grant-type:device_code' })
-        })
-        const pollData = await pollRes.json()
-        if (pollData.access_token) {
-          clearInterval(oauthPollTimer)
-          oauthPollTimer = null
-          sessionStorage.setItem(TOKEN_KEY, pollData.access_token)
-          document.getElementById('oauthSection').style.display = 'none'
-          showNotif('Connecté avec GitHub OAuth !', 'success')
-          showAdmin()
-        } else if (pollData.error === 'authorization_pending') {
-          // Attente utilisateur...
-        } else if (pollData.error === 'slow_down') {
-          // Ralentir le polling
-        } else if (pollData.error === 'expired_token') {
-          clearInterval(oauthPollTimer)
-          oauthPollTimer = null
-          showNotif('Code expiré. Réessaie.', 'error')
-          cancelOAuth()
-        }
-      } catch {}
-    }, interval)
-  } catch (e) {
-    showNotif('Erreur OAuth: ' + e.message, 'error')
-  }
-}
-
-function cancelOAuth() {
-  if (oauthPollTimer) { clearInterval(oauthPollTimer); oauthPollTimer = null }
-  document.getElementById('oauthStep1').style.display = 'block'
-  document.getElementById('oauthStep2').style.display = 'none'
 }
 
 async function githubFetch(path, options = {}) {
@@ -932,7 +874,8 @@ async function publishStats() {
 
 // ─── UI ───
 function showNotif(msg, type) {
-  const el = document.getElementById('notificationMessage')
+  const isLoginVisible = document.getElementById('loginSection')?.style.display !== 'none'
+  const el = isLoginVisible ? document.getElementById('loginNotification') : document.getElementById('notificationMessage')
   if (!el) return
   el.textContent = msg
   el.className = 'upload-status ' + type

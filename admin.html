@@ -32,26 +32,12 @@
             <div class="login-card">
                 <div class="login-icon"><i class="fas fa-lock"></i></div>
                 <h2>Connexion Admin</h2>
-                <p class="login-desc">Connecte-toi avec ton token GitHub pour gérer la bibliothèque.</p>
-                <p class="login-help"><i class="fas fa-info-circle"></i> <a href="https://github.com/settings/tokens?scopes=repo&description=Biblio-Vitrine-Admin" target="_blank" rel="noopener">Créer un token</a> (coche <code>repo</code>)</p>
-                <div class="form-group"><label for="githubToken">Token GitHub (PAT)</label><input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"></div>
-                <button id="loginBtn" class="btn-primary" style="width:100%;justify-content:center;margin-bottom:0.8rem">Se connecter</button>
-                <div style="text-align:center;margin-bottom:0.8rem;color:var(--text3);font-size:0.75rem">— ou —</div>
-                <div id="oauthSection">
-                    <div id="oauthStep1">
-                        <p style="font-size:0.82rem;color:var(--text2);margin-bottom:0.6rem;text-align:center">Connexion sans token via GitHub OAuth</p>
-                        <div class="form-group"><label for="oauthClientId">Client ID (GitHub OAuth App)</label><input type="text" id="oauthClientId" placeholder="Ov23li..."></div>
-                        <button id="startOAuthBtn" class="btn-outline" style="width:100%;justify-content:center"><i class="fab fa-github"></i> S'authentifier avec GitHub</button>
-                    </div>
-                    <div id="oauthStep2" style="display:none;text-align:center">
-                        <p style="font-size:0.82rem;color:var(--text2);margin-bottom:0.6rem">Entre ce code sur GitHub :</p>
-                        <div style="font-size:2rem;font-weight:800;color:var(--primary);letter-spacing:4px;padding:0.5rem;background:var(--bg);border-radius:var(--radius);margin-bottom:0.6rem" id="userCodeDisplay">ABCD-1234</div>
-                        <a id="deviceVerificationLink" href="https://github.com/login/device" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;gap:0.3rem;margin-bottom:0.6rem"><i class="fab fa-github"></i> github.com/login/device</a>
-                        <p style="font-size:0.7rem;color:var(--text3)">En attente de validation…</p>
-                        <button id="cancelOAuthBtn" class="btn-secondary" style="margin-top:0.4rem">Annuler</button>
-                    </div>
-                </div>
-                <p class="login-help" style="margin-top:0.8rem"><i class="fas fa-shield-alt"></i> Le token est stocké en <strong>sessionStorage</strong> (effacé à la fermeture du navigateur).</p>
+                <div id="loginNotification" class="upload-status" style="display:none;margin-bottom:0.8rem"></div>
+                <p class="login-desc">Connecte-toi avec ton Personal Access Token GitHub.</p>
+                <p class="login-help"><i class="fas fa-info-circle"></i> <a href="https://github.com/settings/tokens?scopes=repo&description=Biblio-Vitrine-Admin" target="_blank" rel="noopener">Créer un token</a> (coche <strong>repo</strong>)</p>
+                <div class="form-group"><label for="githubToken">Token GitHub</label><input type="password" id="githubToken" placeholder="github_pat_xxxxxxxxxx" required></div>
+                <button id="loginBtn" class="btn-primary" style="width:100%;justify-content:center">Se connecter</button>
+                <p class="login-help" style="margin-top:0.8rem;font-size:0.72rem"><i class="fas fa-shield-alt"></i> Token stocké en <strong>sessionStorage</strong> (effacé à la fermeture du navigateur).</p>
             </div>
         </div>
 
