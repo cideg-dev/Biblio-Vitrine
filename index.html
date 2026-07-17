@@ -403,32 +403,41 @@
     </div>
 
     <div id="pdf-viewer-overlay">
+        <div id="pdfProgressBar" class="pdf-progress-bar" style="width:0%"></div>
         <div id="pdf-viewer-controls">
-            <button id="back-to-library" class="btn btn-secondary" aria-label="Fermer le lecteur"><i class="fas fa-times"></i></button>
-            <div class="pdf-search-box">
-                <input type="text" id="pdfSearchInput" placeholder="Rechercher dans le PDF…" aria-label="Rechercher dans le PDF">
-                <span id="pdfSearchResults" class="pdf-search-results"></span>
-                <button id="pdfSearchPrev" class="btn btn-secondary search-nav-btn" aria-label="Résultat précédent"><i class="fas fa-chevron-up"></i></button>
-                <button id="pdfSearchNext" class="btn btn-secondary search-nav-btn" aria-label="Résultat suivant"><i class="fas fa-chevron-down"></i></button>
+            <div class="pdf-controls-row main-row">
+                <button id="back-to-library" class="btn btn-secondary" aria-label="Fermer le lecteur"><i class="fas fa-times"></i></button>
+                <div class="pdf-search-box">
+                    <input type="text" id="pdfSearchInput" placeholder="Rechercher…" aria-label="Rechercher dans le PDF">
+                    <span id="pdfSearchResults" class="pdf-search-results"></span>
+                    <button id="pdfSearchPrev" class="btn btn-secondary search-nav-btn" aria-label="Résultat précédent"><i class="fas fa-chevron-up"></i></button>
+                    <button id="pdfSearchNext" class="btn btn-secondary search-nav-btn" aria-label="Résultat suivant"><i class="fas fa-chevron-down"></i></button>
+                </div>
+                <div class="spacer"></div>
+                <button id="prevPage" class="btn btn-secondary" aria-label="Page précédente"><i class="fas fa-chevron-left"></i></button>
+                <span id="pageInfo">Page <span id="pageNumber"></span> / <span id="pageCount"></span></span>
+                <button id="nextPage" class="btn btn-secondary" aria-label="Page suivante"><i class="fas fa-chevron-right"></i></button>
+                <div class="spacer"></div>
+                <button id="scrollModeToggle" class="btn btn-secondary" aria-label="Mode défilement continu" title="Mode défilement"><i class="fas fa-align-justify"></i></button>
+                <button id="readingModeBtn" class="btn btn-secondary" aria-label="Mode lecture" title="Mode lecture"><i class="fas fa-moon"></i></button>
+                <button id="bookmarkBtn" class="btn btn-secondary" aria-label="Signet" title="Signet"><i class="fas fa-bookmark"></i></button>
+                <button id="fitModeBtn" class="btn btn-secondary" aria-label="Ajuster à la largeur" title="Ajuster à la largeur"><i class="fas fa-arrows-alt-h"></i></button>
+                <button id="zoomOut" class="btn btn-secondary" aria-label="Zoom arrière"><i class="fas fa-search-minus"></i></button>
+                <button id="zoomIn" class="btn btn-secondary" aria-label="Zoom avant"><i class="fas fa-search-plus"></i></button>
+                <button id="fullscreenBtn" class="btn btn-secondary" aria-label="Plein écran"><i class="fas fa-expand"></i></button>
+                <button id="shareBtn" class="btn btn-secondary share-btn" aria-label="Partager" title="Partager"><i class="fas fa-share-alt"></i></button>
+                <button id="downloadPdfBtn" class="btn btn-secondary" aria-label="Télécharger"><i class="fas fa-download"></i></button>
             </div>
-            <div class="spacer"></div>
-            <button id="prevPage" class="btn btn-secondary" aria-label="Page précédente"><i class="fas fa-chevron-left"></i></button>
-            <span id="pageInfo">Page <span id="pageNumber"></span> / <span id="pageCount"></span></span>
-            <button id="nextPage" class="btn btn-secondary" aria-label="Page suivante"><i class="fas fa-chevron-right"></i></button>
-            <div class="spacer"></div>
-            <button id="scrollModeToggle" class="btn btn-secondary" aria-label="Mode défilement continu" title="Mode défilement continu"><i class="fas fa-align-justify"></i></button>
-            <button id="readingModeBtn" class="btn btn-secondary" aria-label="Mode lecture" title="Mode lecture"><i class="fas fa-moon"></i></button>
-            <button id="bookmarkBtn" class="btn btn-secondary" aria-label="Ajouter un signet" title="Signet"><i class="fas fa-bookmark"></i></button>
-            <button id="zoomOut" class="btn btn-secondary" aria-label="Zoom arrière"><i class="fas fa-search-minus"></i></button>
-            <button id="zoomIn" class="btn btn-secondary" aria-label="Zoom avant"><i class="fas fa-search-plus"></i></button>
-            <button id="fullscreenBtn" class="btn btn-secondary" aria-label="Plein écran"><i class="fas fa-expand"></i></button>
-            <button id="shareBtn" class="btn btn-secondary share-btn" aria-label="Partager" title="Partager"><i class="fas fa-share-alt"></i></button>
-            <button id="downloadPdfBtn" class="btn btn-secondary" aria-label="Télécharger"><i class="fas fa-download"></i></button>
+            <div class="pdf-controls-row slider-row">
+                <span class="page-label" id="pageLabel">1</span>
+                <input type="range" id="pageSlider" class="page-slider" min="1" max="1" value="1" step="1" aria-label="Naviguer rapidement">
+                <span class="page-label" id="pageCountLabel">1</span>
+            </div>
         </div>
         <div id="pdfInfoBar" class="pdf-info-bar" style="display:none"></div>
         <div id="pdfLoadingIndicator" class="pdf-loading"><i class="fas fa-spinner fa-spin"></i> Chargement du PDF…</div>
         <div id="resumeToast" class="resume-toast"></div>
-        <div class="pdf-viewer-hint"><i class="fas fa-info-circle"></i> <span id="viewerHint"><span class="keyhint" title="Aide">?</span> Pincer pour zoomer, glisser pour naviguer</span></div>
+        <div class="pdf-viewer-hint"><i class="fas fa-info-circle"></i> <span id="viewerHint"><span class="keyhint" title="Aide">?</span> Pincer ⇄ zoomer · Glisser ⇄ naviguer</span></div>
         <div id="pdfShortcutHelp" class="shortcut-help" style="display:none">
             <div class="shortcut-help-content">
                 <h3>Raccourcis clavier</h3>
