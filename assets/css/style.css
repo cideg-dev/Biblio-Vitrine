@@ -117,6 +117,108 @@ h2 {
 }
 .skip-link:focus { top: 0.5rem; }
 
+/* ─── Continue Reading ─── */
+.continue-section { padding: 3rem 0; }
+.continue-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.8rem;
+    max-width: 700px;
+    margin: 0 auto;
+}
+.continue-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s;
+}
+.continue-card:hover { border-color: rgba(0,245,200,0.1); }
+.continue-info { flex: 1; min-width: 0; }
+.continue-title { font-size: 0.85rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.continue-meta { font-size: 0.72rem; color: var(--text3); margin-top: 0.15rem; }
+.continue-resume { flex-shrink: 0; padding: 0.35rem 0.8rem !important; font-size: 0.72rem !important; }
+
+/* ─── Update Banner ─── */
+.update-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 3003;
+    background: var(--surface);
+    border-top: 1px solid var(--primary);
+    padding: 0.6rem 1rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    font-size: 0.85rem;
+    color: var(--text);
+    backdrop-filter: blur(12px);
+}
+.update-banner i { color: var(--primary); }
+
+/* ─── Shortcut Help ─── */
+.shortcut-help {
+    position: fixed;
+    inset: 0;
+    z-index: 3005;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.shortcut-help-content {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    max-width: 360px;
+    width: 90%;
+}
+.shortcut-help-content h3 { color: var(--text); margin-bottom: 1.2rem; text-align: center; font-size: 1.1rem; }
+.shortcut-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.4rem 0;
+    font-size: 0.85rem;
+    color: var(--text2);
+}
+.shortcut-key {
+    background: var(--bg);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 6px;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text);
+    min-width: 50px;
+    text-align: center;
+    font-family: var(--font);
+}
+.shortcut-help-content .btn-secondary { display: block; margin: 1rem auto 0; }
+.keyhint {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.08);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text2);
+    cursor: pointer;
+    vertical-align: middle;
+}
+.keyhint:hover { background: var(--primary); color: var(--bg); }
+
 /* ─── Focus Visible ─── */
 *:focus-visible {
     outline: 2px solid var(--primary);

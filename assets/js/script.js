@@ -217,6 +217,7 @@ async function loadAndDisplayPDFs() {
   }
   // Update home content now that count is known
   initHomeContent()
+  initContinueReading()
   } catch (e) {
     console.error(e)
     document.getElementById('pdfList').innerHTML = '<p class="error-message">Impossible de charger la bibliothèque.</p>'
@@ -486,6 +487,46 @@ function handleNewsletter(e) {
   document.getElementById('newsletterEmail').value = ''
 }
 
+// ─── Continue Reading ───
+function initContinueReading() {
+  const section = document.getElementById('continue-reading')
+  const list = document.getElementById('continueList')
+  if (!section || !list) return
+  try {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('reading_'))
+    if (!keys.length) return
+    const entries = keys.map(k => {
+      const url = atob(k.replace('reading_', ''))
+      const page = parseInt(localStorage.getItem(k)) || 1
+      const pdf = allPdfs.find(p => url.endsWith(p.nom_du_fichier))
+      return { url, page, pdf, time: parseInt(localStorage.getItem(k + '_time') || '0') }
+    }).filter(e => e.pdf).sort((a, b) => b.time - a.time).slice(0, 5)
+    if (!entries.length) return
+    section.style.display = ''
+    list.innerHTML = entries.map(e => {
+      const title = e.pdf.titre || e.pdf.nom_du_fichier.replace('.pdf', '').replace(/_/g, ' ')
+      return `<div class="continue-card anim-fade visible">
+        <div class="continue-info">
+          <div class="continue-title">${esc(title)}</div>
+          <div class="continue-meta">Page ${e.page} sur ${e.pdf.numero || '?'}</div>
+        </div>
+        <button class="pdf-read-btn continue-resume" data-url="${esc(e.url)}" data-page="${e.page}"><i class="fas fa-book-open"></i> Reprendre</button>
+      </div>`
+    }).join('')
+    list.querySelectorAll('.continue-resume').forEach(btn => {
+      btn.addEventListener('click', () => openPDF(btn.dataset.url, parseInt(btn.dataset.page)))
+    })
+  } catch {}
+}
+
+function saveReadingProgress(url, page) {
+  try {
+    const key = 'reading_' + btoa(url)
+    localStorage.setItem(key, page.toString())
+    localStorage.setItem(key + '_time', Date.now().toString())
+  } catch {}
+}
+
 let pdfjsLib = null
 
 async function loadPdfJs() {
@@ -527,6 +568,7 @@ function initPdfViewer() {
     if (e.key === 'ArrowRight') showNextPdfPage()
     if (e.key === '+' || e.key === '=') zoomIn()
     if (e.key === '-') zoomOut()
+    if (e.key === '?') toggleShortcutHelp()
   })
   // Touch swipe
   const container = document.getElementById('pdf-canvas-container')
@@ -548,6 +590,7 @@ function initPdfViewer() {
     controls?.classList.toggle('hidden')
     clearTimeout(hideTimer)
   })
+  document.querySelector('.keyhint')?.addEventListener('click', toggleShortcutHelp)
 }
 
 let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumPending = null, currentScale = 1.5, isScrollMode = false
@@ -567,7 +610,7 @@ function setDesktopControlsVisible() {
   document.getElementById('pdf-canvas-container').style.display = ''
 }
 
-async function openPDF(url) {
+async function openPDF(url, targetPage) {
   window._currentPdfUrl = url
   const loadingEl = document.getElementById('pdfLoadingIndicator')
   if (loadingEl) loadingEl.style.display = 'flex'
@@ -583,9 +626,9 @@ async function openPDF(url) {
     pdfDoc = await pdfjsLib.getDocument(url).promise
     document.getElementById('pageCount').textContent = pdfDoc.numPages
     const saved = getReadingProgress(url)
-    pageNum = saved > 0 && saved <= pdfDoc.numPages ? saved : 1
+    pageNum = targetPage || (saved > 0 && saved <= pdfDoc.numPages ? saved : 1)
     renderPdfPage(pageNum)
-    if (saved > 0 && saved <= pdfDoc.numPages) {
+    if (!targetPage && saved > 0 && saved <= pdfDoc.numPages) {
       showResumeToast(pageNum)
     }
   } catch (e) {
@@ -734,18 +777,23 @@ function updateScrollPageIndicator() {
   document.getElementById('pageNumber').textContent = pageNum
 }
 
+// ─── Shortcut Help ───
+function toggleShortcutHelp() {
+  const el = document.getElementById('pdfShortcutHelp')
+  if (!el) return
+  el.style.display = el.style.display === 'flex' ? 'none' : 'flex'
+}
+function closeShortcutHelp() {
+  const el = document.getElementById('pdfShortcutHelp')
+  if (el) el.style.display = 'none'
+}
+
 // ─── Reading Progress ───
 function getReadingProgress(url) {
   try {
     const key = 'reading_' + btoa(url)
     return parseInt(localStorage.getItem(key)) || 0
   } catch { return 0 }
-}
-function saveReadingProgress(url, page) {
-  try {
-    const key = 'reading_' + btoa(url)
-    localStorage.setItem(key, page.toString())
-  } catch {}
 }
 function showResumeToast(page) {
   const toast = document.getElementById('resumeToast')
@@ -760,11 +808,13 @@ function closePdfViewer() {
   if (url && pdfDoc) saveReadingProgress(url, pageNum)
   isScrollMode = false; scrollCanvases = []
   document.getElementById('pdf-viewer-overlay').style.display = 'none'
+  document.getElementById('pdfShortcutHelp').style.display = 'none'
   const container = document.getElementById('pdf-canvas-container')
   container.innerHTML = '<canvas id="pdfCanvas"></canvas>'
   container.style.overflow = ''
   container.style.padding = ''
   pdfDoc = null; currentScale = 1.5; pageCache.clear()
+  initContinueReading()
 }
 
 function esc(s) {

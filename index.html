@@ -101,6 +101,15 @@
             </div>
         </section>
 
+        <!-- Reprendre la lecture -->
+        <section id="continue-reading" class="continue-section anim-fade" aria-label="Continuer votre lecture" style="display:none">
+            <div class="container">
+                <h2>Continuer votre lecture</h2>
+                <p class="section-subtitle">Reprenez là où vous vous êtes arrêté.</p>
+                <div id="continueList" class="continue-grid"></div>
+            </div>
+        </section>
+
         <!-- Valeurs -->
         <section id="apropos" class="values anim-fade" aria-label="Notre Mission">
             <div class="container">
@@ -372,7 +381,21 @@
         </div>
         <div id="pdfLoadingIndicator" class="pdf-loading"><i class="fas fa-spinner fa-spin"></i> Chargement du PDF…</div>
         <div id="resumeToast" class="resume-toast"></div>
-        <div class="pdf-viewer-hint"><i class="fas fa-info-circle"></i> <span id="viewerHint">Pincer pour zoomer, glisser pour naviguer</span></div>
+        <div class="pdf-viewer-hint"><i class="fas fa-info-circle"></i> <span id="viewerHint"><span class="keyhint" title="Aide">?</span> Pincer pour zoomer, glisser pour naviguer</span></div>
+        <div id="pdfShortcutHelp" class="shortcut-help" style="display:none">
+            <div class="shortcut-help-content">
+                <h3>Raccourcis clavier</h3>
+                <div class="shortcut-row"><span class="shortcut-key">← →</span><span>Page précédente / suivante</span></div>
+                <div class="shortcut-row"><span class="shortcut-key">+ -</span><span>Zoom avant / arrière</span></div>
+                <div class="shortcut-row"><span class="shortcut-key">Esc</span><span>Fermer le lecteur</span></div>
+                <div class="shortcut-row"><span class="shortcut-key">?</span><span>Afficher cette aide</span></div>
+                <button class="btn-secondary" onclick="closeShortcutHelp()">Fermer</button>
+            </div>
+        </div>
+        <div id="updateBanner" class="update-banner" style="display:none">
+            <span><i class="fas fa-sync-alt"></i> Nouvelle version disponible</span>
+            <button id="updateAppBtn" class="btn-primary" style="padding:0.3rem 1rem;font-size:0.8rem">Actualiser</button>
+        </div>
         <div id="pdf-canvas-container"><canvas id="pdfCanvas"></canvas></div>
     </div>
 
@@ -382,24 +405,43 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="assets/js/script.js"></script>
     <script>
+      // ─── Service Worker + PWA Install + Update ───
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js')
+        navigator.serviceWorker.register('service-worker.js').then(reg => {
+          reg.addEventListener('updatefound', () => {
+            const newSW = reg.installing
+            newSW.addEventListener('statechange', () => {
+              if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+                document.getElementById('updateBanner').style.display = 'flex'
+              }
+            })
+          })
+        })
       }
+      document.getElementById('updateAppBtn')?.addEventListener('click', () => {
+        window.location.reload()
+      })
       let deferredPrompt = null
       window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault()
         deferredPrompt = e
-        const btn = document.getElementById('installPwaBtn')
-        if (btn) btn.style.display = 'flex'
+        document.getElementById('installPwaBtn').style.display = 'flex'
       })
       document.getElementById('installPwaBtn')?.addEventListener('click', async () => {
-        if (!deferredPrompt) return
-        deferredPrompt.prompt()
-        const choice = await deferredPrompt.userChoice
-        if (choice.outcome === 'accepted') {
-          document.getElementById('installPwaBtn').style.display = 'none'
+        if (deferredPrompt) {
+          deferredPrompt.prompt()
+          const choice = await deferredPrompt.userChoice
+          if (choice.outcome === 'accepted') document.getElementById('installPwaBtn').style.display = 'none'
+          deferredPrompt = null
+          return
         }
-        deferredPrompt = null
+        // iOS fallback: instructions
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+        if (isIOS) {
+          alert('Pour installer l\'application :\n1. Touche le bouton Partager (⬆️)\n2. Fais défiler et choisis "Sur l\'écran d\'accueil"\n3. Touche "Ajouter"')
+        } else {
+          document.getElementById('installPwaBtn').textContent = 'Installer'
+        }
       })
       window.addEventListener('appinstalled', () => {
         document.getElementById('installPwaBtn').style.display = 'none'
