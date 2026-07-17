@@ -318,22 +318,7 @@ function openChildPdf(url, title, audioUrl) {
   document.body.style.overflow = 'hidden'
 
   frame.onerror = () => { fallback.style.display = 'flex' }
-  frame.onload = () => {
-    try {
-      if (frame.contentDocument?.body?.innerHTML === '' ||
-          (frame.contentDocument?.body?.children?.length || 0) === 0) fallback.style.display = 'flex'
-    } catch {}
-  }
   frame.src = url
-
-  clearTimeout(frame._loadTimer)
-  frame._loadTimer = setTimeout(() => {
-    try {
-      if (!frame.contentDocument?.body?.innerHTML ||
-          frame.contentDocument?.body?.children?.length > 0) return
-    } catch {}
-    fallback.style.display = 'flex'
-  }, 5000)
 }
 
 // ─── Audio controls ───
@@ -470,7 +455,6 @@ document.addEventListener('fullscreenchange', () => {
 function closeChildPdf() {
   if (childAudio) { childAudio.pause(); childAudio.currentTime = 0 }
   const frame = document.getElementById('childPdfFrame')
-  clearTimeout(frame._loadTimer)
   document.getElementById('childPdfViewer').style.display = 'none'
   frame.src = ''
   document.getElementById('childPdfFallback').style.display = 'none'
