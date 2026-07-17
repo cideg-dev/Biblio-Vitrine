@@ -1605,6 +1605,60 @@ footer {
     .text-layer span { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; }
 }
 
+/* ─── TTS Voice Select ─── */
+.tts-voice-select {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    color: var(--text2);
+    padding: 0.2rem 0.4rem;
+    font-size: 0.65rem;
+    font-family: var(--font);
+    max-width: 110px;
+    cursor: pointer;
+    outline: none;
+    transition: border 0.3s;
+    appearance: auto;
+    -webkit-appearance: auto;
+}
+.tts-voice-select:focus { border-color: var(--primary); }
+.tts-voice-select option { background: var(--surface); color: var(--text); }
+.tts-rotate-btn { position: relative; }
+.tts-rotate-btn.active { background: var(--primary); color: var(--bg); }
+.tts-rotate-indicator {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    font-size: 0.45rem;
+    background: var(--surface2);
+    color: var(--primary);
+    padding: 0 2px;
+    border-radius: 4px;
+    line-height: 1;
+    max-width: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.tts-rotate-btn.active .tts-rotate-indicator {
+    background: var(--bg);
+    color: var(--primary);
+}
+.tts-voice-info {
+    font-size: 0.6rem;
+    color: var(--text3);
+    white-space: nowrap;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+body.reading-mode .tts-voice-select {
+    background: rgba(0,0,0,0.06);
+    border-color: rgba(0,0,0,0.1);
+    color: var(--text3);
+}
+body.reading-mode .tts-voice-info { color: var(--text3); }
+
 /* ─── Reflow mode ─── */
 .reflow-container {
     max-width: 720px; margin: 0 auto; text-align: left;

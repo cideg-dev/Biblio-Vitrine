@@ -679,6 +679,18 @@ function initPdfViewer() {
   document.getElementById('fitModeBtn')?.addEventListener('click', toggleFitMode)
   document.getElementById('reflowModeBtn')?.addEventListener('click', toggleReflowMode)
   document.getElementById('ttsBtn')?.addEventListener('click', toggleTts)
+  document.getElementById('ttsVoiceSelect')?.addEventListener('change', e => {
+    ttsVoiceIdx = parseInt(e.target.value) || 0
+    localStorage.setItem('ttsVoiceIdx', e.target.value)
+  })
+  document.getElementById('ttsRotateBtn')?.addEventListener('click', () => {
+    ttsAutoRotate = !ttsAutoRotate
+    const btn = document.getElementById('ttsRotateBtn')
+    btn?.classList.toggle('active')
+    localStorage.setItem('ttsAutoRotate', ttsAutoRotate ? '1' : '')
+    const ri = document.getElementById('ttsRotateIndicator')
+    if (ri) ri.textContent = ttsAutoRotate && ttsFrenchVoices.length > 1 ? ttsFrenchVoices[ttsVoiceIdx].name.split(' ')[0] : ''
+  })
   document.getElementById('exportTxtBtn')?.addEventListener('click', exportPdfAsTxt)
   document.getElementById('tocBtn')?.addEventListener('click', () => {
     const sidebar = document.getElementById('tocSidebar')
@@ -1624,13 +1636,45 @@ async function loadPdfOutline() {
 
 // ─── Lecture audio (TTS) ───
 let ttsSynth = null, ttsUtterance = null, ttsPlaying = false, ttsPageText = ''
+let ttsFrenchVoices = [], ttsVoiceIdx = 0, ttsAutoRotate = false
+let ttsVoiceLoadAttempted = false
+
+function loadTtsVoices() {
+  ttsVoiceLoadAttempted = true
+  ttsFrenchVoices = (speechSynthesis.getVoices() || []).filter(v => v.lang.startsWith('fr'))
+  const sel = document.getElementById('ttsVoiceSelect')
+  if (!sel) return
+  const prevVal = sel.value
+  sel.innerHTML = '<option value="">Voix par défaut</option>'
+  ttsFrenchVoices.forEach((v, i) => {
+    const opt = document.createElement('option')
+    opt.value = i
+    opt.textContent = v.name + (v.default ? ' (par défaut)' : '')
+    sel.appendChild(opt)
+  })
+  if (prevVal && [...sel.options].some(o => o.value === prevVal)) sel.value = prevVal
+  else sel.value = localStorage.getItem('ttsVoiceIdx') || ''
+  ttsVoiceIdx = parseInt(sel.value) || 0
+}
+
+function setTtsVoice(utterance) {
+  if (ttsFrenchVoices.length && ttsVoiceIdx >= 0 && ttsVoiceIdx < ttsFrenchVoices.length) {
+    utterance.voice = ttsFrenchVoices[ttsVoiceIdx]
+  }
+}
+
 function toggleTts() {
   if (!pdfDoc) return
   const btn = document.getElementById('ttsBtn')
   if (ttsPlaying) { stopTts(); btn?.classList.remove('active'); return }
+  if (!ttsVoiceLoadAttempted) loadTtsVoices()
   btn?.classList.add('active')
   ttsSynth = window.speechSynthesis
   if (!ttsSynth) { alert('Synthèse vocale non disponible'); btn?.classList.remove('active'); return }
+  if (ttsFrenchVoices.length === 0) {
+    const v = speechSynthesis.getVoices()
+    if (v && v.length) ttsFrenchVoices = v.filter(x => x.lang.startsWith('fr'))
+  }
   speakPage(pageNum)
 }
 function speakPage(num) {
@@ -1641,7 +1685,20 @@ function speakPage(num) {
     ttsUtterance = new SpeechSynthesisUtterance(ttsPageText)
     ttsUtterance.lang = 'fr-FR'
     ttsUtterance.rate = 0.9
+    setTtsVoice(ttsUtterance)
+    ttsUtterance.onstart = () => {
+      const vInfo = document.getElementById('ttsVoiceInfo')
+      if (vInfo) vInfo.textContent = ttsUtterance.voice ? ttsUtterance.voice.name : 'Voix par défaut'
+    }
     ttsUtterance.onend = () => {
+      if (ttsAutoRotate && ttsFrenchVoices.length > 1) {
+        ttsVoiceIdx = (ttsVoiceIdx + 1) % ttsFrenchVoices.length
+        const sel = document.getElementById('ttsVoiceSelect')
+        if (sel) sel.value = ttsVoiceIdx
+        localStorage.setItem('ttsVoiceIdx', ttsVoiceIdx)
+        const ri = document.getElementById('ttsRotateIndicator')
+        if (ri) ri.textContent = ttsFrenchVoices[ttsVoiceIdx].name.split(' ')[0]
+      }
       if (pageNum < pdfDoc.numPages && ttsPlaying) {
         if (isScrollMode) {
           pageNum++; const c = document.querySelector(`[data-page="${pageNum}"]`)
@@ -1652,12 +1709,19 @@ function speakPage(num) {
     }
     ttsUtterance.onerror = stopTts
     ttsPlaying = true; ttsSynth.speak(ttsUtterance)
+    const ri = document.getElementById('ttsRotateIndicator')
+    if (!ri) return
+    if (ttsAutoRotate && ttsFrenchVoices.length > 1) {
+      ri.textContent = ttsFrenchVoices[ttsVoiceIdx].name.split(' ')[0]
+    }
   }).catch(stopTts)
 }
 function stopTts() {
   ttsPlaying = false
   if (ttsSynth) { ttsSynth.cancel(); ttsSynth = null }
   document.getElementById('ttsBtn')?.classList.remove('active')
+  const ri = document.getElementById('ttsRotateIndicator')
+  if (ri) ri.textContent = ''
 }
 
 // ─── Export PDF → TXT ───
@@ -1764,6 +1828,10 @@ function isNewPdf(pdf) {
 
 // ─── Init all remaining ───
 document.addEventListener('DOMContentLoaded', () => {
+  speechSynthesis?.addEventListener('voiceschanged', loadTtsVoices)
+  if (speechSynthesis?.getVoices()?.length) loadTtsVoices()
+  ttsAutoRotate = localStorage.getItem('ttsAutoRotate') === '1'
+  document.getElementById('ttsRotateBtn')?.classList.toggle('active', ttsAutoRotate)
   initReadingMode()
   handleDirectLink()
   handleCategoryFilter()
