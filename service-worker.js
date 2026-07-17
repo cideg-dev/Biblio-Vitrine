@@ -12,7 +12,8 @@ const SHELL_URLS = [
   '/Biblio-Vitrine/assets/js/script.js',
   '/Biblio-Vitrine/assets/js/admin.js',
   '/Biblio-Vitrine/assets/images/Lumiere_sur_parole.png',
-  '/Biblio-Vitrine/manifest.json'
+  '/Biblio-Vitrine/manifest.json',
+  '/Biblio-Vitrine/assets/data/version.json'
 ]
 
 self.addEventListener('install', event => {

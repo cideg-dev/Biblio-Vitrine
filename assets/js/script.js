@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadTestimonials()
   loadDonationGoal()
   initScrollAnimations()
+  initAppVersion()
   initThemeToggle()
   initSkipLink()
   initSmoothScroll()
@@ -67,6 +68,15 @@ function initBackToTop() {
   if (!btn) return
   window.addEventListener('scroll', () => btn.classList.toggle('visible', window.scrollY > 400))
   btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }))
+}
+
+// ─── App Version ───
+function initAppVersion() {
+  fetch('assets/data/version.json').then(r => r.ok ? r.json() : null).then(d => {
+    if (!d) return
+    const el = document.getElementById('appVersion')
+    if (el) el.textContent = d.version
+  }).catch(() => {})
 }
 
 // ─── Theme Toggle ───
