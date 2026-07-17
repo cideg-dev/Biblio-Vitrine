@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Histoires Bibliques pour Enfants — CIDEG & P.line</title>
-    <meta name="description" content="60 histoires bibliques illustrées pour enfants, avec PDF, coloriages, audio et vidéo. Gratuit. Ressources Bible for Children en français.">
-    <meta name="keywords" content="histoires bibliques enfants, Bible pour enfants, coloriages bibliques, récits bibliques illustrés, éducation chrétienne enfants, Bible for Children, français">
+    <meta name="description" content="60 histoires bibliques illustrées pour enfants, avec PDF, coloriages, audio et vidéo. Gratuit. Bible for Children en français.">
+    <meta name="keywords" content="histoires bibliques enfants, Bible pour enfants, coloriages bibliques, récits bibliques illustrés, Bible for Children">
     <meta name="author" content="CIDEG & P.line">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://cideg-dev.github.io/Biblio-Vitrine/enfants.html">
@@ -88,6 +88,28 @@
             </div>
         </section>
     </main>
+
+    <!-- Lecteur PDF intégré pour les histoires enfants -->
+    <div id="childPdfViewer" class="child-pdf-viewer" style="display:none">
+        <div class="child-pdf-header">
+            <div class="child-pdf-header-left">
+                <button class="btn btn-secondary" onclick="closeChildPdf()" aria-label="Fermer" title="Fermer"><i class="fas fa-times"></i></button>
+                <span id="childPdfTitle" class="child-pdf-title">Histoire</span>
+            </div>
+            <div class="child-pdf-header-right">
+                <a id="childPdfDownloadBtn" class="btn btn-secondary" download aria-label="Télécharger" title="Télécharger le PDF"><i class="fas fa-download"></i> Télécharger</a>
+                <a id="childPdfExternalBtn" class="btn btn-secondary" target="_blank" rel="noopener" aria-label="Ouvrir dans un nouvel onglet" title="Ouvrir dans un nouvel onglet"><i class="fas fa-external-link-alt"></i></a>
+            </div>
+        </div>
+        <div class="child-pdf-body">
+            <iframe id="childPdfFrame" class="child-pdf-iframe" title="Lecteur PDF"></iframe>
+            <div id="childPdfFallback" class="child-pdf-fallback" style="display:none">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Impossible d'afficher ce PDF dans le navigateur.</p>
+                <a id="childPdfFallbackLink" class="btn-primary" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
+            </div>
+        </div>
+    </div>
 
     <footer>
         <div class="container">
@@ -195,32 +217,74 @@ const STORIES = [
 ];
 
 function pad(n) { return n.toString().padStart(2, '0') }
-
 function slugify(title) {
   return title
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/'/g, '')
-    .replace(/[^a-zA-Z0-9\s]/g, '')
-    .replace(/\s+/g, '_')
-    .trim()
+    .replace(/'/g, '').replace(/[^a-zA-Z0-9\s]/g, '')
+    .replace(/\s+/g, '_').trim()
 }
-
 function buildUrl(s, type) {
-  const base = 'https://bibleforchildren.org/PDFs/french'
-  const nn = pad(s.n)
-  const slug = slugify(s.en)
-  const fr = '_French'
+  const base = 'https://bibleforchildren.org/PDFs/french', nn = pad(s.n)
+  const slug = slugify(s.en), fr = '_French'
   switch(type) {
     case 'pdf': return `${base}/${nn}_${slug}${fr}.pdf`
     case 'cb': return `${base}/${nn}_${slug}${fr}_CB.pdf`
-    case 'cb6': return `${base}/${nn}_${slug}${fr}_CB6.pdf`
     case 'audio': return `${base}/${nn}_${slug}${fr}.mp3`
-    case 'pda': return `${base}/${nn}_${slug}${fr}_PDA.pdf`
     case 'tract': return `${base}/${nn}_${slug}${fr}_Tract_Color.pdf`
-    case 'tract-bw': return `${base}/${nn}_${slug}${fr}_Tract_BW.pdf`
     default: return ''
   }
 }
+
+// Color palette for card thumbnails
+function cardColors(n, testament) {
+  const hue = testament === 'at' ? ((n * 47 + 10) % 360) : ((n * 37 + 200) % 360)
+  const s = 55 + (n % 25), l = 35 + (n % 15)
+  return { hue, sat: s, lig: l }
+}
+
+// Open PDF in our embedded viewer
+function openChildPdf(url, title) {
+  const viewer = document.getElementById('childPdfViewer')
+  const frame = document.getElementById('childPdfFrame')
+  const titleEl = document.getElementById('childPdfTitle')
+  const dlBtn = document.getElementById('childPdfDownloadBtn')
+  const extBtn = document.getElementById('childPdfExternalBtn')
+  const fallback = document.getElementById('childPdfFallback')
+  const fallbackLink = document.getElementById('childPdfFallbackLink')
+  titleEl.textContent = title
+  dlBtn.href = url
+  dlBtn.download = title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g, '').trim() + '.pdf'
+  extBtn.href = url
+  fallback.style.display = 'none'
+
+  viewer.style.display = 'flex'
+  document.body.style.overflow = 'hidden'
+
+  frame.src = url
+  frame.onerror = () => {
+    fallback.style.display = 'flex'
+    fallbackLink.href = url
+  }
+  setTimeout(() => {
+    try {
+      if (frame.contentDocument?.body?.innerHTML === '' || frame.contentDocument?.body?.querySelector('img') === null) {
+        // PDF might not have loaded, show fallback after timeout
+      }
+    } catch {} // cross-origin errors are expected
+  }, 3000)
+}
+
+function closeChildPdf() {
+  document.getElementById('childPdfViewer').style.display = 'none'
+  document.getElementById('childPdfFrame').src = ''
+  document.getElementById('childPdfFallback').style.display = 'none'
+  document.body.style.overflow = ''
+}
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('childPdfViewer').style.display !== 'none') closeChildPdf()
+})
 
 function renderStories(list) {
   const grid = document.getElementById('enfantsGrid')
@@ -229,27 +293,31 @@ function renderStories(list) {
     return
   }
   grid.innerHTML = list.map(s => {
-    const pdfUrl = buildUrl(s, 'pdf')
-    const cbUrl = buildUrl(s, 'cb')
-    const audioUrl = buildUrl(s, 'audio')
-    const tractUrl = buildUrl(s, 'tract')
-    const badge = s.testament === 'at'
-      ? '<span class="enfant-badge at">AT</span>'
-      : '<span class="enfant-badge nt">NT</span>'
+    const pdfUrl = buildUrl(s, 'pdf'), cbUrl = buildUrl(s, 'cb')
+    const audioUrl = buildUrl(s, 'audio'), tractUrl = buildUrl(s, 'tract')
+    const { hue, sat, lig } = cardColors(s.n, s.testament)
+    const c1 = `hsl(${hue}, ${sat}%, ${lig}%)`
+    const c2 = `hsl(${(hue + 40) % 360}, ${sat}%, ${lig - 10}%)`
+    const badgeCls = s.testament === 'at' ? 'at' : 'nt'
+    const badgeTxt = s.testament === 'at' ? 'AT' : 'NT'
+    const icon = s.testament === 'at' ? 'fa-scroll' : 'fa-cross'
     return `<article class="enfant-card">
-      <div class="enfant-card-header">
-        <span class="enfant-number">${s.n}</span>
-        <div>
-          <div class="enfant-title">${s.fr} ${badge}</div>
-          <div class="enfant-title-en">${s.en}</div>
-        </div>
+      <div class="enfant-thumb" style="background:linear-gradient(135deg,${c1},${c2})">
+        <div class="enfant-thumb-icon"><i class="fas ${icon}"></i></div>
+        <span class="enfant-thumb-num">#${pad(s.n)}</span>
+        <span class="enfant-badge ${badgeCls}" style="position:absolute;top:0.5rem;right:0.5rem;z-index:1">${badgeTxt}</span>
       </div>
-      <div class="enfant-actions">
-        <a href="${pdfUrl}" target="_blank" rel="noopener" class="enfant-link pdf-link" title="Histoire PDF"><i class="fas fa-file-pdf"></i> PDF</a>
-        <a href="${cbUrl}" target="_blank" rel="noopener" class="enfant-link cb-link" title="Coloriage"><i class="fas fa-palette"></i> Colorier</a>
-        <a href="${audioUrl}" target="_blank" rel="noopener" class="enfant-link audio-link" title="Audio MP3"><i class="fas fa-headphones"></i> Audio</a>
-        <a href="${tractUrl}" target="_blank" rel="noopener" class="enfant-link dl-link" title="Tract"><i class="fas fa-scroll"></i> Tract</a>
-        <a href="https://vimeo.com/bibleforchildren/french${pad(s.n)}" target="_blank" rel="noopener" class="enfant-link video-link" title="Vidéo"><i class="fas fa-video"></i> Vidéo</a>
+      <div class="enfant-card-body">
+        <div class="enfant-title">${s.fr}</div>
+        <div class="enfant-title-en">${s.en}</div>
+        <div class="enfant-actions">
+          <button onclick="openChildPdf('${pdfUrl}','${s.fr}')" class="enfant-link pdf-link" title="Lire l'histoire"><i class="fas fa-book-open"></i> Lire</button>
+          <a href="${pdfUrl}" target="_blank" rel="noopener" class="enfant-link dl-link" title="Télécharger le PDF" download><i class="fas fa-download"></i></a>
+          <a href="${cbUrl}" target="_blank" rel="noopener" class="enfant-link cb-link" title="Coloriage"><i class="fas fa-palette"></i></a>
+          <a href="${audioUrl}" target="_blank" rel="noopener" class="enfant-link audio-link" title="Audio MP3"><i class="fas fa-headphones"></i></a>
+          <a href="${tractUrl}" target="_blank" rel="noopener" class="enfant-link dl-link" title="Tract"><i class="fas fa-scroll"></i></a>
+          <a href="https://vimeo.com/bibleforchildren/french${pad(s.n)}" target="_blank" rel="noopener" class="enfant-link video-link" title="Vidéo"><i class="fas fa-video"></i></a>
+        </div>
       </div>
     </article>`
   }).join('')
@@ -275,22 +343,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('enfantsSearch').addEventListener('input', filterStories)
   document.getElementById('enfantsFilter').addEventListener('change', filterStories)
 
-  // Hamburger menu
   const hamburger = document.querySelector('.hamburger')
   const navMenu = document.querySelector('.nav-menu')
-  hamburger?.addEventListener('click', () => {
-    hamburger.classList.toggle('active')
-    navMenu.classList.toggle('active')
-  })
+  hamburger?.addEventListener('click', () => { hamburger.classList.toggle('active'); navMenu.classList.toggle('active') })
 
-  // Back to top
   const backBtn = document.getElementById('backToTop')
-  window.addEventListener('scroll', () => {
-    backBtn.classList.toggle('visible', window.scrollY > 400)
-  })
+  window.addEventListener('scroll', () => backBtn.classList.toggle('visible', window.scrollY > 400))
   backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }))
 
-  // Version
   const vEl = document.getElementById('appVersion')
   if (vEl) vEl.textContent = localStorage.getItem('appVersion') || '1.3.0'
 })

@@ -350,6 +350,17 @@
                 </div>
             </div>
         </section>
+        <!-- Section Enfants -->
+        <section id="enfants" class="home-enfants anim-fade" aria-label="Histoires pour enfants">
+            <div class="container">
+                <h2><i class="fas fa-child"></i> Histoires <span class="highlight">pour les Enfants</span></h2>
+                <p class="home-enfants-sub">60 histoires bibliques illustrées avec PDF, coloriages, audio et vidéo — gratuit.</p>
+                <div id="homeEnfantsGrid" class="home-enfants-grid"></div>
+                <div class="home-enfant-cta">
+                    <a href="enfants.html" class="btn-primary"><i class="fas fa-child"></i> Voir toutes les histoires</a>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer>
@@ -532,6 +543,31 @@
         window.location.reload()
       })
       // PWA install logic moved to script.js
+    </script>
+    <script>
+      // ─── Homepage Enfants Section ───
+      (function() {
+        const featured = [
+          {n:1,fr:"Lorsque Dieu a tout créé",testament:"at"},
+          {n:3,fr:"Noé et la grande innondation",testament:"at"},
+          {n:19,fr:"David le petit berger",testament:"at"},
+          {n:36,fr:"La naissance de Jésus",testament:"nt"},
+          {n:45,fr:"Le fils prodigue",testament:"nt"},
+          {n:54,fr:"La première Pâques",testament:"nt"}
+        ]
+        const pad = n => n.toString().padStart(2,'0')
+        const grid = document.getElementById('homeEnfantsGrid')
+        if (!grid) return
+        grid.innerHTML = featured.map(s =>
+          `<a class="home-enfant-card" href="enfants.html">
+            <span class="home-enfant-num">${pad(s.n)}</span>
+            <div class="home-enfant-info">
+              <strong>${s.fr}</strong>
+              <span>${s.testament === 'at' ? 'Ancien Testament' : 'Nouveau Testament'}</span>
+            </div>
+          </a>`
+        ).join('')
+      })()
     </script>
     <link rel="manifest" href="manifest.json">
 </body>
