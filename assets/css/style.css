@@ -1510,6 +1510,58 @@ footer {
 .install-pwa-btn:hover { transform: scale(1.05); }
 @keyframes pulse-install { 0%,100% { box-shadow: 0 4px 15px rgba(0,245,200,0.3); } 50% { box-shadow: 0 4px 25px rgba(0,245,200,0.5); } }
 .spacer { flex: 1; }
+
+/* ─── Cookie Banner ─── */
+.cookie-banner {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface2); padding: 0.8rem 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+    gap: 1rem; flex-wrap: wrap; z-index: 9999;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 0.8rem; backdrop-filter: blur(12px);
+}
+.cookie-banner p { color: var(--text2); margin: 0; }
+.cookie-banner-actions { display: flex; align-items: center; gap: 0.8rem; flex-shrink: 0; }
+
+/* ─── Download count ─── */
+.dl-count {
+    font-size: 0.65rem; color: var(--text3); display: inline-flex;
+    align-items: center; gap: 0.2rem; padding: 0.15rem 0.4rem;
+    border-radius: 4px; background: rgba(255,255,255,0.04);
+}
+
+/* ─── Global search ─── */
+.global-search-results {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--surface); border: 1px solid rgba(255,255,255,0.06);
+    border-top: none; border-radius: 0 0 var(--radius) var(--radius);
+    max-height: 300px; overflow-y: auto; z-index: 100;
+    display: flex; flex-direction: column;
+}
+.global-search-item {
+    padding: 0.6rem 0.8rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.2s;
+}
+.global-search-item:hover { background: var(--surface2); }
+.global-search-item:last-child { border-bottom: none; }
+.gs-title { font-size: 0.8rem; color: var(--text); font-weight: 600; }
+.gs-snippet { font-size: 0.65rem; color: var(--text3); margin-top: 0.2rem; line-height: 1.3; }
+
+/* ─── Footer export / sync buttons ─── */
+.footer-export-btn {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    background: none; border: 1px solid rgba(255,255,255,0.06);
+    color: var(--text3); padding: 0.3rem 0.6rem; border-radius: 6px;
+    font-size: 0.7rem; cursor: pointer; margin-top: 0.5rem;
+    font-family: var(--font); transition: all 0.2s;
+    width: 100%;
+}
+.footer-export-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+@supports (user-select: text) {
+    .text-layer span { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; }
+}
+
 #pdf-canvas-container {
     flex: 1;
     overflow: auto;
@@ -1547,6 +1599,135 @@ footer {
     #pageInfo { font-size: 0.7rem; }
     #pdf-canvas-container { padding: 0.5rem; }
 }
+
+/* ─── PDF Info Bar ─── */
+.pdf-info-bar {
+    padding: 0.4rem 1rem;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.8rem;
+    color: var(--text2);
+    flex-wrap: wrap;
+    z-index: 3000;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.pdf-info-bar .pdf-info-title { color: var(--text); font-weight: 600; }
+.pdf-info-bar .pdf-info-author { color: var(--text3); font-size: 0.75rem; }
+
+/* ─── PDF Search ─── */
+.pdf-search-box {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex: 0 1 auto;
+}
+.pdf-search-box input {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+    width: 150px;
+    font-family: var(--font);
+    outline: none;
+    transition: border 0.3s;
+}
+.pdf-search-box input:focus { border-color: var(--primary); }
+.pdf-search-results {
+    font-size: 0.7rem;
+    color: var(--text3);
+    white-space: nowrap;
+    min-width: 70px;
+    text-align: center;
+}
+.search-nav-btn { width: 28px !important; height: 28px !important; font-size: 0.7rem !important; }
+
+/* ─── PDF Sidebar (Signets) ─── */
+.pdf-sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 260px;
+    background: var(--surface);
+    z-index: 3002;
+    padding: 1rem;
+    overflow-y: auto;
+    border-left: 1px solid rgba(255,255,255,0.06);
+    box-shadow: -4px 0 20px rgba(0,0,0,0.4);
+}
+.pdf-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.pdf-sidebar-header h4 { color: var(--text); font-size: 0.9rem; }
+.bm-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.bm-item:last-child { border-bottom: none; }
+
+/* ─── Favoris Button ─── */
+.pdf-fav-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(0,0,0,0.6);
+    border: none;
+    color: var(--text2);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 2;
+    font-size: 0.85rem;
+    backdrop-filter: blur(4px);
+}
+.pdf-fav-btn:hover { transform: scale(1.15); color: var(--accent); }
+.pdf-fav-btn.active { color: var(--accent); text-shadow: 0 0 10px rgba(255,110,199,0.5); }
+
+/* ─── Mode lecture ─── */
+body.reading-mode {
+    --bg: #f5f0e8;
+    --surface: #ede8de;
+    --surface2: #e5e0d6;
+    --text: #2a2a2a;
+    --text2: #555555;
+    --text3: #888888;
+    --primary: #2a7a5a;
+    --primary-dim: rgba(42,122,90,0.12);
+    --accent: #b84a6a;
+}
+body.reading-mode .pdf-card,
+body.reading-mode .continue-card,
+body.reading-mode .value-card,
+body.reading-mode .community-card,
+body.reading-mode .donate-card,
+body.reading-mode .testimonial-card {
+    background: var(--surface);
+    border-color: rgba(0,0,0,0.06);
+}
+body.reading-mode #pdf-viewer-controls { background: rgba(245,240,232,0.95); }
+body.reading-mode .pdf-search-box input { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.1); color: var(--text); }
+body.reading-mode .newsletter-card { background: var(--surface); }
+body.reading-mode #pdfInfoBar { background: var(--surface2); }
+body.reading-mode #pdf-viewer-controls .btn-secondary { background: rgba(0,0,0,0.06); color: var(--text3); }
+body.reading-mode #pdf-viewer-controls .btn-secondary:hover { background: rgba(0,0,0,0.1); color: var(--text); }
+body.reading-mode .hero { background: linear-gradient(135deg, #e8e0d0 0%, #d8d0c0 100%); }
+body.reading-mode .hero h1,
+body.reading-mode h2 { color: var(--text); }
 
 /* ─── Skeleton ─── */
 @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: calc(200px + 100%) 0; } }

@@ -239,6 +239,7 @@ function deleteSelected() {
 
 async function saveChanges() {
   if (selectedIndex < 0) return
+  if (!confirm(`Enregistrer les modifications pour "${pdfs[selectedIndex].nom_du_fichier}" sur GitHub ?`)) return
   pdfs[selectedIndex].titre = document.getElementById('editTitle').value
   pdfs[selectedIndex].description = document.getElementById('editDescription').value
   pdfs[selectedIndex].auteur = document.getElementById('editAuthor').value
@@ -297,6 +298,7 @@ async function handleAddPdf() {
   const descInput = document.getElementById('newPdfDescription')
   const file = fileInput.files[0]
   const title = titleInput.value.trim()
+  if (!confirm(`Uploader "${file?.name}" sur GitHub ? Cela va modifier le dépôt.`)) return
   const desc = descInput.value.trim()
   if (!file) return showNotif('Sélectionne un fichier PDF', 'error')
   if (!title) return showNotif('Entre un titre', 'error')
@@ -400,6 +402,7 @@ function deleteTestimonial(index) {
   showNotif('Témoignage retiré', 'info')
 }
 async function saveTestimonials() {
+  if (!confirm('Sauvegarder les témoignages sur GitHub ?')) return
   document.querySelectorAll('.testi-admin-item').forEach(el => {
     const i = parseInt(el.dataset.index)
     if (isNaN(i)) return
@@ -431,6 +434,7 @@ function updateDonationPreview() {
   document.getElementById('donationPreviewLabel').style.color = show ? 'var(--primary)' : 'var(--text3)'
 }
 async function saveDonationGoal() {
+  if (!confirm('Sauvegarder l\'objectif de dons sur GitHub ?')) return
   const current = parseInt(document.getElementById('donationCurrentInput').value) || 0
   const target = parseInt(document.getElementById('donationTargetInput').value) || 150000
   const show = document.getElementById('donationShowToggle').checked
@@ -595,6 +599,7 @@ function collectMissionData() {
   }
 }
 async function saveMission() {
+  if (!confirm('Sauvegarder la page Mission sur GitHub ?')) return
   const data = collectMissionData()
   showNotif('Sauvegarde en cours…', 'info')
   try {
@@ -611,6 +616,7 @@ async function loadConfig() {
   document.getElementById('gaIdInput').value = cfg.googleAnalyticsId || ''
 }
 async function saveConfig() {
+  if (!confirm('Sauvegarder la configuration sur GitHub ?')) return
   const data = { googleAnalyticsId: document.getElementById('gaIdInput').value.trim(), updatedAt: new Date().toISOString() }
   showNotif('Sauvegarde…', 'info')
   try {
@@ -652,6 +658,7 @@ function removeGalleryFile(idx) {
 }
 async function uploadGalleryToGitHub() {
   if (!selectedGalleryFiles.length) return showNotif('Sélectionne des images', 'error')
+  if (!confirm(`Uploader ${selectedGalleryFiles.length} image(s) sur GitHub ?`)) return
   showNotif('Upload des images en cours…', 'info')
   for (let i = 0; i < selectedGalleryFiles.length; i++) {
     const file = selectedGalleryFiles[i]
@@ -675,6 +682,7 @@ async function uploadGalleryToGitHub() {
   document.getElementById('galleryUploadBtnRow').style.display = 'none'
 }
 async function saveGallerySettings() {
+  if (!confirm('Sauvegarder la configuration de la galerie sur GitHub ?')) return
   const paths = document.getElementById('galleryPathsInput').value.split('\n').map(s => s.trim()).filter(Boolean)
   await saveJSON(GALLERY_PATH + 'gallery.json', { images: paths, updatedAt: new Date().toISOString() }, 'Mise à jour galerie')
   showNotif('Configuration galerie sauvegardée', 'success')
@@ -741,6 +749,7 @@ function addHomeValueItem() {
 }
 
 async function saveHome() {
+  if (!confirm('Sauvegarder la page d\'accueil sur GitHub ?')) return
   const values = []
   document.querySelectorAll('#homeValuesContainer > div').forEach(el => {
     const icon = el.querySelector('.hv-icon')?.value || 'lock-open'
@@ -813,6 +822,7 @@ function deleteArticle(index) {
 }
 
 async function saveArticles() {
+  if (!confirm('Sauvegarder les articles sur GitHub ?')) return
   document.querySelectorAll('.testi-admin-item[data-article-index]').forEach(el => {
     const i = parseInt(el.dataset.articleIndex)
     if (isNaN(i)) return
@@ -864,6 +874,7 @@ function resetStats() {
 }
 
 async function publishStats() {
+  if (!confirm('Publier les statistiques sur GitHub ?')) return
   try {
     const raw = localStorage.getItem('downloadStats')
     const stats = raw ? JSON.parse(raw) : {}

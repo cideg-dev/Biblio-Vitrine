@@ -110,6 +110,24 @@
             </div>
         </section>
 
+        <!-- Favoris ⭐ -->
+        <section id="favorites-section" class="continue-section anim-fade" aria-label="Favoris" style="display:none">
+            <div class="container">
+                <h2><i class="fas fa-heart" style="color:var(--accent)"></i> Mes Favoris</h2>
+                <p class="section-subtitle">Vos livres préférés, toujours à portée de main.</p>
+                <div id="favoritesList" class="continue-grid"></div>
+            </div>
+        </section>
+
+        <!-- Nouveautés 📚 -->
+        <section id="new-releases" class="continue-section anim-fade" aria-label="Nouveautés" style="display:none">
+            <div class="container">
+                <h2><i class="fas fa-star"></i> Nouveautés</h2>
+                <p class="section-subtitle">Les derniers ajouts à la bibliothèque.</p>
+                <div id="newReleasesList" class="continue-grid"></div>
+            </div>
+        </section>
+
         <!-- Valeurs -->
         <section id="apropos" class="values anim-fade" aria-label="Notre Mission">
             <div class="container">
@@ -145,6 +163,13 @@
                         <i class="fas fa-search search-icon" aria-hidden="true"></i>
                         <input type="text" id="searchInput" placeholder="Rechercher par titre, auteur, thème…" aria-label="Rechercher un livre">
                     </div>
+                    <div class="global-search" style="position:relative;margin-top:0.5rem">
+                        <div class="search-bar" style="margin-bottom:0">
+                            <i class="fas fa-file-alt search-icon" aria-hidden="true"></i>
+                            <input type="text" id="globalSearchInput" placeholder="Rechercher dans le contenu des PDFs…" aria-label="Rechercher dans le texte des PDFs">
+                        </div>
+                        <div id="globalSearchResults" class="global-search-results"></div>
+                    </div>
                     <div class="library-filters">
                         <div class="cat-filter" id="categoryFilter" role="tablist" aria-label="Filtrer par catégorie"></div>
                         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;justify-content:center">
@@ -155,6 +180,7 @@
                                     <option value="defaut">Par défaut</option>
                                     <option value="alpha-asc">A → Z</option>
                                     <option value="alpha-desc">Z → A</option>
+                                    <option value="newest">Plus récents</option>
                                 </select>
                             </div>
                             <div class="view-toggle" role="group" aria-label="Affichage">
@@ -352,11 +378,13 @@
                         <a href="https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                         <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
                     </div>
+                    <button onclick="exportUserData()" class="footer-export-btn" title="Exporter mes données" aria-label="Exporter mes données"><i class="fas fa-download"></i> Exporter mes données</button>
+                    <button onclick="syncToCloud({favorites:getFavorites(),readingProgress:Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith('reading_')&&!k.endsWith('_time')).map(k=>[k,localStorage.getItem(k)]))})" class="footer-export-btn" title="Synchroniser dans le cloud" aria-label="Synchroniser dans le cloud"><i class="fas fa-cloud-upload-alt"></i> Sync cloud</button>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2024 CIDEG & P.line. « Ta parole est une lampe à mes pieds. » — Psaume 119:105</p>
-                <p class="app-version">v<span id="appVersion">1.1.2</span></p>
+                <p class="app-version">v<span id="appVersion">1.2.0</span></p>
             </div>
         </div>
     </footer>
@@ -366,20 +394,38 @@
     <a href="https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W" target="_blank" rel="noopener" class="whatsapp-float" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
     <button id="installPwaBtn" class="install-pwa-btn" style="display:none" aria-label="Installer l'application"><i class="fas fa-download"></i><span>Installer</span></button>
 
+    <div id="cookieBanner" class="cookie-banner">
+        <p>Ce site utilise des cookies pour son bon fonctionnement et des analytics. En continuant, vous acceptez leur utilisation.</p>
+        <div class="cookie-banner-actions">
+            <button id="acceptCookies" class="btn-primary" style="padding:0.3rem 1rem;font-size:0.8rem">Accepter</button>
+            <a href="cookies-policy.html" style="font-size:0.75rem;color:var(--text3)">En savoir plus</a>
+        </div>
+    </div>
+
     <div id="pdf-viewer-overlay">
         <div id="pdf-viewer-controls">
-            <button id="back-to-library" class="btn btn-secondary" aria-label="Fermer le lecteur"><i class="fas fa-arrow-left"></i></button>
+            <button id="back-to-library" class="btn btn-secondary" aria-label="Fermer le lecteur"><i class="fas fa-times"></i></button>
+            <div class="pdf-search-box">
+                <input type="text" id="pdfSearchInput" placeholder="Rechercher dans le PDF…" aria-label="Rechercher dans le PDF">
+                <span id="pdfSearchResults" class="pdf-search-results"></span>
+                <button id="pdfSearchPrev" class="btn btn-secondary search-nav-btn" aria-label="Résultat précédent"><i class="fas fa-chevron-up"></i></button>
+                <button id="pdfSearchNext" class="btn btn-secondary search-nav-btn" aria-label="Résultat suivant"><i class="fas fa-chevron-down"></i></button>
+            </div>
             <div class="spacer"></div>
             <button id="prevPage" class="btn btn-secondary" aria-label="Page précédente"><i class="fas fa-chevron-left"></i></button>
             <span id="pageInfo">Page <span id="pageNumber"></span> / <span id="pageCount"></span></span>
             <button id="nextPage" class="btn btn-secondary" aria-label="Page suivante"><i class="fas fa-chevron-right"></i></button>
             <div class="spacer"></div>
             <button id="scrollModeToggle" class="btn btn-secondary" aria-label="Mode défilement continu" title="Mode défilement continu"><i class="fas fa-align-justify"></i></button>
+            <button id="readingModeBtn" class="btn btn-secondary" aria-label="Mode lecture" title="Mode lecture"><i class="fas fa-moon"></i></button>
+            <button id="bookmarkBtn" class="btn btn-secondary" aria-label="Ajouter un signet" title="Signet"><i class="fas fa-bookmark"></i></button>
             <button id="zoomOut" class="btn btn-secondary" aria-label="Zoom arrière"><i class="fas fa-search-minus"></i></button>
             <button id="zoomIn" class="btn btn-secondary" aria-label="Zoom avant"><i class="fas fa-search-plus"></i></button>
             <button id="fullscreenBtn" class="btn btn-secondary" aria-label="Plein écran"><i class="fas fa-expand"></i></button>
+            <button id="shareBtn" class="btn btn-secondary share-btn" aria-label="Partager" title="Partager"><i class="fas fa-share-alt"></i></button>
             <button id="downloadPdfBtn" class="btn btn-secondary" aria-label="Télécharger"><i class="fas fa-download"></i></button>
         </div>
+        <div id="pdfInfoBar" class="pdf-info-bar" style="display:none"></div>
         <div id="pdfLoadingIndicator" class="pdf-loading"><i class="fas fa-spinner fa-spin"></i> Chargement du PDF…</div>
         <div id="resumeToast" class="resume-toast"></div>
         <div class="pdf-viewer-hint"><i class="fas fa-info-circle"></i> <span id="viewerHint"><span class="keyhint" title="Aide">?</span> Pincer pour zoomer, glisser pour naviguer</span></div>
@@ -390,12 +436,28 @@
                 <div class="shortcut-row"><span class="shortcut-key">+ -</span><span>Zoom avant / arrière</span></div>
                 <div class="shortcut-row"><span class="shortcut-key">Esc</span><span>Fermer le lecteur</span></div>
                 <div class="shortcut-row"><span class="shortcut-key">?</span><span>Afficher cette aide</span></div>
+                <div class="shortcut-row"><span class="shortcut-key">M</span><span>Mode lecture</span></div>
+                <div class="shortcut-row"><span class="shortcut-key">B</span><span>Signet</span></div>
+                <div class="shortcut-row"><span class="shortcut-key">Ctrl+F</span><span>Rechercher dans le PDF</span></div>
                 <button class="btn-secondary" onclick="closeShortcutHelp()">Fermer</button>
             </div>
+        </div>
+        <div class="pdf-sidebar" id="pdfSidebar" style="display:none">
+            <div class="pdf-sidebar-header">
+                <h4>Signets</h4>
+                <button id="closeSidebar" class="btn btn-secondary" style="padding:0.2rem 0.5rem;font-size:0.7rem"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="bookmarkList"></div>
         </div>
         <div id="updateBanner" class="update-banner" style="display:none">
             <span><i class="fas fa-sync-alt"></i> Nouvelle version disponible</span>
             <button id="updateAppBtn" class="btn-primary" style="padding:0.3rem 1rem;font-size:0.8rem">Actualiser</button>
+        </div>
+        <div id="recommendations-section" class="continue-section" style="display:none;padding:1rem 1.5rem;background:var(--surface2);border-top:1px solid rgba(255,255,255,0.06)">
+            <div class="container" style="max-width:800px">
+                <h4 style="font-size:0.9rem;margin-bottom:0.5rem;color:var(--text2)"><i class="fas fa-lightbulb"></i> Dans la même catégorie</h4>
+                <div id="recommendationsList" class="continue-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))"></div>
+            </div>
         </div>
         <div id="pdf-canvas-container"><canvas id="pdfCanvas"></canvas></div>
     </div>

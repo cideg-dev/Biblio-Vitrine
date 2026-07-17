@@ -228,6 +228,10 @@ async function loadAndDisplayPDFs() {
   // Update home content now that count is known
   initHomeContent()
   initContinueReading()
+  initFavorites()
+  initNewReleases()
+  initShareButtons()
+  handleDirectLink()
   } catch (e) {
     console.error(e)
     document.getElementById('pdfList').innerHTML = '<p class="error-message">Impossible de charger la bibliothèque.</p>'
@@ -322,10 +326,13 @@ function renderPdfGrid() {
     const author = pdf.auteur || ''
     const cat = pdf.categorie || ''
     const fileUrl = PDF_BASE + pdf.nom_du_fichier
+    const fav = isFavorite(pdf.nom_du_fichier)
+    const dlCount = getDownloadCount(pdf.nom_du_fichier)
     card.innerHTML = `
       <div class="pdf-thumbnail" id="thumb-${i}">
         <div class="thumb-placeholder"><i class="fas fa-book"></i></div>
         <canvas class="thumb-canvas" hidden></canvas>
+        <button class="pdf-fav-btn ${fav ? 'active' : ''}" data-filename="${esc(pdf.nom_du_fichier)}" aria-label="${fav ? 'Retirer des favoris' : 'Ajouter aux favoris'}"><i class="fa${fav ? 's' : 'r'} fa-heart"></i></button>
       </div>
       <div class="pdf-info">
         <div class="pdf-title">${esc(title)}</div>
@@ -334,7 +341,9 @@ function renderPdfGrid() {
         <div class="pdf-description">${esc(desc)}</div>
         <div class="pdf-actions-row">
           <button class="pdf-read-btn" data-url="${esc(fileUrl)}" aria-label="Lire ${esc(title)}"><i class="fas fa-book-open"></i> Lire</button>
+          <button class="pdf-dl-btn share-btn" data-url="${esc(fileUrl)}" data-title="${esc(title)}" title="Partager" aria-label="Partager ${esc(title)}"><i class="fas fa-share-alt"></i></button>
           <a href="${esc(fileUrl)}" download class="pdf-dl-btn" title="Télécharger ${esc(title)}" aria-label="Télécharger ${esc(title)}"><i class="fas fa-download"></i></a>
+          ${dlCount > 0 ? `<span class="dl-count" title="Téléchargé ${dlCount} fois"><i class="fas fa-download"></i> ${dlCount}</span>` : ''}
         </div>
       </div>`
     const readBtn = card.querySelector('.pdf-read-btn')
@@ -342,8 +351,10 @@ function renderPdfGrid() {
       e.stopPropagation()
       openPDF(fileUrl)
     })
-    const dlBtn = card.querySelector('.pdf-dl-btn')
+    const dlBtn = card.querySelector('.pdf-dl-btn[download]')
     if (dlBtn) dlBtn.addEventListener('click', () => trackDownload(pdf.nom_du_fichier))
+    const favBtn = card.querySelector('.pdf-fav-btn')
+    if (favBtn) favBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(pdf.nom_du_fichier); initFavorites() })
     container.appendChild(card)
     loadThumbnail(pdf.nom_du_fichier, i)
   })
@@ -562,6 +573,8 @@ function initPdfViewer() {
   document.getElementById('zoomOut')?.addEventListener('click', zoomOut)
   document.getElementById('fullscreenBtn')?.addEventListener('click', toggleFullscreen)
   document.getElementById('scrollModeToggle')?.addEventListener('click', toggleScrollMode)
+  document.getElementById('readingModeBtn')?.addEventListener('click', toggleReadingMode)
+  document.getElementById('bookmarkBtn')?.addEventListener('click', toggleBookmark)
   document.getElementById('back-to-library')?.addEventListener('click', closePdfViewer)
   document.getElementById('downloadPdfBtn')?.addEventListener('click', () => {
     const url = window._currentPdfUrl
@@ -579,6 +592,12 @@ function initPdfViewer() {
     if (e.key === '+' || e.key === '=') zoomIn()
     if (e.key === '-') zoomOut()
     if (e.key === '?') toggleShortcutHelp()
+    if (e.key === 'm' || e.key === 'M') toggleReadingMode()
+    if (e.key === 'b' || e.key === 'B') toggleBookmark()
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) {
+      e.preventDefault()
+      document.getElementById('pdfSearchInput')?.focus()
+    }
   })
   // Touch swipe
   const container = document.getElementById('pdf-canvas-container')
@@ -601,6 +620,9 @@ function initPdfViewer() {
     clearTimeout(hideTimer)
   })
   document.querySelector('.keyhint')?.addEventListener('click', toggleShortcutHelp)
+  document.getElementById('shareBtn')?.addEventListener('click', sharePdf)
+  document.getElementById('closeSidebar')?.addEventListener('click', () => document.getElementById('pdfSidebar').style.display = 'none')
+  initPdfSearch()
 }
 
 let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumPending = null, currentScale = 1.5, isScrollMode = false
@@ -638,6 +660,13 @@ async function openPDF(url, targetPage) {
     const saved = getReadingProgress(url)
     pageNum = targetPage || (saved > 0 && saved <= pdfDoc.numPages ? saved : 1)
     renderPdfPage(pageNum)
+    const currentPdf = allPdfs.find(p => url.endsWith(p.nom_du_fichier))
+    if (currentPdf) { showPdfInfo(currentPdf); trackRead(currentPdf); showRecommendations(currentPdf.categorie, currentPdf.nom_du_fichier) }
+    renderBookmarks(url)
+    document.getElementById('pdfSearchInput').value = ''
+    document.getElementById('pdfSearchResults').innerHTML = ''
+    pdfSearchMatches = []
+    cachePdfForOffline(url)
     if (!targetPage && saved > 0 && saved <= pdfDoc.numPages) {
       showResumeToast(pageNum)
     }
@@ -652,6 +681,7 @@ async function openPDF(url, targetPage) {
 
 async function renderPdfPage(num) {
   if (!pdfDoc) return
+  const container = document.getElementById('pdf-canvas-container')
   const cached = pageCache.get(num)
   if (cached) {
     canvas.height = cached.height
@@ -681,6 +711,15 @@ async function renderPdfPage(num) {
   const offCtx = offscreen.getContext('2d')
   offCtx.drawImage(canvas, 0, 0)
   pageCache.set(num, { img: offscreen, height: canvas.height, width: canvas.width })
+  // Text layer
+  const existingLayer = container.querySelector('.text-layer')
+  if (existingLayer) existingLayer.remove()
+  const wrapper = document.createElement('div')
+  wrapper.style.position = 'relative'
+  wrapper.style.display = 'inline-block'
+  canvas.parentNode ? canvas.parentNode.replaceChild(wrapper, canvas) : null
+  wrapper.appendChild(canvas)
+  renderTextLayer(page, wrapper, currentScale)
   if (pageNumPending !== null) { renderPdfPage(pageNumPending); pageNumPending = null }
 }
 function queueRenderPage(num) { pageIsRendering ? (pageNumPending = num) : renderPdfPage(num) }
@@ -757,16 +796,20 @@ async function renderScrollMode() {
   container.appendChild(wrapper)
 
   for (let i = 1; i <= pdfDoc.numPages; i++) {
+    const pageDiv = document.createElement('div')
+    pageDiv.style.cssText = 'position:relative;display:inline-block;margin:0 auto 8px;max-width:100%'
     const pc = document.createElement('canvas')
     pc.dataset.page = i
     const page = await pdfDoc.getPage(i)
     const vp = page.getViewport({ scale: currentScale })
     pc.width = vp.width
     pc.height = vp.height
-    pc.style.cssText = 'display:block;margin:0 auto 8px;max-width:100%;border-radius:8px;border:1px solid rgba(255,255,255,0.04)'
+    pc.style.cssText = 'display:block;max-width:100%;border-radius:8px;border:1px solid rgba(255,255,255,0.04)'
     const pCtx = pc.getContext('2d')
     await page.render({ canvasContext: pCtx, viewport: vp }).promise
-    wrapper.appendChild(pc)
+    pageDiv.appendChild(pc)
+    renderTextLayer(page, pageDiv, currentScale)
+    wrapper.appendChild(pageDiv)
     scrollCanvases.push(pc)
   }
 
@@ -895,7 +938,6 @@ async function loadDonationGoal() {
   }
 }
 
-// ─── Verse transition styles ───
 // ─── Download Stats ───
 function trackDownload(filename) {
   try {
@@ -905,6 +947,440 @@ function trackDownload(filename) {
   } catch {}
 }
 
+// ─── Favorites ⭐ ───
+function getFavorites() {
+  try { return JSON.parse(localStorage.getItem('favorites') || '[]') } catch { return [] }
+}
+function toggleFavorite(filename) {
+  let favs = getFavorites()
+  const idx = favs.indexOf(filename)
+  if (idx > -1) favs.splice(idx, 1); else favs.push(filename)
+  localStorage.setItem('favorites', JSON.stringify(favs))
+  render()
+  initFavorites()
+  return idx === -1
+}
+function isFavorite(filename) { return getFavorites().includes(filename) }
+function initFavorites() {
+  const section = document.getElementById('favorites-section')
+  const list = document.getElementById('favoritesList')
+  if (!section || !list) return
+  const favs = getFavorites()
+  const items = favs.map(f => allPdfs.find(p => p.nom_du_fichier === f)).filter(Boolean)
+  if (!items.length) { section.style.display = 'none'; return }
+  section.style.display = ''
+  list.innerHTML = items.map(pdf => {
+    const t = pdf.titre || pdf.nom_du_fichier.replace('.pdf', '').replace(/_/g, ' ')
+    const u = PDF_BASE + pdf.nom_du_fichier
+    return `<div class="continue-card anim-fade visible">
+      <div class="continue-info"><div class="continue-title">${esc(t)}</div></div>
+      <button class="pdf-read-btn continue-resume" data-url="${esc(u)}"><i class="fas fa-book-open"></i> Lire</button>
+    </div>`
+  }).join('')
+  list.querySelectorAll('.continue-resume').forEach(b => b.addEventListener('click', () => openPDF(b.dataset.url)))
+}
+
+// ─── Partager 📤 ───
+function initShareButtons() {
+  document.querySelectorAll('.share-btn').forEach(b => b.addEventListener('click', sharePdf))
+}
+function sharePdf(e) {
+  const btn = e.currentTarget
+  const url = btn.dataset.url || window._currentPdfUrl
+  const title = btn.dataset.title || document.querySelector('.pdf-info-title')?.textContent || 'Document'
+  if (navigator.share) {
+    navigator.share({ title, url: window.location.origin + '/' + url }).catch(() => {})
+  } else {
+    navigator.clipboard?.writeText(window.location.origin + '/' + url).then(() => {
+      const orig = btn.innerHTML
+      btn.innerHTML = '<i class="fas fa-check"></i>'
+      setTimeout(() => btn.innerHTML = orig, 2000)
+    }).catch(() => {})
+  }
+}
+
+// ─── Mode lecture 🌙 ───
+function toggleReadingMode() {
+  document.body.classList.toggle('reading-mode')
+  const btn = document.getElementById('readingModeBtn')
+  if (btn) btn.classList.toggle('active')
+  localStorage.setItem('readingMode', document.body.classList.contains('reading-mode') ? 'on' : 'off')
+}
+function initReadingMode() {
+  const btn = document.getElementById('readingModeBtn')
+  if (localStorage.getItem('readingMode') === 'on') {
+    document.body.classList.add('reading-mode')
+    if (btn) btn.classList.add('active')
+  }
+}
+
+// ─── Liens directs ?pdf=filename ───
+function handleDirectLink() {
+  const params = new URLSearchParams(window.location.search)
+  const name = params.get('pdf')
+  if (!name) return
+  const pdf = allPdfs.find(p => p.nom_du_fichier === name || p.nom_du_fichier === name + '.pdf')
+  if (pdf) setTimeout(() => openPDF(PDF_BASE + pdf.nom_du_fichier), 500)
+}
+
+// ─── Nouveautés 📚 ───
+function initNewReleases() {
+  const section = document.getElementById('new-releases')
+  const list = document.getElementById('newReleasesList')
+  if (!section || !list || !allPdfs.length) return
+  const sorted = [...allPdfs].filter(p => p.numero).sort((a, b) => (b.numero || 0) - (a.numero || 0)).slice(0, 8)
+  if (!sorted.length) { section.style.display = 'none'; return }
+  section.style.display = ''
+  list.innerHTML = sorted.map(pdf => {
+    const t = pdf.titre || pdf.nom_du_fichier.replace('.pdf', '').replace(/_/g, ' ')
+    const u = PDF_BASE + pdf.nom_du_fichier
+    return `<div class="continue-card anim-fade visible">
+      <div class="continue-info">
+        <div class="continue-title">${esc(t)}</div>
+        ${pdf.auteur ? `<div class="continue-meta">${esc(pdf.auteur)}</div>` : ''}
+      </div>
+      <button class="pdf-read-btn continue-resume" data-url="${esc(u)}"><i class="fas fa-book-open"></i> Lire</button>
+    </div>`
+  }).join('')
+  list.querySelectorAll('.continue-resume').forEach(b => b.addEventListener('click', () => openPDF(b.dataset.url)))
+}
+
+// ─── Recherche dans le PDF ouvert 🔍 ───
+let pdfSearchMatches = [], pdfSearchIdx = 0
+function initPdfSearch() {
+  document.getElementById('pdfSearchInput')?.addEventListener('input', e => searchInPdf(e.target.value))
+  document.getElementById('pdfSearchPrev')?.addEventListener('click', () => navigateSearch(-1))
+  document.getElementById('pdfSearchNext')?.addEventListener('click', () => navigateSearch(1))
+}
+async function searchInPdf(term) {
+  const resultsEl = document.getElementById('pdfSearchResults')
+  if (!term || !pdfDoc) { resultsEl.innerHTML = ''; pdfSearchMatches = []; return }
+  try {
+    const pages = await Promise.all(Array.from({ length: pdfDoc.numPages }, (_, i) =>
+      pdfDoc.getPage(i + 1).then(p => p.getTextContent())
+    ))
+    pdfSearchMatches = []
+    pages.forEach((content, i) => {
+      content.items.forEach(item => {
+        if (item.str.toLowerCase().includes(term.toLowerCase())) {
+          pdfSearchMatches.push({ page: i + 1, text: item.str, x: item.transform[4], y: item.transform[5] })
+        }
+      })
+    })
+    pdfSearchIdx = 0
+    if (pdfSearchMatches.length) {
+      resultsEl.innerHTML = `${pdfSearchMatches.length} résultat(s)`
+      goToSearchResult(0)
+    } else {
+      resultsEl.innerHTML = 'Aucun résultat'
+    }
+  } catch {}
+}
+function navigateSearch(dir) {
+  pdfSearchIdx = (pdfSearchIdx + dir + pdfSearchMatches.length) % pdfSearchMatches.length
+  goToSearchResult(pdfSearchIdx)
+}
+function goToSearchResult(idx) {
+  if (!pdfSearchMatches.length) return
+  const match = pdfSearchMatches[idx]
+  if (isScrollMode) {
+    const c = document.querySelector(`[data-page="${match.page}"]`)
+    if (c) c.scrollIntoView({ block: 'center' })
+  } else {
+    pageNum = match.page
+    renderPdfPage(pageNum)
+  }
+  document.getElementById('pageInfo').style.color = 'var(--primary)'
+  setTimeout(() => document.getElementById('pageInfo').style.color = '', 2000)
+}
+
+// ─── Signets 📌 ───
+function getBookmarks(url) {
+  try { return JSON.parse(localStorage.getItem('bm_' + btoa(url)) || '[]') } catch { return [] }
+}
+function addBookmark(url, page) {
+  const bms = getBookmarks(url)
+  if (bms.some(b => b.page === page)) return
+  bms.push({ page, date: new Date().toLocaleDateString() })
+  localStorage.setItem('bm_' + btoa(url), JSON.stringify(bms))
+  renderBookmarks(url)
+}
+function removeBookmark(url, page) {
+  let bms = getBookmarks(url)
+  bms = bms.filter(b => b.page !== page)
+  localStorage.setItem('bm_' + btoa(url), JSON.stringify(bms))
+  renderBookmarks(url)
+}
+function renderBookmarks(url) {
+  const list = document.getElementById('bookmarkList')
+  const sidebar = document.getElementById('pdfSidebar')
+  if (!list) return
+  const bms = getBookmarks(url)
+  if (sidebar) sidebar.style.display = bms.length ? '' : 'none'
+  list.innerHTML = bms.map(b => `<div class="bm-item">
+    <button class="btn-secondary bm-go" data-page="${b.page}" style="padding:0.2rem 0.6rem;font-size:0.75rem">Page ${b.page}</button>
+    <span style="font-size:0.65rem;color:var(--text3)">${b.date}</span>
+    <button class="bm-del" data-page="${b.page}" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.8rem;padding:0.2rem"><i class="fas fa-times"></i></button>
+  </div>`).join('')
+  list.querySelectorAll('.bm-go').forEach(b => b.addEventListener('click', () => {
+    const p = parseInt(b.dataset.page)
+    if (isScrollMode) {
+      const c = document.querySelector(`[data-page="${p}"]`)
+      if (c) c.scrollIntoView({ block: 'center' })
+    } else { pageNum = p; renderPdfPage(p) }
+  }))
+  list.querySelectorAll('.bm-del').forEach(b => b.addEventListener('click', () => removeBookmark(url, parseInt(b.dataset.page))))
+}
+function toggleBookmark() {
+  const url = window._currentPdfUrl
+  if (!url || !pdfDoc) return
+  const bms = getBookmarks(url)
+  if (bms.some(b => b.page === pageNum)) { removeBookmark(url, pageNum); return }
+  addBookmark(url, pageNum)
+}
+
+// ─── Stats de lecture 📊 ───
+function trackRead(pdf) {
+  try {
+    const key = 'readStats'
+    const stats = JSON.parse(localStorage.getItem(key) || '{"reads":{},"total":0}')
+    stats.total = (stats.total || 0) + 1
+    stats.reads[pdf.nom_du_fichier] = (stats.reads[pdf.nom_du_fichier] || 0) + 1
+    const titles = JSON.parse(localStorage.getItem('readTitles') || '[]')
+    if (!titles.includes(pdf.nom_du_fichier)) { titles.push(pdf.nom_du_fichier); localStorage.setItem('readTitles', JSON.stringify(titles)) }
+    localStorage.setItem(key, JSON.stringify(stats))
+  } catch {}
+}
+
+// ─── Infos du livre dans le viewer ───
+function showPdfInfo(pdf) {
+  const bar = document.getElementById('pdfInfoBar')
+  if (!bar) return
+  const title = pdf.titre || pdf.nom_du_fichier.replace('.pdf', '').replace(/_/g, ' ')
+  bar.innerHTML = `
+    <span class="pdf-info-title">${esc(title)}</span>
+    ${pdf.auteur ? `<span class="pdf-info-author"><i class="fas fa-user"></i> ${esc(pdf.auteur)}</span>` : ''}
+    ${pdf.categorie ? `<span class="pdf-cat-tag">${esc(pdf.categorie)}</span>` : ''}
+  `
+  bar.style.display = 'flex'
+}
+
+// ─── Export des donnees ───
+function exportUserData() {
+  const data = {}
+  const keys = ['favorites','downloadStats','readStats','readTitles']
+  keys.forEach(k => { try { data[k] = JSON.parse(localStorage.getItem(k)) } catch {} })
+  const bmKeys = Object.keys(localStorage).filter(k => k.startsWith('bm_'))
+  data.bookmarks = {}
+  bmKeys.forEach(k => { try { data.bookmarks[k.slice(3)] = JSON.parse(localStorage.getItem(k)) } catch {} })
+  const progKeys = Object.keys(localStorage).filter(k => k.startsWith('reading_') && !k.endsWith('_time'))
+  data.readingProgress = {}
+  progKeys.forEach(k => { try { data.readingProgress[k] = parseInt(localStorage.getItem(k)) } catch {} })
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = `bibliotheque-donnees-${new Date().toISOString().slice(0,10)}.json`
+  document.body.appendChild(a); a.click(); a.remove()
+  URL.revokeObjectURL(a.href)
+}
+
+// ─── Selection de texte dans le viewer PDF ───
+let textLayer = null
+function renderTextLayer(page, pageDiv, scale) {
+  const existing = pageDiv.querySelector('.text-layer')
+  if (existing) existing.remove()
+  page.getTextContent().then(tc => {
+    const layer = document.createElement('div')
+    layer.className = 'text-layer'
+    layer.style.position = 'absolute'
+    layer.style.top = '0'; layer.style.left = '0'
+    layer.style.right = '0'; layer.style.bottom = '0'
+    layer.style.pointerEvents = 'none'
+    const viewport = page.getViewport({ scale })
+    tc.items.forEach(item => {
+      const tx = document.createElement('span')
+      tx.textContent = item.str
+      tx.style.position = 'absolute'
+      tx.style.left = (item.transform[4] * scale) + 'px'
+      tx.style.top = ((viewport.height - item.transform[5]) * scale) + 'px'
+      tx.style.fontSize = (item.height * scale) + 'px'
+      tx.style.fontFamily = item.fontName || 'sans-serif'
+      tx.style.color = 'transparent'
+      tx.style.pointerEvents = 'auto'
+      tx.style.cursor = 'text'
+      tx.style.userSelect = 'text'
+      tx.style.whiteSpace = 'pre'
+      layer.appendChild(tx)
+    })
+    pageDiv.appendChild(layer)
+    textLayer = layer
+  }).catch(() => {})
+}
+
+// ─── Livres recommandes par categorie ───
+function showRecommendations(category, currentFile) {
+  const section = document.getElementById('recommendations-section')
+  const list = document.getElementById('recommendationsList')
+  if (!section || !list || !allPdfs.length) return
+  if (!category) { section.style.display = 'none'; return }
+  const related = allPdfs.filter(p => (p.categorie || 'Non classé') === category && p.nom_du_fichier !== currentFile).slice(0, 4)
+  if (!related.length) { section.style.display = 'none'; return }
+  section.style.display = ''
+  list.innerHTML = related.map(pdf => {
+    const t = pdf.titre || pdf.nom_du_fichier.replace('.pdf', '').replace(/_/g, ' ')
+    const u = PDF_BASE + pdf.nom_du_fichier
+    return `<div class="continue-card anim-fade visible">
+      <div class="continue-info"><div class="continue-title">${esc(t)}</div></div>
+      <button class="pdf-read-btn continue-resume" data-url="${esc(u)}"><i class="fas fa-book-open"></i> Lire</button>
+    </div>`
+  }).join('')
+  list.querySelectorAll('.continue-resume').forEach(b => b.addEventListener('click', () => openPDF(b.dataset.url)))
+}
+
+// ─── Mode hors-ligne : cache les PDFs ───
+async function cachePdfForOffline(url) {
+  if (!('caches' in window)) return
+  try {
+    const cache = await caches.open('pdf-cache')
+    const exists = await cache.match(url)
+    if (!exists) await cache.add(url)
+  } catch {}
+}
+
+// ─── Filtre par categorie via URL ───
+function handleCategoryFilter() {
+  const params = new URLSearchParams(window.location.search)
+  const cat = params.get('cat')
+  if (!cat) return
+  const btns = document.querySelectorAll('.cat-btn')
+  btns.forEach(b => {
+    if (b.dataset.cat.toLowerCase() === cat.toLowerCase()) {
+      b.click()
+    }
+  })
+}
+
+// ─── Compteur de telechargements visible ───
+function getDownloadCount(filename) {
+  try {
+    const stats = JSON.parse(localStorage.getItem('downloadStats') || '{}')
+    return stats[filename] || 0
+  } catch { return 0 }
+}
+
+// ─── Recherche plein texte dans tous les PDFs ───
+let fullTextIndex = {}
+async function buildTextIndex() {
+  const visited = JSON.parse(localStorage.getItem('readTitles') || '[]')
+  for (const file of visited) {
+    if (fullTextIndex[file]) continue
+    try {
+      await loadPdfJs()
+      const pdf = await pdfjsLib.getDocument(PDF_BASE + file).promise
+      const texts = []
+      for (let i = 1; i <= Math.min(pdf.numPages, 50); i++) {
+        const page = await pdf.getPage(i)
+        const tc = await page.getTextContent()
+        texts.push(tc.items.map(it => it.str).join(' '))
+      }
+      fullTextIndex[file] = texts.join('\n').slice(0, 50000)
+    } catch {}
+  }
+  localStorage.setItem('pdfTextIndex', JSON.stringify(fullTextIndex))
+}
+function searchAllPdfs(query) {
+  query = query.toLowerCase().trim()
+  if (!query) return []
+  try { fullTextIndex = JSON.parse(localStorage.getItem('pdfTextIndex') || '{}') } catch {}
+  const results = []
+  Object.entries(fullTextIndex).forEach(([file, text]) => {
+    const idx = text.toLowerCase().indexOf(query)
+    if (idx > -1) {
+      const snippet = text.slice(Math.max(0, idx - 60), idx + 120)
+      results.push({ file, snippet: '...' + snippet + '...' })
+    }
+  })
+  return results.sort((a, b) => a.file.localeCompare(b.file))
+}
+function initGlobalSearch() {
+  document.getElementById('globalSearchInput')?.addEventListener('input', e => {
+    const results = searchAllPdfs(e.target.value)
+    const el = document.getElementById('globalSearchResults')
+    if (!el) return
+    if (!e.target.value.trim()) { el.innerHTML = ''; return }
+    if (!results.length) { el.innerHTML = '<p style="font-size:0.8rem;color:var(--text3);padding:0.5rem">Aucun resultat</p>'; return }
+    el.innerHTML = results.map(r => {
+      const pdf = allPdfs.find(p => p.nom_du_fichier === r.file)
+      const t = pdf ? (pdf.titre || r.file.replace('.pdf','')) : r.file
+      return `<div class="global-search-item" data-file="${esc(r.file)}">
+        <div class="gs-title">${esc(t)}</div>
+        <div class="gs-snippet">${esc(r.snippet)}</div>
+      </div>`
+    }).join('')
+    el.querySelectorAll('.global-search-item').forEach(item => {
+      item.addEventListener('click', () => openPDF(PDF_BASE + item.dataset.file))
+    })
+  })
+  // Rebuild index for visited PDFs in background
+  setTimeout(buildTextIndex, 5000)
+}
+
+// ─── Synchronisation cloud via GitHub ───
+async function syncToCloud(data) {
+  const token = prompt('Entrez votre token GitHub (PAT) pour sauvegarder vos donnees dans le cloud:')
+  if (!token) return
+  try {
+    const res = await fetch('https://api.github.com/repos/cideg-dev/Biblio-Vitrine/contents/assets/data/user-data.json', {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Sync user data', content: btoa(unescape(encodeURIComponent(JSON.stringify(data)))), sha: '' })
+    })
+    if (!res.ok) throw new Error('Sync failed')
+    showToast('Donnees synchronisees avec le cloud!')
+  } catch (e) { alert('Erreur synchronisation: ' + e.message) }
+}
+
 const style = document.createElement('style')
 style.textContent = `#dailyVerse, #dailyVerseRef { transition: opacity 0.4s ease; }`
+
+// ─── Text layer styles ───
+style.textContent += `
+.text-layer { position: absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; z-index:10; }
+.text-layer span { pointer-events:auto; cursor:text; user-select:text; color:transparent; }
+.text-layer span::selection { background: rgba(0,245,200,0.3); color:transparent; }
+body.reading-mode .text-layer span::selection { background: rgba(42,122,90,0.3); }
+`
 document.head.appendChild(style)
+
+// ─── Toast helper ───
+function showToast(msg) {
+  let t = document.getElementById('appToast')
+  if (!t) {
+    t = document.createElement('div')
+    t.id = 'appToast'
+    t.style.cssText = 'position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:var(--primary);color:var(--bg);padding:0.6rem 1.5rem;border-radius:100px;font-size:0.85rem;font-weight:600;z-index:9999;transition:all 0.3s;opacity:0;pointer-events:none;font-family:var(--font)'
+    document.body.appendChild(t)
+  }
+  t.textContent = msg
+  t.style.opacity = '1'
+  setTimeout(() => t.style.opacity = '0', 3000)
+}
+
+// ─── Init URL param & reading mode ───
+document.addEventListener('DOMContentLoaded', () => {
+  initReadingMode()
+  handleDirectLink()
+  handleCategoryFilter()
+  initGlobalSearch()
+  // Cookie banner
+  const cookieBanner = document.getElementById('cookieBanner')
+  if (cookieBanner && !localStorage.getItem('cookiesAccepted')) {
+    cookieBanner.style.display = 'flex'
+    document.getElementById('acceptCookies')?.addEventListener('click', () => {
+      localStorage.setItem('cookiesAccepted', 'true')
+      cookieBanner.style.display = 'none'
+    })
+  } else if (cookieBanner) {
+    cookieBanner.style.display = 'none'
+  }
+})
