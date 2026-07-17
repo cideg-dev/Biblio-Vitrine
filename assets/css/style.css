@@ -1625,9 +1625,6 @@ footer {
 .tts-voice-select option { background: var(--surface); color: var(--text); }
 .tts-rotate-btn { position: relative; }
 .tts-rotate-btn.active { background: var(--primary); color: var(--bg); }
-#ttsAutoReadBtn.active { background: var(--primary); color: var(--bg); animation: ttsPulse 2s infinite; }
-#ttsAutoReadBtn.active i { color: var(--bg); }
-@keyframes ttsPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,245,200,0.4); } 50% { box-shadow: 0 0 0 6px rgba(0,245,200,0); } }
 .tts-rotate-indicator {
     position: absolute;
     bottom: -2px;
