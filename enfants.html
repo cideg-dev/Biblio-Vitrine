@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histoires Bibliques pour Enfants — CIDEG & P.line</title>
+    <meta name="description" content="60 histoires bibliques illustrées pour enfants, avec PDF, coloriages, audio et vidéo. Gratuit. Ressources Bible for Children en français.">
+    <meta name="keywords" content="histoires bibliques enfants, Bible pour enfants, coloriages bibliques, récits bibliques illustrés, éducation chrétienne enfants, Bible for Children, français">
+    <meta name="author" content="CIDEG & P.line">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://cideg-dev.github.io/Biblio-Vitrine/enfants.html">
+    <link rel="icon" href="assets/images/Lumiere_sur_parole.png" type="image/png">
+    <meta property="og:title" content="Histoires Bibliques pour Enfants — 60 Récits Illustrés">
+    <meta property="og:description" content="60 histoires bibliques pour enfants avec PDF, coloriages et audio. Gratuit.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cideg-dev.github.io/Biblio-Vitrine/enfants.html">
+    <meta property="og:image" content="https://cideg-dev.github.io/Biblio-Vitrine/assets/images/Lumiere_sur_parole.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="sitemap" type="application/xml" href="sitemap.xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXL9EB8SQY"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config','G-KXL9EB8SQY');</script>
+</head>
+<body>
+    <a href="#enfants-content" id="skipLink" class="skip-link">Aller au contenu</a>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <a href="index.html"><img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="logo-img"></a>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Accueil</a></li>
+                    <li class="nav-item"><a href="index.html#bibliotheque" class="nav-link">Bibliothèque</a></li>
+                    <li class="nav-item"><a href="missions.html" class="nav-link"><i class="fas fa-hand-holding-heart"></i> Mission</a></li>
+                    <li class="nav-item"><a href="blog.html" class="nav-link"><i class="fas fa-newspaper"></i> Blog</a></li>
+                    <li class="nav-item"><a href="enfants.html" class="nav-link active" style="color:var(--primary)!important"><i class="fas fa-child"></i> Enfants</a></li>
+                    <li class="nav-item"><a href="index.html#soutenir" class="nav-link donate-link"><i class="fas fa-heart"></i> Soutenir</a></li>
+                    <li class="nav-item"><a href="admin.html" class="admin-btn">Admin</a></li>
+                </ul>
+                <div class="hamburger"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+            </div>
+        </nav>
+    </header>
+
+    <main id="enfants-content">
+        <section class="enfants-hero">
+            <div class="container">
+                <div class="hero-badge"><i class="fas fa-child"></i> Pour les enfants · 60 histoires</div>
+                <h1><i class="fas fa-book-bible"></i> La Bible <span class="highlight">pour les Enfants</span></h1>
+                <p class="enfants-hero-sub">Des histoires bibliques illustrées, adaptées aux enfants — avec PDF, coloriages, audio et vidéo. 100% gratuit.</p>
+            </div>
+        </section>
+
+        <section class="enfants-intro">
+            <div class="container">
+                <p>Découvrez <strong>60 histoires</strong> tirées de la Bible, magnifiquement illustrées et adaptées aux enfants. Chaque histoire est disponible en <strong>PDF</strong>, avec un <strong>livre de coloriage</strong>, une version <strong>audio</strong> et une <strong>vidéo</strong>. Idéal pour l'école du dimanche, la catéchèse ou la lecture en famille.</p>
+                <div class="enfants-stats">
+                    <div class="enfants-stat"><span class="enfants-stat-num">35</span><span class="enfants-stat-label">Ancien Testament</span></div>
+                    <div class="enfants-stat"><span class="enfants-stat-num">25</span><span class="enfants-stat-label">Nouveau Testament</span></div>
+                    <div class="enfants-stat"><span class="enfants-stat-num">60</span><span class="enfants-stat-label">Histoires</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="enfants-section">
+            <div class="container">
+                <div class="enfants-controls">
+                    <div class="enfants-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="enfantsSearch" placeholder="Rechercher une histoire…" aria-label="Rechercher">
+                    </div>
+                    <select id="enfantsFilter" aria-label="Filtrer par testament" style="background:var(--surface);border:1px solid rgba(255,255,255,0.06);border-radius:100px;color:var(--text);padding:0.4rem 1rem;font-size:0.82rem;font-family:var(--font);cursor:pointer">
+                        <option value="all">Toutes les histoires</option>
+                        <option value="at">Ancien Testament</option>
+                        <option value="nt">Nouveau Testament</option>
+                    </select>
+                </div>
+                <div id="enfantsGrid" class="enfants-grid"></div>
+                <div class="enfants-credit">
+                    Contenu fourni par <a href="https://bibleforchildren.org" target="_blank" rel="noopener">Bible for Children</a> ·
+                    <a href="https://bibleforchildren.org/languages/french/stories.php" target="_blank" rel="noopener">Voir toutes les histoires</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <img src="assets/images/Lumiere_sur_parole.png" alt="CIDEG & P.line" class="footer-logo" loading="lazy">
+                    <p>Rendre la Parole de Dieu accessible à tous, gratuitement.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Liens</h4>
+                    <a href="index.html">Accueil</a>
+                    <a href="index.html#bibliotheque">Bibliothèque</a>
+                    <a href="missions.html">Notre Mission</a>
+                    <a href="enfants.html">Enfants</a>
+                    <a href="index.html#soutenir">Soutenir</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Légal</h4>
+                    <a href="privacy-policy.html">Confidentialité</a>
+                    <a href="cookies-policy.html">Cookies</a>
+                    <a href="terms-of-use.html">Conditions</a>
+                    <a href="legal-notice.html">Mentions légales</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <a href="mailto:cideg.p.line@gmail.com"><i class="fas fa-envelope"></i> cideg.p.line@gmail.com</a>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="https://chat.whatsapp.com/EFm6fpqFC4O8tXXN69e96W" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CIDEG & P.line. « Ta parole est une lampe à mes pieds. » — Psaume 119:105</p>
+                <p class="app-version">v<span id="appVersion">1.3.0</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <button id="backToTop" class="back-to-top" aria-label="Retour en haut"><i class="fas fa-arrow-up"></i></button>
+
+<script>
+const STORIES = [
+  {"n":1,"fr":"Lorsque Dieu a tout créé","en":"When God Made Everything","testament":"at"},
+  {"n":2,"fr":"Le début de la folie de l'homme","en":"The Start of Man's Sadness","testament":"at"},
+  {"n":3,"fr":"Noé et la grande innondation","en":"Noah and the Great Flood","testament":"at"},
+  {"n":4,"fr":"La promesse de Dieu à Abraham","en":"God's Promise to Abraham","testament":"at"},
+  {"n":5,"fr":"Dieu met l'amour d'Abraham à l'épreuve","en":"God Tests Abraham's Love","testament":"at"},
+  {"n":6,"fr":"Jacob le trompeur","en":"Jacob the Deceiver","testament":"at"},
+  {"n":7,"fr":"Un fils préféré devient un esclave","en":"A Favorite Son Becomes a Slave","testament":"at"},
+  {"n":8,"fr":"Dieu honore Joseph l'esclave","en":"God Honors Joseph the Slave","testament":"at"},
+  {"n":9,"fr":"Le Prince du Nil","en":"The Prince From the River","testament":"at"},
+  {"n":10,"fr":"Le prince devient un berger","en":"The Prince Becomes a Shepherd","testament":"at"},
+  {"n":11,"fr":"Adieu Pharaon !","en":"Goodbye Pharaoh","testament":"at"},
+  {"n":12,"fr":"Quarante années","en":"Forty Years","testament":"at"},
+  {"n":13,"fr":"Josué devient responsable","en":"Joshua Takes Charge","testament":"at"},
+  {"n":14,"fr":"Samson, l'homme fort de Dieu","en":"Samson, God's Strong Man","testament":"at"},
+  {"n":15,"fr":"La petite armée de Gédéon","en":"Gideon's Little Army","testament":"at"},
+  {"n":16,"fr":"Ruth : une histoire d'amour","en":"Ruth - A Love Story","testament":"at"},
+  {"n":17,"fr":"Samuel, le petit serviteur de Dieu","en":"Samuel, God's Boy-Servant","testament":"at"},
+  {"n":18,"fr":"Le roi élégant et insensé","en":"The Handsome Foolish King","testament":"at"},
+  {"n":19,"fr":"David le petit berger","en":"David the Shepherd Boy","testament":"at"},
+  {"n":20,"fr":"David le roi (partie 1)","en":"David the King (Part 1)","testament":"at"},
+  {"n":21,"fr":"David le roi (partie 2)","en":"David the King (Part 2)","testament":"at"},
+  {"n":22,"fr":"Salomon, le roi sage","en":"Wise King Solomon","testament":"at"},
+  {"n":23,"fr":"Bons rois, mauvais rois","en":"Good Kings, Bad Kings","testament":"at"},
+  {"n":24,"fr":"L'homme de feu","en":"The Man of Fire","testament":"at"},
+  {"n":25,"fr":"Elisé, homme de miracles","en":"Elisha, Man of Miracles","testament":"at"},
+  {"n":26,"fr":"Jonas et le grand poisson","en":"Jonah and the Big Fish","testament":"at"},
+  {"n":27,"fr":"Ésaïe voit le future","en":"Isaiah Sees the Future","testament":"at"},
+  {"n":28,"fr":"Jérémie, homme de larmes","en":"Jeremiah, Man of Tears","testament":"at"},
+  {"n":29,"fr":"Ezéchiel, homme de visions","en":"Ezekiel: Man of Visions","testament":"at"},
+  {"n":30,"fr":"La magnifique reine Esther","en":"Beautiful Queen Esther","testament":"at"},
+  {"n":31,"fr":"Daniel le prisonnier","en":"Daniel the Captive","testament":"at"},
+  {"n":32,"fr":"Daniel et le rêve mystérieux","en":"Daniel and the Mystery Dream","testament":"at"},
+  {"n":33,"fr":"Les hommes qui ne cédèrent pas","en":"The Men Who Would Not Bend","testament":"at"},
+  {"n":34,"fr":"Daniel et la fosse aux lions","en":"Daniel and the Lions' Den","testament":"at"},
+  {"n":35,"fr":"Le grand mur de Néhémie","en":"The Great Wall of Nehemiah","testament":"at"},
+  {"n":36,"fr":"La naissance de Jésus","en":"The Birth of Jesus","testament":"nt"},
+  {"n":37,"fr":"Un messager de Dieu","en":"A Man Sent From God","testament":"nt"},
+  {"n":38,"fr":"Un moment difficile pour Jésus","en":"A Terrible Time for Jesus","testament":"nt"},
+  {"n":39,"fr":"Jésus choisit douze assistants","en":"Jesus Chooses 12 Helpers","testament":"nt"},
+  {"n":40,"fr":"Les miracles de Jésus","en":"The Miracles of Jesus","testament":"nt"},
+  {"n":41,"fr":"Un chef du temple rend visite à Jésus","en":"A Temple Leader Visits Jesus","testament":"nt"},
+  {"n":42,"fr":"Jésus le grand professeur","en":"Jesus the Great Teacher","testament":"nt"},
+  {"n":43,"fr":"Le fermier et la graine","en":"The Farmer and the Seed","testament":"nt"},
+  {"n":44,"fr":"L'homme riche et l'homme pauvre","en":"Rich Man, Poor Man","testament":"nt"},
+  {"n":45,"fr":"Le fils prodigue","en":"The Prodigal Son","testament":"nt"},
+  {"n":46,"fr":"Le bon Samaritain","en":"The Good Samaritan","testament":"nt"},
+  {"n":47,"fr":"La femme au puits","en":"The Woman at the Well","testament":"nt"},
+  {"n":48,"fr":"Jésus calme la tempête sur la mer","en":"Jesus Stills the Stormy Sea","testament":"nt"},
+  {"n":49,"fr":"La fille qui vécut deux fois","en":"The Girl Who Lived Twice","testament":"nt"},
+  {"n":50,"fr":"Jésus guérit l'aveugle","en":"Jesus Heals the Blind","testament":"nt"},
+  {"n":51,"fr":"Jésus nourrit 5000 personnes","en":"Jesus Feeds 5000 People","testament":"nt"},
+  {"n":52,"fr":"Jésus et Lazare","en":"Jesus and Lazarus","testament":"nt"},
+  {"n":53,"fr":"Jésus et Zachée","en":"Jesus and Zaccheus","testament":"nt"},
+  {"n":54,"fr":"La première Pâques","en":"The First Easter","testament":"nt"},
+  {"n":55,"fr":"La naissance de l'église","en":"The Birth of the Church","testament":"nt"},
+  {"n":56,"fr":"L'église subit des troubles","en":"The Church Meets Trouble","testament":"nt"},
+  {"n":57,"fr":"Pierre et la puissance de la prière","en":"Peter and the Power of Prayer","testament":"nt"},
+  {"n":58,"fr":"De la persecution à la predication","en":"From Persecutor to Preacher","testament":"nt"},
+  {"n":59,"fr":"Les étonnants voyages de Paul","en":"Paul's Amazing Travels","testament":"nt"},
+  {"n":60,"fr":"Le Paradis, la magnifique maison de Dieu","en":"Heaven, God's Beautiful Home","testament":"nt"}
+];
+
+function pad(n) { return n.toString().padStart(2, '0') }
+
+function slugify(title) {
+  return title
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/'/g, '')
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .replace(/\s+/g, '_')
+    .trim()
+}
+
+function buildUrl(s, type) {
+  const base = 'https://bibleforchildren.org/PDFs/french'
+  const nn = pad(s.n)
+  const slug = slugify(s.en)
+  const fr = '_French'
+  switch(type) {
+    case 'pdf': return `${base}/${nn}_${slug}${fr}.pdf`
+    case 'cb': return `${base}/${nn}_${slug}${fr}_CB.pdf`
+    case 'cb6': return `${base}/${nn}_${slug}${fr}_CB6.pdf`
+    case 'audio': return `${base}/${nn}_${slug}${fr}.mp3`
+    case 'pda': return `${base}/${nn}_${slug}${fr}_PDA.pdf`
+    case 'tract': return `${base}/${nn}_${slug}${fr}_Tract_Color.pdf`
+    case 'tract-bw': return `${base}/${nn}_${slug}${fr}_Tract_BW.pdf`
+    default: return ''
+  }
+}
+
+function renderStories(list) {
+  const grid = document.getElementById('enfantsGrid')
+  if (!list.length) {
+    grid.innerHTML = '<div class="enfants-empty"><i class="fas fa-search" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.4"></i>Aucune histoire trouvée</div>'
+    return
+  }
+  grid.innerHTML = list.map(s => {
+    const pdfUrl = buildUrl(s, 'pdf')
+    const cbUrl = buildUrl(s, 'cb')
+    const audioUrl = buildUrl(s, 'audio')
+    const tractUrl = buildUrl(s, 'tract')
+    const badge = s.testament === 'at'
+      ? '<span class="enfant-badge at">AT</span>'
+      : '<span class="enfant-badge nt">NT</span>'
+    return `<article class="enfant-card">
+      <div class="enfant-card-header">
+        <span class="enfant-number">${s.n}</span>
+        <div>
+          <div class="enfant-title">${s.fr} ${badge}</div>
+          <div class="enfant-title-en">${s.en}</div>
+        </div>
+      </div>
+      <div class="enfant-actions">
+        <a href="${pdfUrl}" target="_blank" rel="noopener" class="enfant-link pdf-link" title="Histoire PDF"><i class="fas fa-file-pdf"></i> PDF</a>
+        <a href="${cbUrl}" target="_blank" rel="noopener" class="enfant-link cb-link" title="Coloriage"><i class="fas fa-palette"></i> Colorier</a>
+        <a href="${audioUrl}" target="_blank" rel="noopener" class="enfant-link audio-link" title="Audio MP3"><i class="fas fa-headphones"></i> Audio</a>
+        <a href="${tractUrl}" target="_blank" rel="noopener" class="enfant-link dl-link" title="Tract"><i class="fas fa-scroll"></i> Tract</a>
+        <a href="https://vimeo.com/bibleforchildren/french${pad(s.n)}" target="_blank" rel="noopener" class="enfant-link video-link" title="Vidéo"><i class="fas fa-video"></i> Vidéo</a>
+      </div>
+    </article>`
+  }).join('')
+}
+
+function filterStories() {
+  const q = document.getElementById('enfantsSearch').value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  const t = document.getElementById('enfantsFilter').value
+  const filtered = STORIES.filter(s => {
+    if (t !== 'all' && s.testament !== t) return false
+    if (q) {
+      const fr = s.fr.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      const en = s.en.toLowerCase()
+      if (!fr.includes(q) && !en.includes(q) && !s.n.toString().includes(q)) return false
+    }
+    return true
+  })
+  renderStories(filtered)
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderStories(STORIES)
+  document.getElementById('enfantsSearch').addEventListener('input', filterStories)
+  document.getElementById('enfantsFilter').addEventListener('change', filterStories)
+
+  // Hamburger menu
+  const hamburger = document.querySelector('.hamburger')
+  const navMenu = document.querySelector('.nav-menu')
+  hamburger?.addEventListener('click', () => {
+    hamburger.classList.toggle('active')
+    navMenu.classList.toggle('active')
+  })
+
+  // Back to top
+  const backBtn = document.getElementById('backToTop')
+  window.addEventListener('scroll', () => {
+    backBtn.classList.toggle('visible', window.scrollY > 400)
+  })
+  backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }))
+
+  // Version
+  const vEl = document.getElementById('appVersion')
+  if (vEl) vEl.textContent = localStorage.getItem('appVersion') || '1.3.0'
+})
+</script>
+</body>
+</html>
