@@ -131,7 +131,7 @@
             <iframe id="childPdfFrame" class="child-pdf-iframe" title="Lecteur PDF"></iframe>
             <div id="childPdfFallback" class="child-pdf-fallback" style="display:none">
                 <i class="fas fa-exclamation-triangle"></i>
-                <p id="childPdfFallbackMsg">Impossible d'afficher ce PDF dans le navigateur.</p>
+                <p>Impossible d'afficher ce PDF dans le navigateur.</p>
                 <a id="childPdfFallbackLink" class="btn-primary" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
             </div>
         </div>
@@ -284,6 +284,19 @@ function formatTime(s) {
   return m + ':' + (sec < 10 ? '0' : '') + sec
 }
 
+function showChildToast(msg) {
+  let t = document.getElementById('childToast')
+  if (!t) {
+    t = document.createElement('div')
+    t.id = 'childToast'
+    t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--primary);color:var(--bg);padding:0.6rem 1.5rem;border-radius:100px;font-size:0.85rem;font-weight:600;z-index:99999;transition:all 0.3s;opacity:0;pointer-events:none;font-family:var(--font);white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis'
+    document.body.appendChild(t)
+  }
+  t.textContent = msg
+  t.style.opacity = '1'
+  setTimeout(() => t.style.opacity = '0', 3000)
+}
+
 function openChildPdf(url, title, audioUrl) {
   const viewer = document.getElementById('childPdfViewer')
   const frame = document.getElementById('childPdfFrame')
@@ -292,13 +305,10 @@ function openChildPdf(url, title, audioUrl) {
   const extBtn = document.getElementById('childPdfExternalBtn')
   const fallback = document.getElementById('childPdfFallback')
   const fallbackLink = document.getElementById('childPdfFallbackLink')
-  const fallbackMsg = document.getElementById('childPdfFallbackMsg')
   titleEl.textContent = title
   dlBtn.href = url
   dlBtn.download = title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g, '').trim() + '.pdf'
   extBtn.href = url
-
-  const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 
   // Stop previous audio
   if (childAudio) { childAudio.pause(); childAudio.currentTime = 0 }
@@ -319,18 +329,9 @@ function openChildPdf(url, title, audioUrl) {
   viewer.style.display = 'flex'
   document.body.style.overflow = 'hidden'
 
-  if (isMobile) {
-    frame.src = ''
-    fallbackMsg.textContent = 'Ouvert dans un nouvel onglet pour une meilleure lecture sur mobile.'
-    fallbackLink.textContent = 'Rouvrir le PDF'
-    fallbackLink.href = url
-    fallback.style.display = 'flex'
-    window.open(url, '_blank')
-  } else {
-    fallback.style.display = 'none'
-    frame.onerror = () => { fallback.style.display = 'flex' }
-    frame.src = url
-  }
+  fallback.style.display = 'none'
+  frame.onerror = () => { fallback.style.display = 'flex' }
+  frame.src = url
 }
 
 // ─── Audio controls ───
@@ -344,26 +345,38 @@ function resetAudioUI() {
 function childTogglePlay() {
   const btn = document.getElementById('childPlayBtn')
   if (!childAudioUrl) return
-  if (!childAudio || childAudio.paused) {
-    if (!childAudio) {
-      childAudio = new Audio()
-      childAudio.onended = () => {
-        document.getElementById('childPlayBtn').innerHTML = '<i class="fas fa-play"></i>'
-        document.getElementById('childAudioProgressBar').style.width = '0%'
-        // Auto-play next story
-        if (childStoryId) childNextStory()
-      }
-      childAudio.ontimeupdate = () => {
-        if (childAudio.duration) {
-          const pct = (childAudio.currentTime / childAudio.duration) * 100
-          document.getElementById('childAudioProgressBar').style.width = pct + '%'
-          document.getElementById('childAudioTime').textContent =
-            formatTime(childAudio.currentTime) + ' / ' + formatTime(childAudio.duration)
-        }
+  if (!childAudio) {
+    childAudio = new Audio()
+    childAudio.onended = () => {
+      document.getElementById('childPlayBtn').innerHTML = '<i class="fas fa-play"></i>'
+      document.getElementById('childAudioProgressBar').style.width = '0%'
+      // Auto-play next story
+      if (childStoryId) childNextStory()
+    }
+    childAudio.ontimeupdate = () => {
+      if (childAudio.duration) {
+        const pct = (childAudio.currentTime / childAudio.duration) * 100
+        document.getElementById('childAudioProgressBar').style.width = pct + '%'
+        document.getElementById('childAudioTime').textContent =
+          formatTime(childAudio.currentTime) + ' / ' + formatTime(childAudio.duration)
       }
     }
+    childAudio.onerror = () => {
+      showChildToast('Audio non disponible pour cette histoire.')
+      document.getElementById('childAudioBar').style.display = 'none'
+      resetAudioUI()
+      childAudioUrl = ''
+    }
+  }
+  if (childAudio.paused) {
     childAudio.src = childAudioUrl
-    childAudio.play().catch(() => { resetAudioUI() })
+    childAudio.play().catch(() => {
+      resetAudioUI()
+      if (!childAudioUrl) return
+      showChildToast('Audio non disponible pour cette histoire.')
+      document.getElementById('childAudioBar').style.display = 'none'
+      childAudioUrl = ''
+    })
     btn.innerHTML = '<i class="fas fa-pause"></i>'
   } else {
     childAudio.pause()
