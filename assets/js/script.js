@@ -768,6 +768,10 @@ async function openPDF(url, targetPage) {
     pageNum = targetPage || (saved > 0 && saved <= pdfDoc.numPages ? saved : 1)
     loadZoomForDoc(url)
     renderPdfPage(pageNum)
+    // Auto-fullscreen on mobile
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && !document.fullscreenElement) {
+      setTimeout(() => { document.getElementById('pdf-canvas-container')?.requestFullscreen?.().catch(() => {}) }, 500)
+    }
     const slider = document.getElementById('pageSlider')
     if (slider) { slider.max = pdfDoc.numPages; slider.value = pageNum }
     document.getElementById('pageCountLabel').textContent = pdfDoc.numPages

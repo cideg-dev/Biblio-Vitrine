@@ -134,16 +134,6 @@
                 <p>Impossible d'afficher ce PDF dans le navigateur.</p>
                 <a id="childPdfFallbackLink" class="btn-primary" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
             </div>
-            <div id="childPdfMobileView" class="child-pdf-mobile" style="display:none">
-                <div class="child-mobile-content">
-                    <i class="fas fa-file-pdf child-mobile-icon"></i>
-                    <h3 id="childMobileTitle" class="child-mobile-title">Titre</h3>
-                    <a id="childMobileOpenBtn" class="btn-primary child-mobile-btn" target="_blank" rel="noopener">
-                        <i class="fas fa-external-link-alt"></i> Lire le PDF
-                    </a>
-                    <p class="child-mobile-hint">Le PDF s'ouvre dans un nouvel onglet. Revenez ici pour écouter l'audio.</p>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -315,7 +305,6 @@ function openChildPdf(url, title, audioUrl) {
   const extBtn = document.getElementById('childPdfExternalBtn')
   const fallback = document.getElementById('childPdfFallback')
   const fallbackLink = document.getElementById('childPdfFallbackLink')
-  const mobileView = document.getElementById('childPdfMobileView')
   titleEl.textContent = title
   dlBtn.href = url
   dlBtn.download = title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g, '').trim() + '.pdf'
@@ -340,20 +329,9 @@ function openChildPdf(url, title, audioUrl) {
   viewer.style.display = 'flex'
   document.body.style.overflow = 'hidden'
 
-  const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  if (isMobile) {
-    frame.style.display = 'none'
-    fallback.style.display = 'none'
-    mobileView.style.display = 'flex'
-    document.getElementById('childMobileTitle').textContent = title
-    document.getElementById('childMobileOpenBtn').href = url
-  } else {
-    frame.style.display = 'block'
-    mobileView.style.display = 'none'
-    fallback.style.display = 'none'
-    frame.onerror = () => { fallback.style.display = 'flex' }
-    frame.src = url
-  }
+  fallback.style.display = 'none'
+  frame.onerror = () => { fallback.style.display = 'flex' }
+  frame.src = url
 }
 
 // ─── Audio controls ───
@@ -504,9 +482,7 @@ function closeChildPdf() {
   const frame = document.getElementById('childPdfFrame')
   document.getElementById('childPdfViewer').style.display = 'none'
   frame.src = ''
-  frame.style.display = 'block'
   document.getElementById('childPdfFallback').style.display = 'none'
-  document.getElementById('childPdfMobileView').style.display = 'none'
   document.body.style.overflow = ''
   if (document.fullscreenElement) document.exitFullscreen()?.catch(() => {})
 }
