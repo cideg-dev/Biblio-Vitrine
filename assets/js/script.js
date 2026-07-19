@@ -652,13 +652,11 @@ function initPdfViewer() {
       document.getElementById('pdfSearchInput')?.focus()
     }
   })
-  // Touch swipe + pinch
+  // Touch pinch zoom (without blocking native scroll)
   const container = document.getElementById('pdf-canvas-container')
   if (container && window.Hammer) {
-    const hammer = new Hammer(container, { touchAction: 'pan-y pan-x' })
+    const hammer = new Hammer(container, { touchAction: 'manipulation', preventDefault: false })
     hammer.get('pinch').set({ enable: true })
-    hammer.on('swipeleft', showNextPdfPage)
-    hammer.on('swiperight', showPrevPdfPage)
     let lastScale = 1
     hammer.on('pinchstart', () => { lastScale = currentScale })
     hammer.on('pinchmove', (e) => {
