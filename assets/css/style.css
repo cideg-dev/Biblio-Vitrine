@@ -1767,16 +1767,14 @@ body.auto-theme.light-theme {
 #pdf-canvas-container {
     flex: 1;
     overflow: auto;
-    text-align: center;
     padding: 1rem;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
     touch-action: manipulation;
 }
 #pdfCanvas {
     border: 1px solid rgba(255,255,255,0.04);
     border-radius: var(--radius);
+    display: block;
+    margin: 0 auto;
 }
 
 .pdf-viewer-hint {
