@@ -1465,6 +1465,26 @@ footer {
     font-size: 0.8rem;
     flex-shrink: 0;
 }
+.hide-controls-btn {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.5rem;
+    z-index: 3002;
+    background: rgba(10,10,15,0.8);
+    border: none;
+    color: var(--text2);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.8rem;
+    backdrop-filter: blur(8px);
+}
+.hide-controls-btn:hover { background: rgba(255,255,255,0.12); color: var(--text); }
 #pdf-viewer-controls .btn-secondary:hover { background: rgba(255,255,255,0.12); color: var(--text); }
 #pdf-viewer-controls .btn-secondary.active { background: var(--primary); color: var(--bg); }
 #pageInfo { color: var(--text2); font-size: 0.78rem; white-space: nowrap; }
