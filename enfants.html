@@ -330,8 +330,13 @@ function openChildPdf(url, title, audioUrl) {
   document.body.style.overflow = 'hidden'
 
   fallback.style.display = 'none'
-  frame.onerror = () => { fallback.style.display = 'flex' }
-  frame.src = url
+  const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  if (isMobile) {
+    frame.src = 'https://docs.google.com/gview?url=' + encodeURIComponent(url) + '&embedded=true'
+  } else {
+    frame.onerror = () => { fallback.style.display = 'flex' }
+    frame.src = url
+  }
 }
 
 // ─── Audio controls ───
