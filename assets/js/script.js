@@ -13,14 +13,6 @@ window.addEventListener('beforeinstallprompt', e => {
   const btn = document.getElementById('installPwaBtn')
   if (btn) btn.style.display = 'flex'
 })
-// Fallback: show install button on mobile even if beforeinstallprompt never fired
-setTimeout(() => {
-  const btn = document.getElementById('installPwaBtn')
-  if (!btn || btn.style.display === 'flex') return
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
-  if (isMobile && !isStandalone) btn.style.display = 'flex'
-}, 3000)
 
 document.addEventListener('DOMContentLoaded', () => {
   initNav()
@@ -1541,14 +1533,8 @@ function initPwaInstall() {
       const choice = await deferredPwaPrompt.userChoice
       if (choice.outcome === 'accepted') btn.style.display = 'none'
       deferredPwaPrompt = null
-      return
     }
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
-    if (isIOS) {
-      alert('Pour installer l\'application :\n1. Touche le bouton Partager (⬆️)\n2. Fais défiler et choisis "Sur l\'écran d\'accueil"\n3. Touche "Ajouter"')
-    } else {
-      alert('Pour installer l\'application :\n1. Ouvre le menu du navigateur (⋮)\n2. Cherche "Installer l\'application" ou "Ajouter à l\'écran d\'accueil"')
-    }
+  })
   })
   // If already installed, hide
   if (window.matchMedia('(display-mode: standalone)').matches) btn.style.display = 'none'

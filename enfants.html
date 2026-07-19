@@ -586,22 +586,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (deferredPwaPrompt) {
       deferredPwaPrompt.prompt()
       deferredPwaPrompt.userChoice.then(() => { deferredPwaPrompt = null })
-      return
-    }
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
-    if (isIOS) {
-      alert('Pour installer l\'application :\n1. Touche le bouton Partager (⬆️)\n2. Fais défiler et choisis "Sur l\'écran d\'accueil"\n3. Touche "Ajouter"')
-    } else {
-      alert('Pour installer l\'application :\n1. Ouvre le menu du navigateur (⋮)\n2. Cherche "Installer l\'application" ou "Ajouter à l\'écran d\'accueil"')
     }
   })
-  setTimeout(() => {
-    const btn = document.getElementById('installPwaBtn')
-    if (!btn || btn.style.display !== 'none') return
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
-    if (isMobile && !isStandalone) btn.style.display = 'inline-flex'
-  }, 3000)
 
   const hamburger = document.querySelector('.hamburger')
   const navMenu = document.querySelector('.nav-menu')
