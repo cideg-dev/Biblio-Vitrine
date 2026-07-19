@@ -767,11 +767,16 @@ async function openPDF(url, targetPage) {
     const saved = getReadingProgress(url)
     pageNum = targetPage || (saved > 0 && saved <= pdfDoc.numPages ? saved : 1)
     loadZoomForDoc(url)
-    renderPdfPage(pageNum)
-    // Auto-fullscreen on mobile
-    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && !document.fullscreenElement) {
-      setTimeout(() => { document.getElementById('pdf-canvas-container')?.requestFullscreen?.().catch(() => {}) }, 500)
+    // Fit to width on mobile
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      const container = document.getElementById('pdf-canvas-container')
+      if (container) {
+        const vpW = container.clientWidth - 40
+        currentScale = Math.min(3, Math.max(0.25, vpW / 612))
+        pageCache.clear()
+      }
     }
+    renderPdfPage(pageNum)
     const slider = document.getElementById('pageSlider')
     if (slider) { slider.max = pdfDoc.numPages; slider.value = pageNum }
     document.getElementById('pageCountLabel').textContent = pdfDoc.numPages
