@@ -631,6 +631,7 @@ function initPdfViewer() {
   document.getElementById('zoomIn')?.addEventListener('click', zoomIn)
   document.getElementById('zoomOut')?.addEventListener('click', zoomOut)
   document.getElementById('fullscreenBtn')?.addEventListener('click', toggleFullscreen)
+  document.getElementById('hideControlsBtn')?.addEventListener('click', togglePdfControls)
   document.getElementById('scrollModeToggle')?.addEventListener('click', toggleScrollMode)
   document.getElementById('readingModeBtn')?.addEventListener('click', toggleReadingMode)
   document.getElementById('bookmarkBtn')?.addEventListener('click', toggleBookmark)
@@ -662,7 +663,7 @@ function initPdfViewer() {
   // Touch swipe + pinch
   const container = document.getElementById('pdf-canvas-container')
   if (container && window.Hammer) {
-    const hammer = new Hammer(container)
+    const hammer = new Hammer(container, { touchAction: 'pan-y pan-x' })
     hammer.get('pinch').set({ enable: true })
     hammer.on('swipeleft', showNextPdfPage)
     hammer.on('swiperight', showPrevPdfPage)
@@ -676,8 +677,6 @@ function initPdfViewer() {
         isScrollMode ? renderScrollMode() : renderPdfPage(pageNum)
       }
     })
-    hammer.on('swipedown', () => { if (isScrollMode) return; showNextPdfPage() })
-    hammer.on('swipeup', () => { if (isScrollMode) return; showPrevPdfPage() })
   }
   // Double-click/double-tap zoom
   container?.addEventListener('dblclick', (e) => {
@@ -908,6 +907,29 @@ document.addEventListener('fullscreenchange', () => {
   const btn = document.getElementById('fullscreenBtn')
   if (btn) btn.innerHTML = document.fullscreenElement ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>'
 })
+
+// ─── Masquer / afficher les contrôles ───
+let pdfControlsHidden = false
+function togglePdfControls() {
+  pdfControlsHidden = !pdfControlsHidden
+  const controls = document.getElementById('pdf-viewer-controls')
+  const hint = document.querySelector('.pdf-viewer-hint')
+  const infoBar = document.getElementById('pdfInfoBar')
+  const btn = document.getElementById('hideControlsBtn')
+  if (pdfControlsHidden) {
+    controls.style.display = 'none'
+    if (hint) hint.style.display = 'none'
+    if (infoBar) infoBar.style.display = 'none'
+    btn.innerHTML = '<i class="fas fa-chevron-down"></i>'
+    btn.title = 'Afficher les contrôles'
+  } else {
+    controls.style.display = ''
+    if (hint) hint.style.display = ''
+    if (infoBar) infoBar.style.display = ''
+    btn.innerHTML = '<i class="fas fa-chevron-up"></i>'
+    btn.title = 'Masquer les contrôles'
+  }
+}
 
 // ─── Scroll Mode ───
 function toggleScrollMode() {
