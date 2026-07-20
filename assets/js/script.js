@@ -691,7 +691,8 @@ function initPdfViewer() {
     let touchPanning = false
     let tPanX = 0, tPanY = 0
     hammer.on('panstart', (e) => {
-      if (zoomLevel <= 1.05 || isScrollMode || e.pointers.length > 1) return
+      if (isScrollMode || e.pointers.length > 1) return
+      if (!isPdfZoomedIn() && zoomLevel <= 1.05) return
       touchPanning = true
       tPanX = panX; tPanY = panY
     })
@@ -913,6 +914,14 @@ function showNextPdfPage() {
   }
   if (pdfDoc && pageNum < pdfDoc.numPages) { pageNum++; panX = 0; panY = 0; queueRenderPage(pageNum) }
 }
+function isPdfZoomedIn() {
+  const c = document.getElementById('pdf-canvas-container')
+  if (!c || isScrollMode) return false
+  const cnv = c.querySelector('#pdfCanvas')
+  if (!cnv) return false
+  return cnv.width > c.clientWidth || cnv.height > c.clientHeight
+}
+
 function applyPdfTransform() {
   const c = document.getElementById('pdf-canvas-container')
   const wrapper = c?.querySelector('.pdf-transform-wrapper')
@@ -920,7 +929,8 @@ function applyPdfTransform() {
   const s = zoomLevel
   wrapper.style.transform = `scale(${s}) translate(${panX / s}px, ${panY / s}px)`
   wrapper.style.transformOrigin = '0 0'
-  if (s > 1.05) {
+  const zoomed = isPdfZoomedIn() || s > 1.05
+  if (zoomed) {
     c.style.overflow = 'hidden'
     c.style.touchAction = 'none'
     c.style.cursor = isPanning ? 'grabbing' : 'grab'
@@ -933,7 +943,8 @@ function applyPdfTransform() {
 }
 
 function startPdfPan(e) {
-  if (zoomLevel <= 1.05 || isScrollMode) return
+  if (isScrollMode) return
+  if (!isPdfZoomedIn() && zoomLevel <= 1.05) return
   if (e.button !== 0) return
   if (e.target.closest('.btn, button, input, select, textarea, a, .text-layer span, .page-slider')) return
   isPanning = true
@@ -956,7 +967,7 @@ function stopPdfPan() {
   if (!isPanning) return
   isPanning = false
   const c = document.getElementById('pdf-canvas-container')
-  c.style.cursor = zoomLevel > 1.05 ? 'grab' : ''
+  c.style.cursor = (isPdfZoomedIn() || zoomLevel > 1.05) ? 'grab' : ''
   c.style.userSelect = ''
 }
 
@@ -1071,7 +1082,7 @@ function cleanupScrollMode() {
   scrollCanvases = []
   const container = document.getElementById('pdf-canvas-container')
   container.innerHTML = '<canvas id="pdfCanvas"></canvas>'
-  container.style.overflow = 'hidden'
+  container.style.overflow = ''
   container.style.padding = ''
   container.style.display = ''
 }
