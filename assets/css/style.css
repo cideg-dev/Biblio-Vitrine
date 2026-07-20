@@ -1766,10 +1766,21 @@ body.auto-theme.light-theme {
 
 #pdf-canvas-container {
     flex: 1;
-    overflow: auto;
+    overflow: hidden;
     padding: 1rem;
     touch-action: manipulation;
+    position: relative;
 }
+#pdf-canvas-container.pdf-dragging {
+    cursor: grabbing !important;
+    user-select: none;
+}
+
+.pdf-transform-wrapper {
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
 #pdfCanvas {
     border: 1px solid rgba(255,255,255,0.04);
     border-radius: var(--radius);

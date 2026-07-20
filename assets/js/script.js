@@ -652,26 +652,56 @@ function initPdfViewer() {
       document.getElementById('pdfSearchInput')?.focus()
     }
   })
-  // Touch pinch zoom (without blocking native scroll)
+  // Touch pinch + pan (using Hammer.js)
   const container = document.getElementById('pdf-canvas-container')
   if (container && window.Hammer) {
     const hammer = new Hammer(container, { touchAction: 'manipulation', preventDefault: false })
     hammer.get('pinch').set({ enable: true })
-    let lastScale = 1
-    hammer.on('pinchstart', () => { lastScale = currentScale })
+    hammer.get('pan').set({ enable: true, threshold: 5 })
+    let lastPinchLevel = 1
+    hammer.on('pinchstart', () => { lastPinchLevel = zoomLevel })
     hammer.on('pinchmove', (e) => {
-      const newScale = Math.min(3, Math.max(0.25, lastScale * e.scale))
-      if (Math.abs(newScale - currentScale) > 0.08) {
-        currentScale = Math.round(newScale * 100) / 100
-        pageCache.clear()
-        isScrollMode ? renderScrollMode() : renderPdfPage(pageNum)
+      if (isScrollMode) {
+        const ns = Math.min(3, Math.max(0.25, currentScale * e.scale))
+        if (Math.abs(ns - currentScale) > 0.08) {
+          currentScale = Math.round(ns * 100) / 100
+          pageCache.clear()
+          renderScrollMode()
+        }
+        return
+      }
+      const maxEff = 3, minEff = 0.25
+      const nl = Math.min(maxEff / currentScale, Math.max(minEff / currentScale, lastPinchLevel * e.scale))
+      if (Math.abs(nl - zoomLevel) > 0.05) {
+        zoomLevel = Math.round(nl * 100) / 100
+        applyPdfTransform()
       }
     })
+    let touchPanning = false
+    let tPanX = 0, tPanY = 0
+    hammer.on('panstart', (e) => {
+      if (zoomLevel <= 1.05 || isScrollMode || e.pointers.length > 1) return
+      touchPanning = true
+      tPanX = panX; tPanY = panY
+    })
+    hammer.on('panmove', (e) => {
+      if (!touchPanning || e.pointers.length > 1) return
+      panX = tPanX + e.deltaX; panY = tPanY + e.deltaY
+      applyPdfTransform()
+    })
+    hammer.on('panend', () => { touchPanning = false })
   }
   // Double-click/double-tap zoom
   container?.addEventListener('dblclick', (e) => {
-    if (currentScale < 1.8) { currentScale = 2.5 } else { currentScale = 1.2 }
-    pageCache.clear(); isScrollMode ? renderScrollMode() : renderPdfPage(pageNum)
+    if (isScrollMode) {
+      if (currentScale < 1.8) { currentScale = 2.5 } else { currentScale = 1.2 }
+      pageCache.clear(); renderScrollMode()
+      return
+    }
+    if (zoomLevel < 1.5) { zoomLevel = Math.min(2.0, 3 / currentScale) }
+    else { zoomLevel = Math.max(1.0, 0.25 / currentScale) }
+    panX = 0; panY = 0
+    applyPdfTransform()
   })
   // Page slider (throttled)
   const pageSlider = document.getElementById('pageSlider')
@@ -690,7 +720,7 @@ function initPdfViewer() {
       const c = container?.querySelector('[data-page="' + target + '"]')
       if (c) { c.scrollIntoView({ behavior: 'smooth', block: 'start' }); pageNum = target }
     } else {
-      pageNum = target; queueRenderPage(pageNum)
+      pageNum = target; panX = 0; panY = 0; queueRenderPage(pageNum)
     }
     sliderPending = null
   })
@@ -719,9 +749,17 @@ function initPdfViewer() {
   })
   document.getElementById('closeTocSidebar')?.addEventListener('click', () => document.getElementById('tocSidebar').style.display = 'none')
   initPdfSearch()
+  // Mouse drag panning
+  const pdfContainer = document.getElementById('pdf-canvas-container')
+  if (pdfContainer) {
+    pdfContainer.addEventListener('mousedown', startPdfPan)
+    window.addEventListener('mousemove', movePdfPan)
+    window.addEventListener('mouseup', stopPdfPan)
+  }
 }
 
 let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumPending = null, currentScale = 1.5, isScrollMode = false
+let zoomLevel = 1.0, panX = 0, panY = 0, isPanning = false, panStartX = 0, panStartY = 0
 const canvas = document.getElementById('pdfCanvas')
 const ctx = canvas?.getContext('2d')
 const pageCache = new Map()
@@ -739,6 +777,7 @@ function setDesktopControlsVisible() {
 }
 
 async function openPDF(url, targetPage) {
+  zoomLevel = 1.0; panX = 0; panY = 0; isPanning = false
   window._currentPdfUrl = url
   const loadingEl = document.getElementById('pdfLoadingIndicator')
   if (loadingEl) loadingEl.style.display = 'flex'
@@ -762,6 +801,7 @@ async function openPDF(url, targetPage) {
       if (container) {
         const vpW = container.clientWidth - 40
         currentScale = Math.min(3, Math.max(0.25, vpW / 612))
+        zoomLevel = 1.0; panX = 0; panY = 0
         pageCache.clear()
       }
     }
@@ -827,12 +867,19 @@ async function renderPdfPage(num) {
   // Text layer
   const existingLayer = container.querySelector('.text-layer')
   if (existingLayer) existingLayer.remove()
+  const oldTw = container.querySelector('.pdf-transform-wrapper')
+  if (oldTw) oldTw.remove()
   const wrapper = document.createElement('div')
   wrapper.style.position = 'relative'
   wrapper.style.display = 'inline-block'
   canvas.parentNode ? canvas.parentNode.replaceChild(wrapper, canvas) : null
   wrapper.appendChild(canvas)
   renderTextLayer(page, wrapper, currentScale)
+  const tw = document.createElement('div')
+  tw.className = 'pdf-transform-wrapper'
+  wrapper.parentNode.insertBefore(tw, wrapper)
+  tw.appendChild(wrapper)
+  applyPdfTransform()
   if (pageNumPending !== null) { renderPdfPage(pageNumPending); pageNumPending = null }
 }
 function queueRenderPage(num) { pageIsRendering ? (pageNumPending = num) : renderPdfPage(num) }
@@ -843,7 +890,7 @@ function showPrevPdfPage() {
     if (c) { c.scrollIntoView({ behavior: 'smooth', block: 'start' }); pageNum-- }
     return
   }
-  if (pageNum > 1) { pageNum--; queueRenderPage(pageNum) }
+  if (pageNum > 1) { pageNum--; panX = 0; panY = 0; queueRenderPage(pageNum) }
 }
 function showNextPdfPage() {
   if (isScrollMode) {
@@ -853,10 +900,77 @@ function showNextPdfPage() {
     if (c) { c.scrollIntoView({ behavior: 'smooth', block: 'start' }); pageNum++ }
     return
   }
-  if (pdfDoc && pageNum < pdfDoc.numPages) { pageNum++; queueRenderPage(pageNum) }
+  if (pdfDoc && pageNum < pdfDoc.numPages) { pageNum++; panX = 0; panY = 0; queueRenderPage(pageNum) }
 }
-function zoomIn() { if (currentScale < 3) { currentScale += 0.25; pageCache.clear(); isScrollMode ? renderScrollMode() : renderPdfPage(pageNum) } }
-function zoomOut() { if (currentScale > 0.25) { currentScale -= 0.25; pageCache.clear(); isScrollMode ? renderScrollMode() : renderPdfPage(pageNum) } }
+function applyPdfTransform() {
+  const c = document.getElementById('pdf-canvas-container')
+  const wrapper = c?.querySelector('.pdf-transform-wrapper')
+  if (!wrapper || isScrollMode) return
+  const s = zoomLevel
+  wrapper.style.transform = `scale(${s}) translate(${panX / s}px, ${panY / s}px)`
+  wrapper.style.transformOrigin = '0 0'
+  if (s > 1.05) {
+    c.style.overflow = 'hidden'
+    c.style.touchAction = 'none'
+    c.style.cursor = isPanning ? 'grabbing' : 'grab'
+  } else {
+    c.style.overflow = ''
+    c.style.touchAction = ''
+    c.style.cursor = ''
+    panX = 0; panY = 0
+  }
+}
+
+function startPdfPan(e) {
+  if (zoomLevel <= 1.05 || isScrollMode) return
+  if (e.button !== 0) return
+  if (e.target.closest('.btn, button, input, select, textarea, a, .text-layer span, .page-slider')) return
+  isPanning = true
+  panStartX = e.clientX - panX
+  panStartY = e.clientY - panY
+  const c = document.getElementById('pdf-canvas-container')
+  c.style.cursor = 'grabbing'
+  c.style.userSelect = 'none'
+  e.preventDefault()
+}
+
+function movePdfPan(e) {
+  if (!isPanning) return
+  panX = e.clientX - panStartX
+  panY = e.clientY - panStartY
+  applyPdfTransform()
+}
+
+function stopPdfPan() {
+  if (!isPanning) return
+  isPanning = false
+  const c = document.getElementById('pdf-canvas-container')
+  c.style.cursor = zoomLevel > 1.05 ? 'grab' : ''
+  c.style.userSelect = ''
+}
+
+function zoomIn() {
+  if (isScrollMode) {
+    if (currentScale < 3) { currentScale += 0.25; pageCache.clear(); renderScrollMode() }
+    return
+  }
+  const maxEff = 3
+  if (currentScale * zoomLevel < maxEff) {
+    zoomLevel = Math.round(Math.min(zoomLevel * 1.25, maxEff / currentScale) * 100) / 100
+    applyPdfTransform()
+  }
+}
+function zoomOut() {
+  if (isScrollMode) {
+    if (currentScale > 0.25) { currentScale -= 0.25; pageCache.clear(); renderScrollMode() }
+    return
+  }
+  const minEff = 0.25
+  if (currentScale * zoomLevel > minEff) {
+    zoomLevel = Math.round(Math.max(zoomLevel / 1.25, minEff / currentScale) * 100) / 100
+    applyPdfTransform()
+  }
+}
 function updateProgressBar() {
   const bar = document.getElementById('pdfProgressBar')
   const slider = document.getElementById('pageSlider')
@@ -872,12 +986,14 @@ function toggleFitMode() {
     btn.title = 'Ajuster à la largeur'
     btn.innerHTML = '<i class="fas fa-arrows-alt-h"></i>'
     currentScale = 1.5
+    zoomLevel = 1.0; panX = 0; panY = 0
   } else {
     btn?.classList.add('active')
     btn.title = 'Largeur réelle'
     btn.innerHTML = '<i class="fas fa-arrows-alt-v"></i>'
     const vp = { width: container.clientWidth - 40 }
     currentScale = Math.min(3, Math.max(0.25, vp.width / 612))
+    zoomLevel = 1.0; panX = 0; panY = 0
   }
   pageCache.clear()
   isScrollMode ? renderScrollMode() : renderPdfPage(pageNum)
@@ -940,7 +1056,7 @@ function cleanupScrollMode() {
   scrollCanvases = []
   const container = document.getElementById('pdf-canvas-container')
   container.innerHTML = '<canvas id="pdfCanvas"></canvas>'
-  container.style.overflow = ''
+  container.style.overflow = 'hidden'
   container.style.padding = ''
   container.style.display = ''
 }
@@ -1035,7 +1151,7 @@ function closePdfViewer() {
   container.innerHTML = '<canvas id="pdfCanvas"></canvas>'
   container.style.overflow = ''
   container.style.padding = ''
-  pdfDoc = null; currentScale = 1.5; pageCache.clear()
+  pdfDoc = null; currentScale = 1.5; zoomLevel = 1.0; panX = 0; panY = 0; isPanning = false; pageCache.clear()
   initContinueReading()
 }
 
@@ -1533,7 +1649,6 @@ function initPwaInstall() {
       deferredPwaPrompt = null
     }
   })
-  })
   // If already installed, hide
   if (window.matchMedia('(display-mode: standalone)').matches) btn.style.display = 'none'
 }
@@ -1577,16 +1692,21 @@ function gotoPageDialog() {
     if (isScrollMode) {
       const c = document.querySelector(`[data-page="${n}"]`)
       if (c) { c.scrollIntoView({ block: 'start' }); pageNum = n; document.getElementById('pageNumber').textContent = n; updateProgressBar() }
-    } else { pageNum = n; queueRenderPage(n) }
+    } else { pageNum = n; panX = 0; panY = 0; queueRenderPage(n) }
   }
 }
 
 // ─── Save/Load zoom per document ───
 function saveZoomForDoc(url) {
-  try { localStorage.setItem('zoom_' + btoa(url), currentScale.toString()) } catch {}
+  try { localStorage.setItem('zoom_' + btoa(url), (currentScale * zoomLevel).toFixed(2)) } catch {}
 }
 function loadZoomForDoc(url) {
-  try { const z = parseFloat(localStorage.getItem('zoom_' + btoa(url))); if (z >= 0.25 && z <= 3) currentScale = z } catch {}
+  try {
+    const z = parseFloat(localStorage.getItem('zoom_' + btoa(url)))
+    if (z >= 0.25 && z <= 3) {
+      zoomLevel = Math.min(3 / currentScale, Math.max(0.25 / currentScale, z / currentScale))
+    }
+  } catch {}
 }
 
 // ─── Mode Texte Reflow ───
