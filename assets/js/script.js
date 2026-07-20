@@ -677,6 +677,17 @@ function initPdfViewer() {
         applyPdfTransform()
       }
     })
+    hammer.on('pinchend', () => {
+      if (!isScrollMode && Math.abs(zoomLevel - 1.0) > 0.05) {
+        const ns = Math.min(3, Math.max(0.25, Math.round(currentScale * zoomLevel * 10) / 10))
+        if (Math.abs(ns - currentScale) > 0.01) {
+          currentScale = ns
+          zoomLevel = 1.0; panX = 0; panY = 0
+          pageCache.clear()
+          renderPdfPage(pageNum)
+        }
+      }
+    })
     let touchPanning = false
     let tPanX = 0, tPanY = 0
     hammer.on('panstart', (e) => {
@@ -698,10 +709,11 @@ function initPdfViewer() {
       pageCache.clear(); renderScrollMode()
       return
     }
-    if (zoomLevel < 1.5) { zoomLevel = Math.min(2.0, 3 / currentScale) }
-    else { zoomLevel = Math.max(1.0, 0.25 / currentScale) }
-    panX = 0; panY = 0
-    applyPdfTransform()
+    if (currentScale < 1.8) { currentScale = Math.min(2.5, 3) }
+    else { currentScale = Math.max(1.2, 0.25) }
+    zoomLevel = 1.0; panX = 0; panY = 0
+    pageCache.clear()
+    renderPdfPage(pageNum)
   })
   // Page slider (throttled)
   const pageSlider = document.getElementById('pageSlider')
@@ -872,13 +884,12 @@ async function renderPdfPage(num) {
   const wrapper = document.createElement('div')
   wrapper.style.position = 'relative'
   wrapper.style.display = 'inline-block'
-  canvas.parentNode ? canvas.parentNode.replaceChild(wrapper, canvas) : null
   wrapper.appendChild(canvas)
   renderTextLayer(page, wrapper, currentScale)
   const tw = document.createElement('div')
   tw.className = 'pdf-transform-wrapper'
-  wrapper.parentNode.insertBefore(tw, wrapper)
   tw.appendChild(wrapper)
+  container.appendChild(tw)
   applyPdfTransform()
   if (pageNumPending !== null) { renderPdfPage(pageNumPending); pageNumPending = null }
 }
@@ -954,10 +965,12 @@ function zoomIn() {
     if (currentScale < 3) { currentScale += 0.25; pageCache.clear(); renderScrollMode() }
     return
   }
-  const maxEff = 3
-  if (currentScale * zoomLevel < maxEff) {
-    zoomLevel = Math.round(Math.min(zoomLevel * 1.25, maxEff / currentScale) * 100) / 100
-    applyPdfTransform()
+  const ns = Math.min(currentScale + 0.25, 3)
+  if (ns !== currentScale) {
+    currentScale = Math.round(ns * 100) / 100
+    zoomLevel = 1.0; panX = 0; panY = 0
+    pageCache.clear()
+    renderPdfPage(pageNum)
   }
 }
 function zoomOut() {
@@ -965,10 +978,12 @@ function zoomOut() {
     if (currentScale > 0.25) { currentScale -= 0.25; pageCache.clear(); renderScrollMode() }
     return
   }
-  const minEff = 0.25
-  if (currentScale * zoomLevel > minEff) {
-    zoomLevel = Math.round(Math.max(zoomLevel / 1.25, minEff / currentScale) * 100) / 100
-    applyPdfTransform()
+  const ns = Math.max(currentScale - 0.25, 0.25)
+  if (ns !== currentScale) {
+    currentScale = Math.round(ns * 100) / 100
+    zoomLevel = 1.0; panX = 0; panY = 0
+    pageCache.clear()
+    renderPdfPage(pageNum)
   }
 }
 function updateProgressBar() {
@@ -1698,14 +1713,12 @@ function gotoPageDialog() {
 
 // ─── Save/Load zoom per document ───
 function saveZoomForDoc(url) {
-  try { localStorage.setItem('zoom_' + btoa(url), (currentScale * zoomLevel).toFixed(2)) } catch {}
+  try { localStorage.setItem('zoom_' + btoa(url), currentScale.toString()) } catch {}
 }
 function loadZoomForDoc(url) {
   try {
     const z = parseFloat(localStorage.getItem('zoom_' + btoa(url)))
-    if (z >= 0.25 && z <= 3) {
-      zoomLevel = Math.min(3 / currentScale, Math.max(0.25 / currentScale, z / currentScale))
-    }
+    if (z >= 0.25 && z <= 3) currentScale = z
   } catch {}
 }
 
