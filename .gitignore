@@ -15,3 +15,8 @@ assets/config/server-secret.json
 
 # Dossier PDF personnel (à ne pas commettre)
 /PDF/
+
+# Fichiers personnels et artefacts locaux
+/note.txt
+/code.txt
+/Lumière_sur_parole.png
